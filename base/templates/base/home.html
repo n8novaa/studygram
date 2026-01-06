@@ -53,7 +53,7 @@
                 </div>
                 <div class="roomListRoom__content">
                     <!-- Room Detail implementation in Feature 2 -->
-                    <a href="#">{{room.name}}</a>
+                    <a href="{% url 'room' room.id %}">{{room.name}}</a>
                     <!-- <p>{{room.description}}</p> -->
                 </div>
                 <div class="roomListRoom__meta">
