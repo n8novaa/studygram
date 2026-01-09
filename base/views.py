@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
-from .models import Room, Topic, Message
-from .forms import RoomForm
+from django.http import HttpResponse
+from .models import Room, Topic, Message, User
+from .forms import RoomForm, UserForm
 
 def home(request):
     q = request.GET.get('q') if request.GET.get('q') is not None else ''
@@ -79,3 +80,26 @@ def deleteRoom(request, pk):
         return redirect('home')
         
     return render(request, 'base/delete.html', {'obj': room})
+
+@login_required(login_url='login')
+def userProfile(request, pk):
+    user = User.objects.get(id=pk)
+    rooms = user.room_set.all()
+    room_messages = user.message_set.all()
+    topics = Topic.objects.all()
+    context = {'user': user, 'rooms': rooms, 'room_messages': room_messages, 'topics': topics}
+    return render(request, 'base/profile.html', context)
+
+@login_required(login_url='login')
+def updateUser(request):
+    user = request.user
+    form = UserForm(instance=user)
+
+    if request.method == 'POST':
+        form = UserForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('user-profile', pk=user.id)
+
+    context = {'form': form}
+    return render(request, 'base/update-user.html', context)
