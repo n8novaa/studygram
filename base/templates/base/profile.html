@@ -1,114 +1,52 @@
-{% extends 'main.html' %}
+{% extends 'main.html' %} {% block content %}
 
-{% block content %}
-<main class="profile-page layout layout--3">
-  <div class="container">
-    <!-- Topics Start -->
-    <div class="topics">
-        <div class="topics__header">
-            <h2>Browse Topics</h2>
-        </div>
-        <ul class="topics__list">
-            <li>
-                <a href="{% url 'home' %}" class="active">All <span>{{topics.count}}</span></a>
-            </li>
-            {% for topic in topics %}
-            <li>
-                <a href="{% url 'home' %}?q={{topic.name}}">{{topic.name}}</a>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-    <!-- Topics End -->
+  <main class="profile-page layout layout--3">
+    <div class="container">
+      
+      <!-- Topics Start -->
+      {% include 'base/topics_component.html' %}
+      <!-- Topics End -->
 
-    <!-- Profile Start -->
-    <div class="roomList">
-      <div class="profile">
-        <div class="profile__avatar">
-          <div class="avatar avatar--large active">
-            <img src="{{user.avatar.url}}" />
-          </div>
-        </div>
-        <div class="profile__info">
-          <h3>{{user.name}}</h3>
-          <p>@{{user.username}}</p>
-          {% if request.user == user %}
-          <a href="{% url 'update-user' %}" class="btn btn--main btn--pill">Edit Profile</a>
-          {% endif %}
-        </div>
-        <div class="profile__about">
-          <h3>About</h3>
-          <p>
-            {{user.bio}}
-          </p>
-        </div>
-      </div>
-
-      <div class="roomList__header">
-        <div>
-          <h2>Study Rooms Hosted by {{user.username}}</h2>
-        </div>
-      </div>
-
-      {% for room in rooms %}
-      <div class="roomListRoom">
-        <div class="roomListRoom__header">
-          <a href="{% url 'user-profile' room.host.id %}" class="roomListRoom__author">
-            <div class="avatar avatar--small">
-              <img src="{{room.host.avatar.url}}" />
+      <!-- Room List Start -->
+      <div class="roomList">
+        <div class="profile">
+          <div class="profile__avatar">
+            <div class="avatar avatar--large active">
+              <img src="https://randomuser.me/api/portraits/men/11.jpg" />
             </div>
-            <span>@{{room.host.username}}</span>
-          </a>
-          <div class="roomListRoom__actions">
-            <span>{{room.created|timesince}}</span>
           </div>
-        </div>
-        <div class="roomListRoom__content">
-          <a href="{% url 'room' room.id %}">{{room.name}}</a>
-        </div>
-        <div class="roomListRoom__meta">
-          <a href="#" class="roomListRoom__joined">
-            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-              <title>user-group</title>
-              <path
-                d="M30.539 20.766c-2.69-1.547-5.75-2.427-8.92-2.62-0.615-1.577-1.396-3.056-2.316-4.417 3.518-1.745 5.961-5.328 5.961-9.524 0-5.937-4.813-10.75-10.75-10.75s-10.75 4.813-10.75 10.75c0 4.195 2.444 7.779 5.961 9.524-0.92 1.361-1.701 2.84-2.316 4.417-3.17 0.193-6.23 1.072-8.92 2.62-1.637 0.941-2.488 1.921-2.488 2.903v2.833h32v-2.833c0-0.982-0.852-1.962-2.488-2.903zM14.514 4.205c4.135 0 7.5 3.365 7.5 7.5s-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5 3.365-7.5 7.5-7.5zM3.864 26.5c1.474-1.246 3.549-2.229 5.978-2.85 0.528 1.545 1.252 2.992 2.138 4.305-3.033 0.165-5.698 0.551-7.859 1.096l-0.256-2.551zM14.514 30.5c-3.238 0-6.205-0.785-8.586-2.14 0.963-1.673 2.193-3.155 3.619-4.397 1.325 0.354 2.768 0.548 4.298 0.548 1.764 0 3.407-0.258 4.968-0.728 1.426 1.242 2.656 2.724 3.619 4.397-2.381 1.355-5.348 2.14-8.586 2.14zM22.95 27.956c-2.162-0.545-4.825-0.931-7.859-1.096 0.886-1.313 1.61-2.76 2.138-4.305 2.429 0.621 4.504 1.604 5.978 2.85l-0.256 2.551z">
-              </path>
-            </svg>
-            {{room.participants.all.count}} Joined
-          </a>
-          <p class="roomListRoom__topic">{{room.topic.name}}</p>
-        </div>
-      </div>
-      {% endfor %}
-
-    </div>
-    <!-- Profile End -->
-
-    <!-- Activities Start -->
-    <div class="activities">
-      <div class="activities__header">
-        <h2>Recent Activities</h2>
-      </div>
-      {% for message in room_messages %}
-      <div class="activities__box">
-        <div class="activities__boxHeader">
-          <a href="{% url 'user-profile' message.user.id %}" class="activities__boxAuthor">
-            <div class="avatar avatar--small">
-              <img src="{{message.user.avatar.url}}" />
-            </div>
+          <div class="profile__info">
+            <h3>{{user.username}}</h3>
+            <p>@{{user.username}}</p>
+            {% if request.user == user %}
+            <a href="{% url 'update-user' %}" class="btn btn--main btn--pill">Edit Profile</a>
+            {% endif %}
+          </div>
+          <div class="profile__about">
+            <h3>About</h3>
             <p>
-              @{{message.user.username}}
-              <span>{{message.created|timesince}} ago</span>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequuntur illo tenetur
+              facilis sunt nemo debitis quisquam hic atque aut? Ducimus alias placeat optio
+              accusamus repudiandae quis ab ex exercitationem rem?
             </p>
-          </a>
-          <div class="activities__boxRoomContent">
-            {{message.body}}
           </div>
         </div>
+
+        <div class="roomList__header">
+          <div>
+            <h2>Study Rooms Hosted by {{user.username}}</h2>
+          </div>
+        </div>
+
+        {% include 'base/feed_component.html' %}
+
       </div>
-      {% endfor %}
+      <!-- Room List End -->
+
+      <!-- Activities Start -->
+      {% include 'base/activity_component.html' %}
+      <!-- Activities End -->
     </div>
-    <!-- Activities End -->
-  </div>
-</main>
-{% endblock %}
+  </main>
+
+  {% endblock content %}

@@ -1,0 +1,21 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<main class="layout layout--3">
+  <div class="container">
+    <div class="roomList">
+      <div class="roomList__header">
+        <div>
+          <h2>404 Not Found</h2>
+        </div>
+      </div>
+      <div class="roomList__room">
+        <div class="roomList__room__header">
+          <p>The page you are looking for does not exist or has been moved.</p>
+        </div>
+        <a href="{% url 'home' %}" class="btn btn--main">Go Back Home</a>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

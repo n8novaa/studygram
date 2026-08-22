@@ -1,0 +1,21 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<main class="layout layout--3">
+  <div class="container">
+    <div class="roomList">
+      <div class="roomList__header">
+        <div>
+          <h2>403 Forbidden</h2>
+        </div>
+      </div>
+      <div class="roomList__room">
+        <div class="roomList__room__header">
+          <p>You do not have permission to perform this action.</p>
+        </div>
+        <a href="{% url 'home' %}" class="btn btn--main">Go Back Home</a>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

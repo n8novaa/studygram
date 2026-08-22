@@ -1,12 +1,37 @@
 # Virtual environment
 venv/
+.venv/
+env/
 
 # Python cache
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
 
-# Django local DB
+# Django
 db.sqlite3
+*.log
+local_settings.py
+media/
 
 # Environment variables
 .env
+.env.local
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Build / distribution
+dist/
+build/
+*.egg-info/
+*.zip
+
+# Node (future frontend)
+node_modules/

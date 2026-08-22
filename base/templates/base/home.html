@@ -1,108 +1,60 @@
-{% extends 'main.html' %}
+{% extends 'main.html' %} {% block content %}
+    
+    <main class="layout layout--3">
+      <div class="container">
 
-{% block content %}
-<main class="layout layout--3">
-    <div class="container">
+
         <!-- Topics Start -->
-        <div class="topics">
-            <div class="topics__header">
-                <h2>Browse Topics</h2>
-                <a href="{% url 'topics' %}" class="btn btn--link">More</a>
-            </div>
-            <ul class="topics__list">
-                <li>
-                    <a href="{% url 'home' %}" class="active">All <span>{{room_count}}</span></a>
-                </li>
-                {% for topic in topics %}
-                <li>
-                    <a href="{% url 'home' %}?q={{topic.name}}">{{topic.name}}</a>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
+         {% include 'base/topics_component.html' %}
+        
         <!-- Topics End -->
 
         <!-- Room List Start -->
         <div class="roomList">
-            <div class="roomList__header">
-                <div>
-                    <h2>Study Rooms</h2>
-                    <p>{{room_count}} Rooms available</p>
-                </div>
-                <a class="btn btn--main" href="{% url 'create-room' %}">
-                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-                        <title>add</title>
-                        <path d="M16.943 0.943h-1.885v14.115h-14.115v1.885h14.115v14.115h1.885v-14.115h14.115v-1.885h-14.115v-14.115z"></path>
-                    </svg>
-                    Create Room
-                </a>
+          <div class="mobile-menu">
+            <form action="{% url 'home' %}" method="GET" class="header__search">
+              <label>
+                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                  <title>search</title>
+                  <path
+                    d="M32 30.586l-10.845-10.845c1.771-2.092 2.845-4.791 2.845-7.741 0-6.617-5.383-12-12-12s-12 5.383-12 12c0 6.617 5.383 12 12 12 2.949 0 5.649-1.074 7.741-2.845l10.845 10.845 1.414-1.414zM12 22c-5.514 0-10-4.486-10-10s4.486-10 10-10c5.514 0 10 4.486 10 10s-4.486 10-10 10z"
+                  ></path>
+                </svg>
+                <input name="q" placeholder="Search for posts" />
+              </label>
+            </form>
+            <div class="mobile-menuItems">
+              <a class="btn btn--main btn--pill" href="{% url 'topics' %}">Browse Topics</a>
+              <a class="btn btn--main btn--pill" href="{% url 'activity' %}">Recent Activities</a>
+            </div>
+          </div>
+          <div class="roomList__header">
+            <div>
+              <h2>Study Room</h2>
+              <p>{{room_count}} Rooms available</p>
             </div>
 
-            {% for room in rooms %}
-            <div class="roomListRoom">
-                <div class="roomListRoom__header">
-                    <a href="#" class="roomListRoom__author">
-                        <div class="avatar avatar--small">
-                            <img src="{{room.host.avatar.url}}" />
-                        </div>
-                        <span>@{{room.host.username}}</span>
-                    </a>
-                    <div class="roomListRoom__actions">
-                        <span>{{room.created|timesince}} ago</span>
-                    </div>
-                </div>
-                <div class="roomListRoom__content">
-                    <!-- Room Detail implementation in Feature 2 -->
-                    <a href="{% url 'room' room.id %}">{{room.name}}</a>
-                    <!-- <p>{{room.description}}</p> -->
-                </div>
-                <div class="roomListRoom__meta">
-                    <a href="#" class="roomListRoom__joined">
-                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-                            <title>user-group</title>
-                            <path d="M30.539 20.766c-2.69-1.547-5.75-2.427-8.92-2.62-0.615-1.577-1.396-3.056-2.316-4.417 3.518-1.745 5.961-5.328 5.961-9.524 0-5.937-4.813-10.75-10.75-10.75s-10.75 4.813-10.75 10.75c0 4.195 2.444 7.779 5.961 9.524-0.92 1.361-1.701 2.84-2.316 4.417-3.17 0.193-6.23 1.072-8.92 2.62-1.637 0.941-2.488 1.921-2.488 2.903v2.833h32v-2.833c0-0.982-0.852-1.962-2.488-2.903zM14.514 4.205c4.135 0 7.5 3.365 7.5 7.5s-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5 3.365-7.5 7.5-7.5zM3.864 26.5c1.474-1.246 3.549-2.229 5.978-2.85 0.528 1.545 1.252 2.992 2.138 4.305-3.033 0.165-5.698 0.551-7.859 1.096l-0.256-2.551zM14.514 30.5c-3.238 0-6.205-0.785-8.586-2.14 0.963-1.673 2.193-3.155 3.619-4.397 1.325 0.354 2.768 0.548 4.298 0.548 1.764 0 3.407-0.258 4.968-0.728 1.426 1.242 2.656 2.724 3.619 4.397-2.381 1.355-5.348 2.14-8.586 2.14zM22.95 27.956c-2.162-0.545-4.825-0.931-7.859-1.096 0.886-1.313 1.61-2.76 2.138-4.305 2.429 0.621 4.504 1.604 5.978 2.85l-0.256 2.551z"></path>
-                        </svg>
-                        {{room.participants.all.count}} Joined
-                    </a>
-                    <p class="roomListRoom__topic">{{room.topic.name}}</p>
-                </div>
-            </div>
-            {% endfor %}
+            <a class="btn btn--main" href="{% url 'create-room' %}">
+              <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                <title>add</title>
+                <path
+                  d="M16.943 0.943h-1.885v14.115h-14.115v1.885h14.115v14.115h1.885v-14.115h14.115v-1.885h-14.115v-14.115z"
+                ></path>
+              </svg>
+              Create Room
+            </a>
+          </div>
+
+          {% include 'base/feed_component.html' %}
+          
         </div>
         <!-- Room List End -->
-        
+
         <!-- Activities Start -->
-        <div class="activities">
-             <div class="activities__header">
-                <h2>Recent Activities</h2>
-            </div>
-            {% for message in room_messages %}
-            <div class="activities__box">
-                <div class="activities__boxHeader">
-                    <a href="{% url 'user-profile' message.user.id %}" class="activities__boxAuthor">
-                        <div class="avatar avatar--small">
-                            <img src="{{message.user.avatar.url}}" />
-                        </div>
-                        <p>
-                            @{{message.user.username}}
-                            <span>{{message.created|timesince}} ago</span>
-                        </p>
-                    </a>
-                    <div class="activities__boxRoomContent">
-                        <a href="{% url 'room' message.room.id %}">"{{message.room.name}}"</a>
-                       
-                       <div class="activities__boxRoomContent">
-                        {{message.body}}
-                       </div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-            <div class="activities__header">
-                <a href="{% url 'activity' %}" class="btn btn--link">More</a>
-            </div>
-        </div>
+         {% include 'base/activity_component.html' %}
+        
         <!-- Activities End -->
-    </div>
-</main>
+      </div>
+    </main>
+   
 {% endblock %}

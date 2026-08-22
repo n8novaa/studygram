@@ -1,43 +1,86 @@
-{% extends 'main.html' %}
+{% extends 'main.html' %} {% block content %}
 
-{% block content %}
-<main class="create-room layout">
-  <div class="container">
-    <div class="layout__box">
-      <div class="layout__boxHeader">
-        <div class="layout__boxTitle">
-          <a href="{{request.META.HTTP_REFERER}}">
-            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-              <title>arrow-left</title>
-              <path
-                d="M13.723 2.286l-13.723 13.714 13.719 13.714 1.616-1.611-10.96-10.96h27.625v-2.286h-27.625l10.965-10.965-1.616-1.607z">
-              </path>
-            </svg>
-          </a>
-          <h3>Create/Update Study Room</h3>
+  <main class="create-room layout">
+    <div class="container">
+      <div class="layout__box">
+        <div class="layout__boxHeader">
+          <div class="layout__boxTitle">
+            <a href="{% url 'home' %}">
+              <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                <title>arrow-left</title>
+                <path
+                  d="M13.723 2.286l-13.723 13.714 13.719 13.714 1.616-1.611-10.96-10.96h27.625v-2.286h-27.625l10.965-10.965-1.616-1.607z">
+                </path>
+              </svg>
+            </a>
+            <h3>Create/Update Study Room</h3>
+          </div>
+        </div>
+        <div class="layout__body">
+          <form class="form" action="" method="POST">
+             {% csrf_token %}
+
+              <div class="form__group">
+              <label for="room_topic">Enter a Topic</label>
+              <input required type="text" value="{{form.topic_name.value|default_if_none:room.topic.name|default_if_none:''}}" name="topic_name" list="topic-list" />
+              <datalist id="topic-list">
+                <select id="room_topic">
+                  {% for topic in topics %}
+                  <option value="{{topic.name}}">{{topic.name}}</option>
+                  {% endfor %}
+                </select>
+
+              </datalist>
+              {% if form.topic_name.errors %}
+                {% for error in form.topic_name.errors %}
+                  <p class="form__error" style="color: #ff6b6b; font-size: 1.4rem; margin-top: 0.5rem;">{{ error }}</p>
+                {% endfor %}
+              {% endif %}
+            </div>
+             
+            <div class="form__group">
+              <label for="room_name">Room Name</label>
+              {{form.name}}
+              {% if form.name.errors %}
+                {% for error in form.name.errors %}
+                  <p class="form__error" style="color: #ff6b6b; font-size: 1.4rem; margin-top: 0.5rem;">{{ error }}</p>
+                {% endfor %}
+              {% endif %}
+            </div>
+
+              <div class="form__group">
+              <label for="room_description">Room Description</label>
+              {{form.description}}
+              {% if form.description.errors %}
+                {% for error in form.description.errors %}
+                  <p class="form__error" style="color: #ff6b6b; font-size: 1.4rem; margin-top: 0.5rem;">{{ error }}</p>
+                {% endfor %}
+              {% endif %}
+            </div>
+            
+
+          <!--  <div class="form__group">
+              <label for="room_topic">Topic</label>
+              <input required type="text" name="topic" id="room_topic" list="topic-list" />
+              <datalist id="topic-list">
+                <select id="room_topic">
+                  <option value="">Select your topic</option>
+                  <option value="Python">Python</option>
+                  <option value="Django">Django</option>
+                </select>
+              </datalist>
+
+            </div> -->
+
+
+            
+            <div class="form__action">
+              <a class="btn btn--dark" href="index.html">Cancel</a>
+              <button class="btn btn--main" type="submit">Create Room</button>
+            </div>
+          </form>
         </div>
       </div>
-      <div class="layout__body">
-        <form class="form" action="" method="POST">
-          {% csrf_token %}
-
-          <!-- Manual Field Rendering for better control, or defaults -->
-          <!-- We can iterate form or do manual, let's keep it simple with default django rendering wrapped in groups -->
-          
-          {% for field in form %}
-          <div class="form__group">
-            <label for="{{field.id_for_label}}">{{field.label}}</label>
-            {{field}}
-          </div>
-          {% endfor %}
-
-          <div class="form__action">
-            <a class="btn btn--dark" href="{{request.META.HTTP_REFERER}}">Cancel</a>
-            <button class="btn btn--main" type="submit">Submit</button>
-          </div>
-        </form>
-      </div>
     </div>
-  </div>
-</main>
-{% endblock %}
+  </main>
+{% endblock content %}

@@ -389,46 +389,35 @@ a {
 =>  Layout
 ================================*/
 
-/*==============================
-=>  Layout
-================================*/
-
 .layout {
   margin-top: 2.4rem;
 }
 
 .layout > .container {
-  display: grid;
-  grid-template-columns: 1fr 3fr 1fr;
-  gap: 3rem;
-}
-
-.layout--3 > .container {
-  grid-template-columns: 1fr 3fr 1fr;
-}
-
-.layout--2 > .container {
-  grid-template-columns: 3fr 1fr;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
 .layout--3 > .container > div:first-child {
-   /* No special styling needed for grid child unless spanning */
+  flex-basis: 18%;
+  max-width: 22.5rem;
 }
 
-/* media queries for responsiveness */
-@media screen and (max-width: 900px) {
-    .layout--3 > .container {
-        grid-template-columns: 1fr;
-    }
-    
-    .layout--2 > .container {
-        grid-template-columns: 1fr;
-    }
+.layout--3 > .container > div:nth-child(2) {
+  flex-basis: 50%;
+}
 
-    .activities,
-    .topics {
-        display: none;
-    }
+.layout--3 > .container > div:last-child {
+  flex-basis: 25%;
+}
+
+.layout--2 > .container > div:first-child {
+  flex-basis: 72%;
+}
+
+.layout--2 > .container > div:last-child {
+  flex-basis: 25%;
 }
 /*========== Layout Box ==========*/
 
@@ -615,7 +604,7 @@ a {
   border-bottom: 1px solid var(--color-dark-medium);
 }
 
-.topics-page .header__search{
+.topics-page .header__search {
   display: block;
 }
 
