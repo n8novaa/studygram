@@ -22,7 +22,18 @@ urlpatterns = [
     path('auth/token/', TokenObtainPairView.as_view(), name='api-token-obtain'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='api-token-refresh'),
     path('auth/me/', CurrentUserView.as_view(), name='api-me'),
-    path('rooms/<int:room_pk>/messages/', RoomMessageListCreateView.as_view(), name='api-room-messages'),
-    path('messages/<int:pk>/', MessageDetailView.as_view(), name='api-message-detail'),
+
+    path(
+        'rooms/<int:room_pk>/messages/',
+        RoomMessageListCreateView.as_view(),
+        name='api-room-messages',
+    ),
+    path(
+        'messages/<int:pk>/',
+        MessageDetailView.as_view(),
+        name='api-message-detail',
+    ),
+
     path('', include(router.urls)),
+    path('', include('workspaces.urls')),
 ]
