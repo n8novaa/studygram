@@ -9,6 +9,7 @@ import AppHome from './pages/AppHome'
 import Workspaces from './pages/Workspaces'
 import Discover from './pages/discover'
 import Messages from './pages/Messages'
+import WorkspaceDetail from './pages/WorkspaceDetail'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/app" element={<AppLayout />}>
             <Route index element={<AppHome />} />
             <Route path="workspaces" element={<Workspaces />} />
+            <Route path="workspaces/:id" element={<WorkspaceDetail />} />
             <Route path="discover" element={<Discover />} />
             <Route path="messages" element={<Messages />} />
           </Route>
