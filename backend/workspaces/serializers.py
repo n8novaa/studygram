@@ -14,8 +14,16 @@ class WorkspaceMemberSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = WorkspaceMembership
-        fields = ['user', 'role', 'created']
-        read_only_fields = ['user', 'role', 'created']
+        fields = [
+            'user',
+            'role',
+            'created',
+        ]
+        read_only_fields = [
+            'user',
+            'role',
+            'created',
+        ]
 
 
 class WorkspaceSerializer(serializers.ModelSerializer):
@@ -51,7 +59,9 @@ class WorkspaceSerializer(serializers.ModelSerializer):
         ).data
 
 
-class WorkspaceJoinRequestSerializer(serializers.ModelSerializer):
+class WorkspaceJoinRequestSerializer(
+    serializers.ModelSerializer
+):
     user = serializers.StringRelatedField(read_only=True)
     workspace = serializers.StringRelatedField(read_only=True)
 
@@ -75,7 +85,9 @@ class WorkspaceJoinRequestSerializer(serializers.ModelSerializer):
         ]
 
 
-class WorkspaceInvitationSerializer(serializers.ModelSerializer):
+class WorkspaceInvitationSerializer(
+    serializers.ModelSerializer
+):
     workspace = serializers.StringRelatedField(read_only=True)
     created_by = serializers.StringRelatedField(read_only=True)
 
@@ -107,6 +119,7 @@ class WorkspaceInvitationSerializer(serializers.ModelSerializer):
 
 
 class AcceptInvitationSerializer(serializers.Serializer):
+
     def validate(self, attrs):
         invitation = self.context['invitation']
         user = self.context['request'].user
@@ -127,3 +140,31 @@ class AcceptInvitationSerializer(serializers.Serializer):
         attrs['invitation'] = invitation
 
         return attrs
+
+class WorkspaceDiscoverSerializer(serializers.ModelSerializer):
+    owner = serializers.StringRelatedField(read_only=True)
+    member_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Workspace
+        fields = [
+            'id',
+            'name',
+            'owner',
+            'visibility',
+            'member_count',
+            'created',
+            'updated',
+        ]
+        read_only_fields = [
+            'id',
+            'name',
+            'owner',
+            'visibility',
+            'member_count',
+            'created',
+            'updated',
+        ]
+
+    def get_member_count(self, obj):
+        return obj.memberships.count()

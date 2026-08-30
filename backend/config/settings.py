@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'base.apps.BaseConfig',
     'workspaces',
+    
 ]
 
 MIDDLEWARE = [

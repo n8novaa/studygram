@@ -1,79 +1,22 @@
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from rest_framework import permissions, status, viewsets
+
+from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import (
+from ..models import (
     Workspace,
     WorkspaceInvitation,
     WorkspaceJoinRequest,
     WorkspaceMembership,
 )
-from .permissions import (
-    IsWorkspaceEditor,
-    IsWorkspaceMember,
-    IsWorkspaceOwner,
-)
-from .serializers import (
+from ..serializers import (
     AcceptInvitationSerializer,
     WorkspaceInvitationSerializer,
     WorkspaceJoinRequestSerializer,
-    WorkspaceSerializer,
 )
 
-
-class WorkspaceViewSet(viewsets.ModelViewSet):
-    serializer_class = WorkspaceSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-
-        return (
-            Workspace.objects
-            .filter(memberships__user=user)
-            .select_related('owner')
-            .prefetch_related('memberships__user')
-            .distinct()
-        )
-
-    def get_permissions(self):
-        if self.action in ('retrieve', 'list'):
-            permission_classes = [
-                permissions.IsAuthenticated,
-                IsWorkspaceMember,
-            ]
-
-        elif self.action in ('update', 'partial_update'):
-            permission_classes = [
-                permissions.IsAuthenticated,
-                IsWorkspaceEditor,
-            ]
-
-        elif self.action == 'destroy':
-            permission_classes = [
-                permissions.IsAuthenticated,
-                IsWorkspaceOwner,
-            ]
-
-        else:
-            permission_classes = [
-                permissions.IsAuthenticated,
-            ]
-
-        return [permission() for permission in permission_classes]
-
-    def perform_create(self, serializer):
-        workspace = serializer.save(
-            owner=self.request.user
-        )
-
-        WorkspaceMembership.objects.create(
-            workspace=workspace,
-            user=self.request.user,
-            role=WorkspaceMembership.Role.ADMIN,
-        )
 
 class WorkspaceJoinView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -118,16 +61,23 @@ class WorkspaceJoinView(APIView):
 
         # PRIVATE workspace:
         # create a pending request instead.
-        join_request, created = WorkspaceJoinRequest.objects.get_or_create(
-            workspace=workspace,
-            user=request.user,
+        join_request, created = (
+            WorkspaceJoinRequest.objects.get_or_create(
+                workspace=workspace,
+                user=request.user,
+            )
         )
 
         if not created:
-            if join_request.status == WorkspaceJoinRequest.Status.PENDING:
+            if (
+                join_request.status
+                == WorkspaceJoinRequest.Status.PENDING
+            ):
                 return Response(
                     {
-                        'detail': 'Your join request is already pending.'
+                        'detail': (
+                            'Your join request is already pending.'
+                        )
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
@@ -167,10 +117,16 @@ class WorkspaceJoinRequestListView(APIView):
             user=request.user,
         ).first()
 
-        if not membership or membership.role != WorkspaceMembership.Role.ADMIN:
+        if (
+            not membership
+            or membership.role != WorkspaceMembership.Role.ADMIN
+        ):
             return Response(
                 {
-                    'detail': 'Only workspace admins can view join requests.'
+                    'detail': (
+                        'Only workspace admins can view '
+                        'join requests.'
+                    )
                 },
                 status=status.HTTP_403_FORBIDDEN,
             )
@@ -191,6 +147,7 @@ class WorkspaceJoinRequestListView(APIView):
 
         return Response(serializer.data)
 
+
 class WorkspaceJoinRequestApproveView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -205,10 +162,15 @@ class WorkspaceJoinRequestApproveView(APIView):
             user=request.user,
         ).first()
 
-        if not membership or membership.role != WorkspaceMembership.Role.ADMIN:
+        if (
+            not membership
+            or membership.role != WorkspaceMembership.Role.ADMIN
+        ):
             return Response(
                 {
-                    'detail': 'Only workspace admins can approve requests.'
+                    'detail': (
+                        'Only workspace admins can approve requests.'
+                    )
                 },
                 status=status.HTTP_403_FORBIDDEN,
             )
@@ -219,10 +181,15 @@ class WorkspaceJoinRequestApproveView(APIView):
             workspace=workspace,
         )
 
-        if join_request.status != WorkspaceJoinRequest.Status.PENDING:
+        if (
+            join_request.status
+            != WorkspaceJoinRequest.Status.PENDING
+        ):
             return Response(
                 {
-                    'detail': 'This request has already been reviewed.'
+                    'detail': (
+                        'This request has already been reviewed.'
+                    )
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -233,7 +200,9 @@ class WorkspaceJoinRequestApproveView(APIView):
             role=WorkspaceMembership.Role.MEMBER,
         )
 
-        join_request.status = WorkspaceJoinRequest.Status.APPROVED
+        join_request.status = (
+            WorkspaceJoinRequest.Status.APPROVED
+        )
         join_request.reviewed_at = timezone.now()
         join_request.save(
             update_fields=['status', 'reviewed_at']
@@ -249,6 +218,7 @@ class WorkspaceJoinRequestApproveView(APIView):
             status=status.HTTP_200_OK,
         )
 
+
 class WorkspaceJoinRequestRejectView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -263,10 +233,15 @@ class WorkspaceJoinRequestRejectView(APIView):
             user=request.user,
         ).first()
 
-        if not membership or membership.role != WorkspaceMembership.Role.ADMIN:
+        if (
+            not membership
+            or membership.role != WorkspaceMembership.Role.ADMIN
+        ):
             return Response(
                 {
-                    'detail': 'Only workspace admins can reject requests.'
+                    'detail': (
+                        'Only workspace admins can reject requests.'
+                    )
                 },
                 status=status.HTTP_403_FORBIDDEN,
             )
@@ -277,15 +252,22 @@ class WorkspaceJoinRequestRejectView(APIView):
             workspace=workspace,
         )
 
-        if join_request.status != WorkspaceJoinRequest.Status.PENDING:
+        if (
+            join_request.status
+            != WorkspaceJoinRequest.Status.PENDING
+        ):
             return Response(
                 {
-                    'detail': 'This request has already been reviewed.'
+                    'detail': (
+                        'This request has already been reviewed.'
+                    )
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        join_request.status = WorkspaceJoinRequest.Status.REJECTED
+        join_request.status = (
+            WorkspaceJoinRequest.Status.REJECTED
+        )
         join_request.reviewed_at = timezone.now()
 
         join_request.save(
@@ -301,6 +283,7 @@ class WorkspaceJoinRequestRejectView(APIView):
             status=status.HTTP_200_OK,
         )
 
+
 class WorkspaceInvitationCreateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -315,7 +298,10 @@ class WorkspaceInvitationCreateView(APIView):
             user=request.user,
         ).first()
 
-        if not membership or membership.role != WorkspaceMembership.Role.ADMIN:
+        if (
+            not membership
+            or membership.role != WorkspaceMembership.Role.ADMIN
+        ):
             return Response(
                 {
                     'detail': (
@@ -328,7 +314,10 @@ class WorkspaceInvitationCreateView(APIView):
         invitation = WorkspaceInvitation.objects.create(
             workspace=workspace,
             created_by=request.user,
-            expires_at=timezone.now() + timezone.timedelta(days=7),
+            expires_at=(
+                timezone.now()
+                + timezone.timedelta(days=7)
+            ),
         )
 
         serializer = WorkspaceInvitationSerializer(
@@ -346,7 +335,9 @@ class AcceptInvitationView(APIView):
 
     def post(self, request, token):
         invitation = get_object_or_404(
-            WorkspaceInvitation.objects.select_related('workspace'),
+            WorkspaceInvitation.objects.select_related(
+                'workspace'
+            ),
             token=token,
         )
 

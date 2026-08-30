@@ -1,12 +1,13 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from .views import (
+from .views.workspace import WorkspaceViewSet
+
+from .views.access import (
     WorkspaceJoinRequestApproveView,
     WorkspaceJoinRequestListView,
     WorkspaceJoinRequestRejectView,
     WorkspaceJoinView,
-    WorkspaceViewSet,
 )
 
 

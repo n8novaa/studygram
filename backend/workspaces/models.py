@@ -1,6 +1,7 @@
+import secrets
+
 from django.contrib.auth.models import User
 from django.db import models
-import secrets
 
 
 class Workspace(models.Model):
@@ -9,6 +10,7 @@ class Workspace(models.Model):
         PRIVATE = 'private', 'Private'
 
     name = models.CharField(max_length=150)
+
     description = models.TextField(blank=True)
 
     owner = models.ForeignKey(
@@ -24,6 +26,7 @@ class Workspace(models.Model):
     )
 
     created = models.DateTimeField(auto_now_add=True)
+
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -67,7 +70,11 @@ class WorkspaceMembership(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.user.username} - {self.workspace.name} ({self.role})'
+        return (
+            f'{self.user.username} - '
+            f'{self.workspace.name} '
+            f'({self.role})'
+        )
 
 
 class WorkspaceJoinRequest(models.Model):
@@ -95,7 +102,11 @@ class WorkspaceJoinRequest(models.Model):
     )
 
     created = models.DateTimeField(auto_now_add=True)
-    reviewed_at = models.DateTimeField(null=True, blank=True)
+
+    reviewed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         constraints = [
@@ -104,12 +115,14 @@ class WorkspaceJoinRequest(models.Model):
                 name='unique_workspace_join_request',
             ),
         ]
+
         ordering = ['-created']
 
     def __str__(self):
         return (
             f'{self.user.username} - '
-            f'{self.workspace.name} ({self.status})'
+            f'{self.workspace.name} '
+            f'({self.status})'
         )
 
 
@@ -134,6 +147,7 @@ class WorkspaceInvitation(models.Model):
     )
 
     created = models.DateTimeField(auto_now_add=True)
+
     expires_at = models.DateTimeField()
 
     def __str__(self):
