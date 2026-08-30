@@ -7,6 +7,47 @@ import {
   getWorkspaces,
 } from '../services/workspaceService'
 
+function formatRelativeTime(dateString) {
+  const date = new Date(dateString)
+  const now = new Date()
+
+  const difference = Math.floor(
+    (now.getTime() - date.getTime()) / 1000,
+  )
+
+  if (difference < 60) {
+    return 'just now'
+  }
+
+  const minutes = Math.floor(difference / 60)
+
+  if (minutes < 60) {
+    return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`
+  }
+
+  const hours = Math.floor(minutes / 60)
+
+  if (hours < 24) {
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`
+  }
+
+  const days = Math.floor(hours / 24)
+
+  if (days < 30) {
+    return `${days} ${days === 1 ? 'day' : 'days'} ago`
+  }
+
+  const months = Math.floor(days / 30)
+
+  if (months < 12) {
+    return `${months} ${months === 1 ? 'month' : 'months'} ago`
+  }
+
+  const years = Math.floor(months / 12)
+
+  return `${years} ${years === 1 ? 'year' : 'years'} ago`
+}
+
 function Workspaces() {
   const { accessToken } = useAuth()
 
@@ -17,6 +58,8 @@ function Workspaces() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [visibility, setVisibility] = useState('private')
+
   const [creating, setCreating] = useState(false)
   const [createError, setCreateError] = useState('')
 
@@ -55,12 +98,14 @@ function Workspaces() {
       const workspace = await createWorkspace(accessToken, {
         name: name.trim(),
         description: description.trim(),
+        visibility,
       })
 
       setWorkspaces((current) => [workspace, ...current])
 
       setName('')
       setDescription('')
+      setVisibility('private')
       setShowCreateForm(false)
     } catch (err) {
       setCreateError(err.message)
@@ -99,7 +144,9 @@ function Workspaces() {
             setCreateError('')
           }}
         >
-          {showCreateForm ? 'Cancel' : 'Create Workspace'}
+          {showCreateForm
+            ? 'Cancel'
+            : 'Create Workspace'}
         </button>
       </header>
 
@@ -117,7 +164,9 @@ function Workspaces() {
                 id="workspace-name"
                 type="text"
                 value={name}
-                onChange={(event) => setName(event.target.value)}
+                onChange={(event) =>
+                  setName(event.target.value)
+                }
                 placeholder="My Workspace"
                 disabled={creating}
               />
@@ -139,12 +188,61 @@ function Workspaces() {
               />
             </div>
 
+            <div>
+              <fieldset disabled={creating}>
+                <legend>Visibility</legend>
+
+                <label>
+                  <input
+                    type="radio"
+                    name="visibility"
+                    value="public"
+                    checked={visibility === 'public'}
+                    onChange={(event) =>
+                      setVisibility(event.target.value)
+                    }
+                  />
+
+                  Public
+                </label>
+
+                <p>
+                  Anyone can discover and join this
+                  workspace.
+                </p>
+
+                <label>
+                  <input
+                    type="radio"
+                    name="visibility"
+                    value="private"
+                    checked={visibility === 'private'}
+                    onChange={(event) =>
+                      setVisibility(event.target.value)
+                    }
+                  />
+
+                  Private
+                </label>
+
+                <p>
+                  Anyone can discover this workspace,
+                  but joining requires admin approval.
+                </p>
+              </fieldset>
+            </div>
+
             {createError && (
               <p>{createError}</p>
             )}
 
-            <button type="submit" disabled={creating}>
-              {creating ? 'Creating...' : 'Create Workspace'}
+            <button
+              type="submit"
+              disabled={creating}
+            >
+              {creating
+                ? 'Creating...'
+                : 'Create Workspace'}
             </button>
           </form>
         </section>
@@ -152,34 +250,70 @@ function Workspaces() {
 
       {workspaces.length === 0 ? (
         <section>
-          <p>You don't belong to any workspaces yet.</p>
+          <p>
+            You don't belong to any workspaces yet.
+          </p>
         </section>
       ) : (
         <section>
-          {workspaces.map((workspace) => (
-            <article key={workspace.id}>
-              <h2>{workspace.name}</h2>
+          {workspaces.map((workspace) => {
+            const isPublic =
+              workspace.visibility === 'public'
 
-              {workspace.description && (
-                <p>{workspace.description}</p>
-              )}
+            const createdTime = new Date(
+              workspace.created,
+            ).getTime()
 
-              <p>Owner: {workspace.owner}</p>
+            const updatedTime = new Date(
+              workspace.updated,
+            ).getTime()
 
-              <p>
-                {workspace.members?.length ?? 0}{' '}
-                {workspace.members?.length === 1
-                  ? 'member'
-                  : 'members'}
-              </p>
+            const wasEdited =
+              updatedTime - createdTime > 1000
 
-              <Link
-                to={`/app/workspaces/${workspace.id}`}
-              >
-                Open workspace
-              </Link>
-            </article>
-          ))}
+            return (
+              <article key={workspace.id}>
+                <header>
+                  <h2>{workspace.name}</h2>
+
+                  <span>
+                    {isPublic ? 'Public' : 'Private'}
+                  </span>
+                </header>
+
+                {workspace.description && (
+                  <p>{workspace.description}</p>
+                )}
+
+                <p>
+                  {workspace.members?.length ?? 0}{' '}
+                  {workspace.members?.length === 1
+                    ? 'member'
+                    : 'members'}
+                </p>
+
+                <p>
+                  Owner: {workspace.owner}
+                </p>
+
+                <p>
+                  {wasEdited
+                    ? `Updated ${formatRelativeTime(
+                        workspace.updated,
+                      )}`
+                    : `Created ${formatRelativeTime(
+                        workspace.created,
+                      )}`}
+                </p>
+
+                <Link
+                  to={`/app/workspaces/${workspace.id}`}
+                >
+                  Open workspace
+                </Link>
+              </article>
+            )
+          })}
         </section>
       )}
     </main>

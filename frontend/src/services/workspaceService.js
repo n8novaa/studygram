@@ -56,6 +56,7 @@ export async function createWorkspace(accessToken, workspaceData) {
       data.detail ||
       data.name?.[0] ||
       data.description?.[0] ||
+      data.visibility?.[0] ||
       'Failed to create workspace'
 
     throw new Error(message)
@@ -88,6 +89,7 @@ export async function updateWorkspace(
       data.detail ||
       data.name?.[0] ||
       data.description?.[0] ||
+      data.visibility?.[0] ||
       'Failed to update workspace'
 
     throw new Error(message)
@@ -120,4 +122,130 @@ export async function deleteWorkspace(accessToken, workspaceId) {
       data.detail || 'Failed to delete workspace',
     )
   }
+}
+
+
+/*
+ * Join a workspace.
+ *
+ * Public workspace:
+ *     Creates membership immediately.
+ *
+ * Private workspace:
+ *     Creates a pending join request.
+ */
+export async function joinWorkspace(
+  accessToken,
+  workspaceId,
+) {
+  const response = await fetch(
+    `${API_BASE_URL}/workspaces/${workspaceId}/join/`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  )
+
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(
+      data.detail || 'Failed to join workspace',
+    )
+  }
+
+  return data
+}
+
+
+/*
+ * Get pending join requests for a workspace.
+ *
+ * Only workspace admins should be able to
+ * successfully call this endpoint.
+ */
+export async function getJoinRequests(
+  accessToken,
+  workspaceId,
+) {
+  const response = await fetch(
+    `${API_BASE_URL}/workspaces/${workspaceId}/join-requests/`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  )
+
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(
+      data.detail || 'Failed to load join requests',
+    )
+  }
+
+  return data
+}
+
+
+/*
+ * Approve a pending join request.
+ */
+export async function approveJoinRequest(
+  accessToken,
+  workspaceId,
+  requestId,
+) {
+  const response = await fetch(
+    `${API_BASE_URL}/workspaces/${workspaceId}/join-requests/${requestId}/approve/`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  )
+
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(
+      data.detail || 'Failed to approve join request',
+    )
+  }
+
+  return data
+}
+
+
+/*
+ * Reject a pending join request.
+ */
+export async function rejectJoinRequest(
+  accessToken,
+  workspaceId,
+  requestId,
+) {
+  const response = await fetch(
+    `${API_BASE_URL}/workspaces/${workspaceId}/join-requests/${requestId}/reject/`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  )
+
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(
+      data.detail || 'Failed to reject join request',
+    )
+  }
+
+  return data
 }

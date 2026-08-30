@@ -8,6 +8,47 @@ import {
   updateWorkspace,
 } from '../services/workspaceService'
 
+function formatRelativeTime(dateString) {
+  const date = new Date(dateString)
+  const now = new Date()
+
+  const difference = Math.floor(
+    (now.getTime() - date.getTime()) / 1000,
+  )
+
+  if (difference < 60) {
+    return 'just now'
+  }
+
+  const minutes = Math.floor(difference / 60)
+
+  if (minutes < 60) {
+    return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`
+  }
+
+  const hours = Math.floor(minutes / 60)
+
+  if (hours < 24) {
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`
+  }
+
+  const days = Math.floor(hours / 24)
+
+  if (days < 30) {
+    return `${days} ${days === 1 ? 'day' : 'days'} ago`
+  }
+
+  const months = Math.floor(days / 30)
+
+  if (months < 12) {
+    return `${months} ${months === 1 ? 'month' : 'months'} ago`
+  }
+
+  const years = Math.floor(months / 12)
+
+  return `${years} ${years === 1 ? 'year' : 'years'} ago`
+}
+
 function WorkspaceDetail() {
   const { accessToken, user } = useAuth()
   const { id } = useParams()
@@ -19,11 +60,13 @@ function WorkspaceDetail() {
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [visibility, setVisibility] = useState('private')
+
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
 
   const [deleting, setDeleting] = useState(false)
-  const [deleteError, setDeleteError] = useState('')  
+  const [deleteError, setDeleteError] = useState('')
 
   useEffect(() => {
     async function loadWorkspace() {
@@ -81,9 +124,20 @@ function WorkspaceDetail() {
   const canDelete =
     workspace.owner === user?.username
 
+  const isPublic = workspace.visibility === 'public'
+
+  const createdTime = new Date(workspace.created).getTime()
+  const updatedTime = new Date(workspace.updated).getTime()
+
+  // Django updates `updated` whenever the workspace is saved.
+  // Treat very small differences as "created".
+  const wasEdited =
+    updatedTime - createdTime > 1000
+
   function startEditing() {
     setName(workspace.name)
     setDescription(workspace.description || '')
+    setVisibility(workspace.visibility || 'private')
     setSaveError('')
     setEditing(true)
   }
@@ -91,6 +145,7 @@ function WorkspaceDetail() {
   function cancelEditing() {
     setName(workspace.name)
     setDescription(workspace.description || '')
+    setVisibility(workspace.visibility || 'private')
     setSaveError('')
     setEditing(false)
   }
@@ -113,6 +168,7 @@ function WorkspaceDetail() {
         {
           name: name.trim(),
           description: description.trim(),
+          visibility,
         },
       )
 
@@ -153,11 +209,11 @@ function WorkspaceDetail() {
         ← Back to Workspaces
       </Link>
 
-      <header>
-        {editing ? (
-          <form onSubmit={handleUpdateWorkspace}>
-            <h1>Edit Workspace</h1>
+      {editing ? (
+        <section>
+          <h1>Edit Workspace</h1>
 
+          <form onSubmit={handleUpdateWorkspace}>
             <div>
               <label htmlFor="workspace-name">
                 Name
@@ -189,6 +245,49 @@ function WorkspaceDetail() {
               />
             </div>
 
+            <div>
+              <fieldset disabled={saving}>
+                <legend>Visibility</legend>
+
+                <label>
+                  <input
+                    type="radio"
+                    name="workspace-visibility"
+                    value="public"
+                    checked={visibility === 'public'}
+                    onChange={(event) =>
+                      setVisibility(event.target.value)
+                    }
+                  />
+                  Public
+                </label>
+
+                <p>
+                  Anyone can discover and join this
+                  workspace.
+                </p>
+
+                <label>
+                  <input
+                    type="radio"
+                    name="workspace-visibility"
+                    value="private"
+                    checked={visibility === 'private'}
+                    onChange={(event) =>
+                      setVisibility(event.target.value)
+                    }
+                  />
+                  Private
+                </label>
+
+                <p>
+                  Anyone can discover this workspace,
+                  but joining requires administrator
+                  approval.
+                </p>
+              </fieldset>
+            </div>
+
             {saveError && (
               <p>{saveError}</p>
             )}
@@ -197,7 +296,9 @@ function WorkspaceDetail() {
               type="submit"
               disabled={saving}
             >
-              {saving ? 'Saving...' : 'Save Changes'}
+              {saving
+                ? 'Saving...'
+                : 'Save Changes'}
             </button>
 
             <button
@@ -208,13 +309,17 @@ function WorkspaceDetail() {
               Cancel
             </button>
           </form>
-        ) : (
-          <>
+        </section>
+      ) : (
+        <>
+          <header>
             <h1>{workspace.name}</h1>
 
-            {workspace.description && (
-              <p>{workspace.description}</p>
-            )}
+            <p>
+              <strong>
+                {isPublic ? 'Public' : 'Private'}
+              </strong>
+            </p>
 
             {canEdit && (
               <button
@@ -225,54 +330,68 @@ function WorkspaceDetail() {
               </button>
             )}
 
-              {canDelete && (
-                <button
-                  type="button"
-                  onClick={handleDeleteWorkspace}
-                  disabled={deleting}
-                >
-                  {deleting ? 'Deleting...' : 'Delete Workspace'}
-                    </button>
-                  )}
+            {canDelete && (
+              <button
+                type="button"
+                onClick={handleDeleteWorkspace}
+                disabled={deleting}
+              >
+                {deleting
+                  ? 'Deleting...'
+                  : 'Delete Workspace'}
+              </button>
+            )}
 
-                  {deleteError && (
-                    <p>{deleteError}</p>
-                  )}
-                        </>
-                      )}
-      </header>
+            {deleteError && (
+              <p>{deleteError}</p>
+            )}
+          </header>
 
-      <section>
-        <h2>Workspace Information</h2>
+          {workspace.description && (
+            <section>
+              <p>{workspace.description}</p>
+            </section>
+          )}
 
-        <p>
-          <strong>Owner:</strong>{' '}
-          {workspace.owner}
-        </p>
+          <section>
+            <h2>Workspace Information</h2>
 
-        <p>
-          <strong>Members:</strong>{' '}
-          {workspace.members?.length ?? 0}
-        </p>
-      </section>
+            <p>
+              <strong>Owner:</strong>{' '}
+              {workspace.owner}
+            </p>
 
-      <section>
-        <h2>Members</h2>
+            <p>
+              <strong>Members:</strong>{' '}
+              {workspace.members?.length ?? 0}
+            </p>
 
-        {workspace.members?.length ? (
-          <ul>
-            {workspace.members.map((member) => (
-              <li key={member.user}>
-                <strong>{member.user}</strong>
-                {' — '}
-                {member.role}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No members found.</p>
-        )}
-      </section>
+            <p>
+              {wasEdited
+                ? `Updated ${formatRelativeTime(workspace.updated)}`
+                : `Created ${formatRelativeTime(workspace.created)}`}
+            </p>
+          </section>
+
+          <section>
+            <h2>Members</h2>
+
+            {workspace.members?.length ? (
+              <ul>
+                {workspace.members.map((member) => (
+                  <li key={member.user}>
+                    <strong>{member.user}</strong>
+                    {' — '}
+                    {member.role}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No members found.</p>
+            )}
+          </section>
+        </>
+      )}
     </main>
   )
 }
