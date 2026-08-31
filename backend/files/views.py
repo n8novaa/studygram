@@ -1,9 +1,11 @@
 from django.shortcuts import get_object_or_404
 
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 
 from workspaces.models import Workspace
+
+from rest_framework.response import Response
 
 from .models import WorkspaceFile, WorkspaceFolder
 from .permissions import (
@@ -65,18 +67,48 @@ class WorkspaceFileListView(generics.ListAPIView):
 
         return queryset
         
-class WorkspaceFileDetailView(generics.RetrieveAPIView):
+class WorkspaceFileDetailView(generics.RetrieveUpdateAPIView):
     serializer_class = WorkspaceFileSerializer
     permission_classes = [
         IsAuthenticated,
-        IsWorkspaceFileMember,
     ]
 
+    def get_workspace(self):
+        return get_object_or_404(
+            Workspace,
+            pk=self.kwargs["workspace_pk"],
+        )
+
     def get_queryset(self):
-        workspace_id = self.kwargs["workspace_pk"]
+        workspace = self.get_workspace()
 
         return WorkspaceFile.objects.filter(
-            workspace_id=workspace_id
+            workspace=workspace
+        )
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+
+        context["workspace"] = self.get_workspace()
+
+        return context
+
+    def get_permissions(self):
+        if self.request.method in ["PATCH", "PUT"]:
+            return [
+                IsAuthenticated(),
+                IsWorkspaceFileAdmin(),
+            ]
+
+        return [
+            IsAuthenticated(),
+            IsWorkspaceFileMember(),
+        ]
+
+    def put(self, request, *args, **kwargs):
+        return Response(
+            {"detail": "PUT is not supported. Use PATCH."},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
         )
 
 

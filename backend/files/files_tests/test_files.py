@@ -847,3 +847,210 @@ class WorkspaceFileDetailTests(APITestCase):
             response.status_code,
             status.HTTP_404_NOT_FOUND,
         )
+
+    def test_admin_can_rename_file(self):
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.patch(
+            self.url,
+            {
+                "name": "renamed-document.txt",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        self.workspace_file.refresh_from_db()
+
+        self.assertEqual(
+            self.workspace_file.name,
+            "renamed-document.txt",
+        )
+
+    def test_member_cannot_rename_file(self):
+        self.client.force_authenticate(user=self.member)
+
+        response = self.client.patch(
+            self.url,
+            {
+                "name": "member-renamed.txt",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+
+        self.workspace_file.refresh_from_db()
+
+        self.assertEqual(
+            self.workspace_file.name,
+            "document.txt",
+        )
+
+    def test_admin_can_move_file_into_folder(self):
+        folder = WorkspaceFolder.objects.create(
+            workspace=self.workspace,
+            name="Notes",
+            created_by=self.admin,
+        )
+
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.patch(
+            self.url,
+            {
+                "folder": folder.pk,
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        self.workspace_file.refresh_from_db()
+
+        self.assertEqual(
+            self.workspace_file.folder,
+            folder,
+        )
+
+    def test_admin_can_move_file_to_workspace_root(self):
+        folder = WorkspaceFolder.objects.create(
+            workspace=self.workspace,
+            name="Notes",
+            created_by=self.admin,
+        )
+
+        self.workspace_file.folder = folder
+        self.workspace_file.save()
+
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.patch(
+            self.url,
+            {
+                "folder": None,
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        self.workspace_file.refresh_from_db()
+
+        self.assertIsNone(
+            self.workspace_file.folder,
+        )
+
+    def test_member_cannot_move_file(self):
+        folder = WorkspaceFolder.objects.create(
+            workspace=self.workspace,
+            name="Notes",
+            created_by=self.admin,
+        )
+
+        self.client.force_authenticate(user=self.member)
+
+        response = self.client.patch(
+            self.url,
+            {
+                "folder": folder.pk,
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+
+        self.workspace_file.refresh_from_db()
+
+        self.assertIsNone(
+            self.workspace_file.folder,
+        )
+
+    def test_admin_cannot_move_file_into_another_workspace_folder(self):
+        other_workspace = Workspace.objects.create(
+            name="Other Workspace",
+            description="Another workspace",
+            owner=self.admin,
+        )
+
+        other_folder = WorkspaceFolder.objects.create(
+            workspace=other_workspace,
+            name="Other Folder",
+            created_by=self.admin,
+        )
+
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.patch(
+            self.url,
+            {
+                "folder": other_folder.pk,
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+
+        self.workspace_file.refresh_from_db()
+
+        self.assertIsNone(
+            self.workspace_file.folder,
+        )
+
+    def test_admin_cannot_rename_file_to_empty_name(self):
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.patch(
+            self.url,
+            {
+                "name": "   ",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+
+        self.workspace_file.refresh_from_db()
+
+        self.assertEqual(
+            self.workspace_file.name,
+            "document.txt",
+        )
+
+    def test_put_is_not_supported(self):
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.put(
+            self.url,
+            {
+                "name": "replacement.txt",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_405_METHOD_NOT_ALLOWED,
+        )

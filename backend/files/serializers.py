@@ -74,9 +74,10 @@ class WorkspaceFileSerializer(serializers.ModelSerializer):
         read_only_fields = [
             "id",
             "workspace",
-            "created_by",
+            "uploaded_file",
             "file_type",
             "size",
+            "created_by",
             "created_at",
             "updated_at",
         ]
