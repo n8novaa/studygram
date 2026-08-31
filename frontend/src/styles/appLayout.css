@@ -1,0 +1,351 @@
+/* =========================
+   App Layout
+   ========================= */
+
+.app-layout {
+  min-height: 100vh;
+  background: #f7f8fa;
+}
+
+
+/* =========================
+   Sidebar
+   ========================= */
+
+.app-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  width: 240px;
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  box-sizing: border-box;
+
+  padding: 18px 12px;
+
+  background: #ffffff;
+
+  border-right: 1px solid #e5e7eb;
+}
+
+
+/* =========================
+   Brand
+   ========================= */
+
+.sidebar-brand {
+  padding: 8px 10px 24px;
+}
+
+.sidebar-brand h2 {
+  margin: 0;
+
+  color: #111827;
+
+  font-size: 19px;
+  font-weight: 700;
+}
+
+
+/* =========================
+   Navigation
+   ========================= */
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  min-height: 38px;
+
+  padding: 0 10px;
+
+  box-sizing: border-box;
+
+  border-radius: 7px;
+
+  color: #6b7280;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  text-decoration: none;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+
+.sidebar-link:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+
+.sidebar-link.active {
+  background: #eef2ff;
+  color: #4338ca;
+
+  font-weight: 600;
+}
+
+
+/* Navigation icons */
+
+.sidebar-link-icon {
+  width: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: inherit;
+
+  font-size: 17px;
+  line-height: 1;
+}
+
+
+/* =========================
+   Account section
+   ========================= */
+
+.sidebar-account {
+  margin-top: auto;
+
+  padding-top: 14px;
+
+  border-top: 1px solid #e5e7eb;
+}
+
+
+.account-info {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 8px 6px 12px;
+}
+
+
+.account-avatar {
+  width: 32px;
+  height: 32px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+
+  background: #eef2ff;
+  color: #4338ca;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+
+.account-details {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+
+.account-name {
+  overflow: hidden;
+
+  color: #374151;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+.account-label {
+  color: #9ca3af;
+
+  font-size: 11px;
+}
+
+
+/* =========================
+   Logout
+   ========================= */
+
+.logout-button {
+  width: 100%;
+
+  min-height: 36px;
+
+  padding: 0 10px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 7px;
+
+  background: #ffffff;
+
+  color: #6b7280;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+
+.logout-button:hover {
+  background: #f9fafb;
+
+  border-color: #d1d5db;
+
+  color: #374151;
+}
+
+
+/* =========================
+   Main Content
+   ========================= */
+
+.app-content {
+  min-height: 100vh;
+
+  margin-left: 240px;
+
+  box-sizing: border-box;
+
+  padding: 40px;
+}
+
+
+/* =========================
+   Responsive
+   ========================= */
+
+@media (max-width: 700px) {
+
+  .app-sidebar {
+    width: 64px;
+
+    padding: 18px 8px;
+  }
+
+
+  .sidebar-brand {
+    padding: 8px 0 24px;
+
+    text-align: center;
+  }
+
+
+  .sidebar-brand h2 {
+    font-size: 0;
+
+    width: 36px;
+    height: 36px;
+
+    margin: 0 auto;
+
+    border-radius: 9px;
+
+    background: #eef2ff;
+  }
+
+
+  .sidebar-brand h2::after {
+    content: 'S';
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 100%;
+
+    color: #4338ca;
+
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+
+  .sidebar-link {
+    justify-content: center;
+
+    padding: 0;
+
+    gap: 0;
+  }
+
+
+  .sidebar-link span:last-child {
+    display: none;
+  }
+
+
+  .sidebar-link-icon {
+    width: 100%;
+  }
+
+
+  .account-info {
+    justify-content: center;
+
+    padding: 8px 0 12px;
+  }
+
+
+  .account-details {
+    display: none;
+  }
+
+
+  .logout-button {
+    padding: 0;
+
+    font-size: 0;
+  }
+
+
+  .logout-button::after {
+    content: '↪';
+
+    font-size: 17px;
+  }
+
+
+  .app-content {
+    margin-left: 64px;
+
+    padding: 28px 18px;
+  }
+
+}

@@ -4,7 +4,7 @@ import ProtectedRoute from './auth/ProtectedRoute'
 import AppLayout from './components/layout/AppLayout'
 
 import Login from './pages/Login'
-import Register from './pages/Register'
+import Register from './pages/register'
 import AppHome from './pages/AppHome'
 import Workspaces from './pages/Workspaces'
 import Discover from './pages/discover'

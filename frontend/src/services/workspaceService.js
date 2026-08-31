@@ -249,3 +249,25 @@ export async function rejectJoinRequest(
 
   return data
 }
+
+export async function getDiscoveredWorkspaces(accessToken) {
+  const response = await fetch(
+    `${API_BASE_URL}/workspaces/discover/`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    },
+  )
+
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(
+      data.detail || 'Failed to load workspaces',
+    )
+  }
+
+  return data.results ?? data
+}

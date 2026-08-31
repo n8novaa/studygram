@@ -8,6 +8,8 @@ import {
   updateWorkspace,
 } from '../services/workspaceService'
 
+import '../styles/workspaceDetail.css'
+
 function formatRelativeTime(dateString) {
   const date = new Date(dateString)
   const now = new Date()
@@ -23,30 +25,40 @@ function formatRelativeTime(dateString) {
   const minutes = Math.floor(difference / 60)
 
   if (minutes < 60) {
-    return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`
+    return `${minutes} ${
+      minutes === 1 ? 'minute' : 'minutes'
+    } ago`
   }
 
   const hours = Math.floor(minutes / 60)
 
   if (hours < 24) {
-    return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`
+    return `${hours} ${
+      hours === 1 ? 'hour' : 'hours'
+    } ago`
   }
 
   const days = Math.floor(hours / 24)
 
   if (days < 30) {
-    return `${days} ${days === 1 ? 'day' : 'days'} ago`
+    return `${days} ${
+      days === 1 ? 'day' : 'days'
+    } ago`
   }
 
   const months = Math.floor(days / 30)
 
   if (months < 12) {
-    return `${months} ${months === 1 ? 'month' : 'months'} ago`
+    return `${months} ${
+      months === 1 ? 'month' : 'months'
+    } ago`
   }
 
   const years = Math.floor(months / 12)
 
-  return `${years} ${years === 1 ? 'year' : 'years'} ago`
+  return `${years} ${
+    years === 1 ? 'year' : 'years'
+  } ago`
 }
 
 function WorkspaceDetail() {
@@ -74,7 +86,11 @@ function WorkspaceDetail() {
         setLoading(true)
         setError('')
 
-        const data = await getWorkspace(accessToken, id)
+        const data = await getWorkspace(
+          accessToken,
+          id,
+        )
+
         setWorkspace(data)
       } catch (err) {
         setError(err.message)
@@ -90,21 +106,28 @@ function WorkspaceDetail() {
 
   if (loading) {
     return (
-      <main>
-        <p>Loading workspace...</p>
+      <main className="workspace-detail">
+        <div className="workspace-state">
+          <p>Loading workspace...</p>
+        </div>
       </main>
     )
   }
 
   if (error) {
     return (
-      <main>
-        <Link to="/app/workspaces">
+      <main className="workspace-detail">
+        <Link
+          className="workspace-back-link"
+          to="/app/workspaces"
+        >
           ← Back to Workspaces
         </Link>
 
-        <h1>Workspace</h1>
-        <p>{error}</p>
+        <div className="workspace-state workspace-state-error">
+          <h1>Workspace</h1>
+          <p>{error}</p>
+        </div>
       </main>
     )
   }
@@ -114,7 +137,8 @@ function WorkspaceDetail() {
   }
 
   const currentMember = workspace.members?.find(
-    (member) => member.user === user?.username,
+    (member) =>
+      member.user === user?.username,
   )
 
   const canEdit =
@@ -124,28 +148,40 @@ function WorkspaceDetail() {
   const canDelete =
     workspace.owner === user?.username
 
-  const isPublic = workspace.visibility === 'public'
+  const isPublic =
+    workspace.visibility === 'public'
 
-  const createdTime = new Date(workspace.created).getTime()
-  const updatedTime = new Date(workspace.updated).getTime()
+  const createdTime = new Date(
+    workspace.created,
+  ).getTime()
 
-  // Django updates `updated` whenever the workspace is saved.
-  // Treat very small differences as "created".
+  const updatedTime = new Date(
+    workspace.updated,
+  ).getTime()
+
   const wasEdited =
     updatedTime - createdTime > 1000
 
   function startEditing() {
     setName(workspace.name)
-    setDescription(workspace.description || '')
-    setVisibility(workspace.visibility || 'private')
+    setDescription(
+      workspace.description || '',
+    )
+    setVisibility(
+      workspace.visibility || 'private',
+    )
     setSaveError('')
     setEditing(true)
   }
 
   function cancelEditing() {
     setName(workspace.name)
-    setDescription(workspace.description || '')
-    setVisibility(workspace.visibility || 'private')
+    setDescription(
+      workspace.description || '',
+    )
+    setVisibility(
+      workspace.visibility || 'private',
+    )
     setSaveError('')
     setEditing(false)
   }
@@ -154,7 +190,9 @@ function WorkspaceDetail() {
     event.preventDefault()
 
     if (!name.trim()) {
-      setSaveError('Workspace name is required.')
+      setSaveError(
+        'Workspace name is required.',
+      )
       return
     }
 
@@ -162,15 +200,16 @@ function WorkspaceDetail() {
       setSaving(true)
       setSaveError('')
 
-      const updatedWorkspace = await updateWorkspace(
-        accessToken,
-        id,
-        {
-          name: name.trim(),
-          description: description.trim(),
-          visibility,
-        },
-      )
+      const updatedWorkspace =
+        await updateWorkspace(
+          accessToken,
+          id,
+          {
+            name: name.trim(),
+            description: description.trim(),
+            visibility,
+          },
+        )
 
       setWorkspace(updatedWorkspace)
       setEditing(false)
@@ -194,9 +233,13 @@ function WorkspaceDetail() {
       setDeleting(true)
       setDeleteError('')
 
-      await deleteWorkspace(accessToken, id)
+      await deleteWorkspace(
+        accessToken,
+        id,
+      )
 
-      window.location.href = '/app/workspaces'
+      window.location.href =
+        '/app/workspaces'
     } catch (err) {
       setDeleteError(err.message)
       setDeleting(false)
@@ -204,17 +247,32 @@ function WorkspaceDetail() {
   }
 
   return (
-    <main>
-      <Link to="/app/workspaces">
+    <main className="workspace-detail">
+
+      <Link
+        className="workspace-back-link"
+        to="/app/workspaces"
+      >
         ← Back to Workspaces
       </Link>
 
       {editing ? (
-        <section>
-          <h1>Edit Workspace</h1>
-
-          <form onSubmit={handleUpdateWorkspace}>
+        <section className="workspace-card workspace-edit-card">
+          <div className="workspace-section-heading">
             <div>
+              <span className="workspace-eyebrow">
+                Workspace settings
+              </span>
+
+              <h1>Edit Workspace</h1>
+            </div>
+          </div>
+
+          <form
+            className="workspace-form"
+            onSubmit={handleUpdateWorkspace}
+          >
+            <div className="form-field">
               <label htmlFor="workspace-name">
                 Name
               </label>
@@ -230,7 +288,7 @@ function WorkspaceDetail() {
               />
             </div>
 
-            <div>
+            <div className="form-field">
               <label htmlFor="workspace-description">
                 Description
               </label>
@@ -239,157 +297,294 @@ function WorkspaceDetail() {
                 id="workspace-description"
                 value={description}
                 onChange={(event) =>
-                  setDescription(event.target.value)
+                  setDescription(
+                    event.target.value,
+                  )
                 }
                 disabled={saving}
               />
             </div>
 
-            <div>
-              <fieldset disabled={saving}>
-                <legend>Visibility</legend>
+            <fieldset
+              className="visibility-fieldset"
+              disabled={saving}
+            >
+              <legend>Visibility</legend>
 
-                <label>
-                  <input
-                    type="radio"
-                    name="workspace-visibility"
-                    value="public"
-                    checked={visibility === 'public'}
-                    onChange={(event) =>
-                      setVisibility(event.target.value)
-                    }
-                  />
-                  Public
-                </label>
+              <label className="visibility-option">
+                <input
+                  type="radio"
+                  name="workspace-visibility"
+                  value="public"
+                  checked={
+                    visibility === 'public'
+                  }
+                  onChange={(event) =>
+                    setVisibility(
+                      event.target.value,
+                    )
+                  }
+                />
 
-                <p>
-                  Anyone can discover and join this
-                  workspace.
-                </p>
+                <span>
+                  <strong>Public</strong>
+                  <small>
+                    Anyone can discover and
+                    join this workspace.
+                  </small>
+                </span>
+              </label>
 
-                <label>
-                  <input
-                    type="radio"
-                    name="workspace-visibility"
-                    value="private"
-                    checked={visibility === 'private'}
-                    onChange={(event) =>
-                      setVisibility(event.target.value)
-                    }
-                  />
-                  Private
-                </label>
+              <label className="visibility-option">
+                <input
+                  type="radio"
+                  name="workspace-visibility"
+                  value="private"
+                  checked={
+                    visibility === 'private'
+                  }
+                  onChange={(event) =>
+                    setVisibility(
+                      event.target.value,
+                    )
+                  }
+                />
 
-                <p>
-                  Anyone can discover this workspace,
-                  but joining requires administrator
-                  approval.
-                </p>
-              </fieldset>
-            </div>
+                <span>
+                  <strong>Private</strong>
+                  <small>
+                    Anyone can discover this
+                    workspace, but joining
+                    requires administrator
+                    approval.
+                  </small>
+                </span>
+              </label>
+            </fieldset>
 
             {saveError && (
-              <p>{saveError}</p>
+              <p className="workspace-error">
+                {saveError}
+              </p>
             )}
 
-            <button
-              type="submit"
-              disabled={saving}
-            >
-              {saving
-                ? 'Saving...'
-                : 'Save Changes'}
-            </button>
+            <div className="workspace-form-actions">
+              <button
+                className="workspace-button workspace-button-primary"
+                type="submit"
+                disabled={saving}
+              >
+                {saving
+                  ? 'Saving...'
+                  : 'Save Changes'}
+              </button>
 
-            <button
-              type="button"
-              onClick={cancelEditing}
-              disabled={saving}
-            >
-              Cancel
-            </button>
+              <button
+                className="workspace-button workspace-button-secondary"
+                type="button"
+                onClick={cancelEditing}
+                disabled={saving}
+              >
+                Cancel
+              </button>
+            </div>
           </form>
         </section>
       ) : (
         <>
-          <header>
-            <h1>{workspace.name}</h1>
+          <section className="workspace-card workspace-header-card">
+            <div className="workspace-header-content">
+              <div>
+                <div className="workspace-title-row">
+                  <h1>{workspace.name}</h1>
 
-            <p>
-              <strong>
-                {isPublic ? 'Public' : 'Private'}
-              </strong>
-            </p>
+                  <span
+                    className={`workspace-visibility-badge ${
+                      isPublic
+                        ? 'workspace-visibility-public'
+                        : 'workspace-visibility-private'
+                    }`}
+                  >
+                    {isPublic
+                      ? 'Public'
+                      : 'Private'}
+                  </span>
+                </div>
 
-            {canEdit && (
-              <button
-                type="button"
-                onClick={startEditing}
-              >
-                Edit Workspace
-              </button>
-            )}
+                <p className="workspace-owner">
+                  Owned by{' '}
+                  <strong>
+                    {workspace.owner}
+                  </strong>
+                </p>
+              </div>
 
-            {canDelete && (
-              <button
-                type="button"
-                onClick={handleDeleteWorkspace}
-                disabled={deleting}
-              >
-                {deleting
-                  ? 'Deleting...'
-                  : 'Delete Workspace'}
-              </button>
-            )}
+              <div className="workspace-header-actions">
+                {canEdit && (
+                  <button
+                    className="workspace-button workspace-button-secondary"
+                    type="button"
+                    onClick={startEditing}
+                  >
+                    Edit
+                  </button>
+                )}
+
+                {canDelete && (
+                  <button
+                    className="workspace-button workspace-button-danger"
+                    type="button"
+                    onClick={
+                      handleDeleteWorkspace
+                    }
+                    disabled={deleting}
+                  >
+                    {deleting
+                      ? 'Deleting...'
+                      : 'Delete'}
+                  </button>
+                )}
+              </div>
+            </div>
 
             {deleteError && (
-              <p>{deleteError}</p>
+              <p className="workspace-error">
+                {deleteError}
+              </p>
             )}
-          </header>
 
-          {workspace.description && (
-            <section>
-              <p>{workspace.description}</p>
-            </section>
-          )}
-
-          <section>
-            <h2>Workspace Information</h2>
-
-            <p>
-              <strong>Owner:</strong>{' '}
-              {workspace.owner}
-            </p>
-
-            <p>
-              <strong>Members:</strong>{' '}
-              {workspace.members?.length ?? 0}
-            </p>
-
-            <p>
-              {wasEdited
-                ? `Updated ${formatRelativeTime(workspace.updated)}`
-                : `Created ${formatRelativeTime(workspace.created)}`}
-            </p>
+            {workspace.description && (
+              <p className="workspace-description">
+                {workspace.description}
+              </p>
+            )}
           </section>
 
-          <section>
-            <h2>Members</h2>
+          <section className="workspace-card">
+            <div className="workspace-section-heading">
+              <div>
+                <span className="workspace-eyebrow">
+                  Overview
+                </span>
+
+                <h2>Workspace Information</h2>
+              </div>
+            </div>
+
+            <div className="workspace-info-grid">
+              <div className="workspace-info-item">
+                <span>Owner</span>
+                <strong>
+                  {workspace.owner}
+                </strong>
+              </div>
+
+              <div className="workspace-info-item">
+                <span>Members</span>
+                <strong>
+                  {workspace.members?.length ??
+                    0}
+                </strong>
+              </div>
+
+              <div className="workspace-info-item">
+                <span>Visibility</span>
+                <strong>
+                  {isPublic
+                    ? 'Public'
+                    : 'Private'}
+                </strong>
+              </div>
+
+              <div className="workspace-info-item">
+                <span>Activity</span>
+                <strong>
+                  {wasEdited
+                    ? `Updated ${formatRelativeTime(
+                        workspace.updated,
+                      )}`
+                    : `Created ${formatRelativeTime(
+                        workspace.created,
+                      )}`}
+                </strong>
+              </div>
+            </div>
+          </section>
+
+          <section className="workspace-card">
+            <div className="workspace-section-heading">
+              <div>
+                <span className="workspace-eyebrow">
+                  Community
+                </span>
+
+                <h2>Members</h2>
+              </div>
+
+              <span className="workspace-member-count">
+                {workspace.members?.length ??
+                  0}{' '}
+                {workspace.members?.length ===
+                1
+                  ? 'member'
+                  : 'members'}
+              </span>
+            </div>
 
             {workspace.members?.length ? (
-              <ul>
-                {workspace.members.map((member) => (
-                  <li key={member.user}>
-                    <strong>{member.user}</strong>
-                    {' — '}
-                    {member.role}
-                  </li>
-                ))}
-              </ul>
+              <div className="workspace-member-list">
+                {workspace.members.map(
+                  (member) => (
+                    <div
+                      className="workspace-member"
+                      key={member.user}
+                    >
+                      <div className="workspace-member-avatar">
+                        {member.user
+                          ?.charAt(0)
+                          ?.toUpperCase()}
+                      </div>
+
+                      <div className="workspace-member-details">
+                        <strong>
+                          {member.user}
+                        </strong>
+
+                        <span>
+                          {member.role}
+                        </span>
+                      </div>
+
+                      {member.role ===
+                        'admin' && (
+                        <span className="workspace-role-badge">
+                          Admin
+                        </span>
+                      )}
+                    </div>
+                  ),
+                )}
+              </div>
             ) : (
-              <p>No members found.</p>
+              <div className="workspace-empty">
+                <p>
+                  No members found.
+                </p>
+              </div>
             )}
           </section>
+
+          {/*
+           * Future workspace features can be
+           * added below this point.
+           *
+           * Examples:
+           * - Rooms
+           * - Posts
+           * - Invitations
+           * - Workspace notifications
+           * - Admin controls
+           */}
         </>
       )}
     </main>

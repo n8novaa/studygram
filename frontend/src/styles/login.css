@@ -1,0 +1,309 @@
+/* =========================
+   Login Page
+   ========================= */
+
+.login-page {
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-sizing: border-box;
+
+  padding: 40px 20px;
+
+  background: #f7f8fa;
+}
+
+
+/* =========================
+   Container
+   ========================= */
+
+.login-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+
+/* =========================
+   Brand
+   ========================= */
+
+.login-brand {
+  text-align: center;
+
+  margin-bottom: 28px;
+}
+
+
+.login-logo {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0 auto 14px;
+
+  border-radius: 12px;
+
+  background: #4f46e5;
+  color: #ffffff;
+
+  font-size: 20px;
+  font-weight: 700;
+}
+
+
+.login-brand h1 {
+  margin: 0;
+
+  color: #111827;
+
+  font-size: 25px;
+  font-weight: 700;
+}
+
+
+.login-brand p {
+  max-width: 320px;
+
+  margin: 8px auto 0;
+
+  color: #6b7280;
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+
+/* =========================
+   Login Card
+   ========================= */
+
+.login-card {
+  padding: 28px;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+
+/* =========================
+   Card Header
+   ========================= */
+
+.login-card-header {
+  margin-bottom: 24px;
+}
+
+
+.login-card-header h2 {
+  margin: 0;
+
+  color: #1f2937;
+
+  font-size: 21px;
+  font-weight: 650;
+}
+
+
+.login-card-header p {
+  margin: 6px 0 0;
+
+  color: #6b7280;
+
+  font-size: 13px;
+}
+
+
+/* =========================
+   Form
+   ========================= */
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+
+  gap: 18px;
+}
+
+
+/* =========================
+   Fields
+   ========================= */
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+
+.login-field label {
+  color: #374151;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+
+.login-field input {
+  width: 100%;
+
+  min-height: 40px;
+
+  box-sizing: border-box;
+
+  padding: 0 11px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+
+  outline: none;
+
+  background: #ffffff;
+
+  color: #111827;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+
+.login-field input::placeholder {
+  color: #9ca3af;
+}
+
+
+.login-field input:hover {
+  border-color: #9ca3af;
+}
+
+
+.login-field input:focus {
+  border-color: #4f46e5;
+
+  box-shadow:
+    0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+
+.login-field input:disabled {
+  background: #f9fafb;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================
+   Error
+   ========================= */
+
+.login-error {
+  padding: 10px 12px;
+
+  border: 1px solid #f1c7c7;
+  border-radius: 7px;
+
+  background: #fff5f5;
+
+  color: #b42318;
+
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+
+/* =========================
+   Login Button
+   ========================= */
+
+.login-button {
+  width: 100%;
+
+  min-height: 40px;
+
+  margin-top: 2px;
+
+  border: 1px solid #4f46e5;
+  border-radius: 7px;
+
+  background: #4f46e5;
+  color: #ffffff;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+
+.login-button:hover:not(:disabled) {
+  background: #4338ca;
+  border-color: #4338ca;
+}
+
+
+.login-button:disabled {
+  opacity: 0.65;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================
+   Footer
+   ========================= */
+
+.login-footer {
+  margin: 20px 0 0;
+
+  text-align: center;
+
+  color: #9ca3af;
+
+  font-size: 12px;
+}
+
+
+/* =========================
+   Mobile
+   ========================= */
+
+@media (max-width: 480px) {
+
+  .login-page {
+    padding: 24px 16px;
+  }
+
+
+  .login-card {
+    padding: 22px;
+  }
+
+
+  .login-brand {
+    margin-bottom: 22px;
+  }
+
+}
