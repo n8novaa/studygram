@@ -17,6 +17,8 @@ from .serializers import (
     WorkspaceFolderSerializer,
 )
 
+from django.http import FileResponse
+
 class WorkspaceFolderListView(generics.ListAPIView):
     serializer_class = WorkspaceFolderSerializer
     permission_classes = [
@@ -119,6 +121,31 @@ class WorkspaceFileDetailView(generics.RetrieveUpdateDestroyAPIView):
         if uploaded_file:
             uploaded_file.delete(save=False)
 
+
+class WorkspaceFileDownloadView(generics.GenericAPIView):
+    permission_classes = [
+        IsAuthenticated,
+        IsWorkspaceFileMember,
+    ]
+
+    def get_queryset(self):
+        workspace_id = self.kwargs["workspace_pk"]
+
+        return WorkspaceFile.objects.filter(
+            workspace_id=workspace_id
+        )
+
+    def get(self, request, *args, **kwargs):
+        workspace_file = get_object_or_404(
+            self.get_queryset(),
+            pk=kwargs["pk"],
+        )
+
+        return FileResponse(
+            workspace_file.uploaded_file.open("rb"),
+            as_attachment=True,
+            filename=workspace_file.name,
+        )
 
 class WorkspaceFolderCreateView(generics.CreateAPIView):
     serializer_class = WorkspaceFolderSerializer

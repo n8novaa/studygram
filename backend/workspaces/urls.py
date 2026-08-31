@@ -10,6 +10,7 @@ from files.views import (
     WorkspaceFolderCreateView,
     WorkspaceFolderDetailView,
     WorkspaceFileCreateView,
+    WorkspaceFileDownloadView,
 )
 
 from .views.access import (
@@ -87,6 +88,12 @@ urlpatterns = [
         'workspaces/<int:workspace_pk>/files/<int:pk>/',
         WorkspaceFileDetailView.as_view(),
         name='workspace-file-detail',
+    ),
+
+    path(
+        "workspaces/<int:workspace_pk>/files/<int:pk>/download/",
+        WorkspaceFileDownloadView.as_view(),
+        name="workspace-file-download",
     ),
 ]
 
