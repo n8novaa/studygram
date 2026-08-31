@@ -1054,3 +1054,132 @@ class WorkspaceFileDetailTests(APITestCase):
             response.status_code,
             status.HTTP_405_METHOD_NOT_ALLOWED,
         )
+
+    def test_admin_can_delete_file(self):
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.delete(self.url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_204_NO_CONTENT,
+        )
+
+        self.assertFalse(
+            WorkspaceFile.objects.filter(
+                pk=self.workspace_file.pk,
+            ).exists()
+        )
+
+    def test_member_cannot_delete_file(self):
+        self.client.force_authenticate(user=self.member)
+
+        response = self.client.delete(self.url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+
+        self.assertTrue(
+            WorkspaceFile.objects.filter(
+                pk=self.workspace_file.pk,
+            ).exists()
+        )
+
+    def test_outsider_cannot_delete_file(self):
+        self.client.force_authenticate(user=self.outsider)
+
+        response = self.client.delete(self.url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+
+        self.assertTrue(
+            WorkspaceFile.objects.filter(
+                pk=self.workspace_file.pk,
+            ).exists()
+        )
+
+    def test_unauthenticated_user_cannot_delete_file(self):
+        response = self.client.delete(self.url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_401_UNAUTHORIZED,
+        )
+
+        self.assertTrue(
+            WorkspaceFile.objects.filter(
+                pk=self.workspace_file.pk,
+            ).exists()
+        )
+
+    def test_admin_cannot_delete_file_from_another_workspace(self):
+        other_workspace = Workspace.objects.create(
+            name="Other Workspace",
+            description="Another workspace",
+            owner=self.admin,
+        )
+
+        other_file = WorkspaceFile.objects.create(
+            workspace=other_workspace,
+            name="secret.txt",
+            uploaded_file=SimpleUploadedFile(
+                "secret.txt",
+                b"Secret workspace file",
+                content_type="text/plain",
+            ),
+            file_type="text/plain",
+            size=len(b"Secret workspace file"),
+            created_by=self.admin,
+        )
+
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.delete(
+            reverse(
+                "workspace-file-detail",
+                kwargs={
+                    "workspace_pk": self.workspace.pk,
+                    "pk": other_file.pk,
+                },
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_404_NOT_FOUND,
+        )
+
+        self.assertTrue(
+            WorkspaceFile.objects.filter(
+                pk=other_file.pk,
+            ).exists()
+        )
+
+    def test_deleting_file_removes_physical_file(self):
+        self.client.force_authenticate(user=self.admin)
+
+        file_path = self.workspace_file.uploaded_file.path
+
+        self.assertTrue(
+            self.workspace_file.uploaded_file.storage.exists(
+                self.workspace_file.uploaded_file.name
+            )
+        )
+
+        response = self.client.delete(self.url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_204_NO_CONTENT,
+        )
+
+        self.assertFalse(
+            self.workspace_file.uploaded_file.storage.exists(
+                self.workspace_file.uploaded_file.name
+            )
+        )

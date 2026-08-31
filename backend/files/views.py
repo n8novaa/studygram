@@ -67,7 +67,7 @@ class WorkspaceFileListView(generics.ListAPIView):
 
         return queryset
         
-class WorkspaceFileDetailView(generics.RetrieveUpdateAPIView):
+class WorkspaceFileDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = WorkspaceFileSerializer
     permission_classes = [
         IsAuthenticated,
@@ -94,7 +94,7 @@ class WorkspaceFileDetailView(generics.RetrieveUpdateAPIView):
         return context
 
     def get_permissions(self):
-        if self.request.method in ["PATCH", "PUT"]:
+        if self.request.method in ["PATCH", "PUT", "DELETE"]:
             return [
                 IsAuthenticated(),
                 IsWorkspaceFileAdmin(),
@@ -110,6 +110,14 @@ class WorkspaceFileDetailView(generics.RetrieveUpdateAPIView):
             {"detail": "PUT is not supported. Use PATCH."},
             status=status.HTTP_405_METHOD_NOT_ALLOWED,
         )
+
+    def perform_destroy(self, instance):
+        uploaded_file = instance.uploaded_file
+
+        instance.delete()
+
+        if uploaded_file:
+            uploaded_file.delete(save=False)
 
 
 class WorkspaceFolderCreateView(generics.CreateAPIView):
