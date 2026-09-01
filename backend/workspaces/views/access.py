@@ -484,3 +484,57 @@ class WorkspaceMemberDemoteView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class WorkspaceMemberRemoveView(APIView):
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsWorkspaceAdmin,
+    ]
+
+    def delete(self, request, workspace_pk, user_pk):
+        workspace = get_object_or_404(
+            Workspace,
+            pk=workspace_pk,
+        )
+
+        membership = get_object_or_404(
+            WorkspaceMembership,
+            workspace=workspace,
+            user_id=user_pk,
+        )
+
+        # The owner cannot be removed from their own workspace.
+        if membership.user_id == workspace.owner_id:
+            return Response(
+                {
+                    'detail': (
+                        'The workspace owner cannot be removed.'
+                    )
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # An admin cannot remove themselves.
+        if membership.user_id == request.user.id:
+            return Response(
+                {
+                    'detail': (
+                        'You cannot remove yourself from the workspace.'
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        username = membership.user.username
+
+        membership.delete()
+
+        return Response(
+            {
+                'detail': 'Member removed from workspace.',
+                'user': username,
+                'workspace_id': workspace.id,
+            },
+            status=status.HTTP_200_OK,
+        )

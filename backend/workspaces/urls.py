@@ -21,6 +21,7 @@ from .views.access import (
     WorkspaceMemberListView,
     WorkspaceMemberPromoteView,
     WorkspaceMemberDemoteView,
+    WorkspaceMemberRemoveView,
 )
 
 
@@ -116,6 +117,12 @@ urlpatterns = [
         WorkspaceMemberDemoteView.as_view(),
         name='workspace-member-demote',
     ),
+
+    path(
+    'workspaces/<int:workspace_pk>/members/<int:user_pk>/remove/',
+    WorkspaceMemberRemoveView.as_view(),
+    name='workspace-member-remove',
+),
 ]
 
 urlpatterns += router.urls
