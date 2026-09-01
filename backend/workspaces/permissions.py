@@ -34,3 +34,30 @@ class IsWorkspaceOwner(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return obj.owner_id == request.user.id
+
+
+class IsWorkspaceAdmin(BasePermission):
+    """
+    User must be an admin of the workspace.
+    """
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+
+        workspace_id = view.kwargs.get('workspace_pk')
+
+        return WorkspaceMembership.objects.filter(
+            workspace_id=workspace_id,
+            user=request.user,
+            role=WorkspaceMembership.Role.ADMIN,
+        ).exists()
+
+    def has_object_permission(self, request, view, obj):
+        if obj.owner_id == request.user.id:
+            return True
+
+        return obj.memberships.filter(
+            user=request.user,
+            role=WorkspaceMembership.Role.ADMIN,
+        ).exists()

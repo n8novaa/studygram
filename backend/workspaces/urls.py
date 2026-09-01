@@ -18,6 +18,9 @@ from .views.access import (
     WorkspaceJoinRequestListView,
     WorkspaceJoinRequestRejectView,
     WorkspaceJoinView,
+    WorkspaceMemberListView,
+    WorkspaceMemberPromoteView,
+    WorkspaceMemberDemoteView,
 )
 
 
@@ -94,6 +97,24 @@ urlpatterns = [
         "workspaces/<int:workspace_pk>/files/<int:pk>/download/",
         WorkspaceFileDownloadView.as_view(),
         name="workspace-file-download",
+    ),
+
+    path(
+        'workspaces/<int:workspace_pk>/members/',
+        WorkspaceMemberListView.as_view(),
+        name='workspace-members',
+    ),
+
+    path(
+        'workspaces/<int:workspace_pk>/members/<int:user_pk>/promote/',
+        WorkspaceMemberPromoteView.as_view(),
+        name='workspace-member-promote',
+    ),
+
+    path(
+        'workspaces/<int:workspace_pk>/members/<int:user_pk>/demote/',
+        WorkspaceMemberDemoteView.as_view(),
+        name='workspace-member-demote',
     ),
 ]
 

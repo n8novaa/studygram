@@ -5,6 +5,8 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from ..permissions import IsWorkspaceAdmin
+
 from ..models import (
     Workspace,
     WorkspaceInvitation,
@@ -15,6 +17,7 @@ from ..serializers import (
     AcceptInvitationSerializer,
     WorkspaceInvitationSerializer,
     WorkspaceJoinRequestSerializer,
+    WorkspaceMemberSerializer,
 )
 
 
@@ -365,4 +368,119 @@ class AcceptInvitationView(APIView):
                 'role': membership.role,
             },
             status=status.HTTP_201_CREATED,
+        )
+
+class WorkspaceMemberListView(APIView):
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsWorkspaceAdmin,
+    ]
+
+    def get(self, request, workspace_pk):
+        workspace = get_object_or_404(
+            Workspace,
+            pk=workspace_pk,
+        )
+
+
+        memberships = (
+            WorkspaceMembership.objects
+            .filter(workspace=workspace)
+            .select_related('user')
+        )
+
+        serializer = WorkspaceMemberSerializer(
+            memberships,
+            many=True,
+        )
+
+        return Response(serializer.data)
+
+class WorkspaceMemberPromoteView(APIView):
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsWorkspaceAdmin,
+    ]
+
+    def post(self, request, workspace_pk, user_pk):
+        workspace = get_object_or_404(
+            Workspace,
+            pk=workspace_pk,
+        )
+
+        
+
+        membership = get_object_or_404(
+            WorkspaceMembership,
+            workspace=workspace,
+            user_id=user_pk,
+        )
+
+        if membership.role == WorkspaceMembership.Role.ADMIN:
+            return Response(
+                {
+                    'detail': 'User is already an admin.'
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        membership.role = WorkspaceMembership.Role.ADMIN
+        membership.save(update_fields=['role'])
+
+        return Response(
+            {
+                'detail': 'Member promoted to admin.',
+                'user': membership.user.username,
+                'workspace_id': workspace.id,
+                'role': membership.role,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+class WorkspaceMemberDemoteView(APIView):
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsWorkspaceAdmin,
+    ]
+
+    def post(self, request, workspace_pk, user_pk):
+        workspace = get_object_or_404(
+            Workspace,
+            pk=workspace_pk,
+        )
+
+
+        membership = get_object_or_404(
+            WorkspaceMembership,
+            workspace=workspace,
+            user_id=user_pk,
+        )
+
+        if membership.user_id == workspace.owner_id:
+            return Response(
+                {
+                    'detail': 'The workspace owner cannot be demoted.'
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        if membership.role == WorkspaceMembership.Role.MEMBER:
+            return Response(
+                {
+                    'detail': 'User is already a member.'
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        membership.role = WorkspaceMembership.Role.MEMBER
+        membership.save(update_fields=['role'])
+
+        return Response(
+            {
+                'detail': 'Admin demoted to member.',
+                'user': membership.user.username,
+                'workspace_id': workspace.id,
+                'role': membership.role,
+            },
+            status=status.HTTP_200_OK,
         )
