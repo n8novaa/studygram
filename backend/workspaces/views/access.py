@@ -7,6 +7,8 @@ from rest_framework.views import APIView
 
 from ..permissions import IsWorkspaceAdmin
 
+from django.db import transaction
+
 from ..models import (
     Workspace,
     WorkspaceInvitation,
@@ -22,7 +24,10 @@ from ..serializers import (
 
 
 class WorkspaceJoinView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [
+        permissions.IsAuthenticated
+        
+        ]
 
     def post(self, request, workspace_pk):
         workspace = get_object_or_404(
@@ -107,7 +112,10 @@ class WorkspaceJoinView(APIView):
 
 
 class WorkspaceJoinRequestListView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsWorkspaceAdmin,
+        ]
 
     def get(self, request, workspace_pk):
         workspace = get_object_or_404(
@@ -115,24 +123,7 @@ class WorkspaceJoinRequestListView(APIView):
             pk=workspace_pk,
         )
 
-        membership = WorkspaceMembership.objects.filter(
-            workspace=workspace,
-            user=request.user,
-        ).first()
-
-        if (
-            not membership
-            or membership.role != WorkspaceMembership.Role.ADMIN
-        ):
-            return Response(
-                {
-                    'detail': (
-                        'Only workspace admins can view '
-                        'join requests.'
-                    )
-                },
-                status=status.HTTP_403_FORBIDDEN,
-            )
+        
 
         requests = (
             WorkspaceJoinRequest.objects
@@ -152,7 +143,10 @@ class WorkspaceJoinRequestListView(APIView):
 
 
 class WorkspaceJoinRequestApproveView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsWorkspaceAdmin,
+        ]
 
     def post(self, request, workspace_pk, request_pk):
         workspace = get_object_or_404(
@@ -160,23 +154,7 @@ class WorkspaceJoinRequestApproveView(APIView):
             pk=workspace_pk,
         )
 
-        membership = WorkspaceMembership.objects.filter(
-            workspace=workspace,
-            user=request.user,
-        ).first()
-
-        if (
-            not membership
-            or membership.role != WorkspaceMembership.Role.ADMIN
-        ):
-            return Response(
-                {
-                    'detail': (
-                        'Only workspace admins can approve requests.'
-                    )
-                },
-                status=status.HTTP_403_FORBIDDEN,
-            )
+        
 
         join_request = get_object_or_404(
             WorkspaceJoinRequest,
@@ -197,19 +175,20 @@ class WorkspaceJoinRequestApproveView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        WorkspaceMembership.objects.create(
-            workspace=workspace,
-            user=join_request.user,
-            role=WorkspaceMembership.Role.MEMBER,
-        )
+        with transaction.atomic():
+            WorkspaceMembership.objects.create(
+                workspace=workspace,
+                user=join_request.user,
+                role=WorkspaceMembership.Role.MEMBER,
+            )
 
-        join_request.status = (
-            WorkspaceJoinRequest.Status.APPROVED
-        )
-        join_request.reviewed_at = timezone.now()
-        join_request.save(
-            update_fields=['status', 'reviewed_at']
-        )
+            join_request.status = (
+                WorkspaceJoinRequest.Status.APPROVED
+            )
+            join_request.reviewed_at = timezone.now()
+            join_request.save(
+                update_fields=['status', 'reviewed_at']
+            )
 
         return Response(
             {
@@ -223,7 +202,10 @@ class WorkspaceJoinRequestApproveView(APIView):
 
 
 class WorkspaceJoinRequestRejectView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsWorkspaceAdmin,
+        ]
 
     def post(self, request, workspace_pk, request_pk):
         workspace = get_object_or_404(
@@ -231,23 +213,7 @@ class WorkspaceJoinRequestRejectView(APIView):
             pk=workspace_pk,
         )
 
-        membership = WorkspaceMembership.objects.filter(
-            workspace=workspace,
-            user=request.user,
-        ).first()
-
-        if (
-            not membership
-            or membership.role != WorkspaceMembership.Role.ADMIN
-        ):
-            return Response(
-                {
-                    'detail': (
-                        'Only workspace admins can reject requests.'
-                    )
-                },
-                status=status.HTTP_403_FORBIDDEN,
-            )
+        
 
         join_request = get_object_or_404(
             WorkspaceJoinRequest,
