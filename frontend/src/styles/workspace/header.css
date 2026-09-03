@@ -1,0 +1,227 @@
+/* =========================================================
+   Workspace Header
+   ========================================================= */
+
+.workspace-back-link {
+  display: inline-flex;
+  align-items: center;
+
+  margin-bottom: 20px;
+
+  color: #6b7280;
+
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.workspace-back-link:hover {
+  color: #111827;
+}
+
+
+/* =========================================================
+   Header Card
+   ========================================================= */
+
+.workspace-header-card {
+  padding: 28px;
+}
+
+
+/* =========================================================
+   Header Content
+   ========================================================= */
+
+.workspace-header-content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 24px;
+}
+
+.workspace-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 12px;
+}
+
+.workspace-title-row h1 {
+  margin: 0;
+
+  color: #111827;
+
+  font-size: 30px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   Owner
+   ========================================================= */
+
+.workspace-owner {
+  margin: 10px 0 0;
+
+  color: #6b7280;
+
+  font-size: 14px;
+}
+
+.workspace-owner strong {
+  color: #374151;
+}
+
+
+/* =========================================================
+   Description
+   ========================================================= */
+
+.workspace-description {
+  margin: 24px 0 0;
+  padding-top: 20px;
+
+  border-top: 1px solid #f0f0f0;
+
+  color: #4b5563;
+
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+
+/* =========================================================
+   Visibility
+   ========================================================= */
+
+.workspace-visibility-badge {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 5px 10px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.workspace-visibility-public {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.workspace-visibility-private {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.workspace-visibility-dot {
+  width: 6px;
+  height: 6px;
+
+  margin-right: 6px;
+
+  border-radius: 50%;
+
+  background: currentColor;
+}
+
+
+/* =========================================================
+   Header Actions
+   ========================================================= */
+
+.workspace-header-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  flex-shrink: 0;
+}
+
+.workspace-button {
+  border: 0;
+  border-radius: 7px;
+
+  padding: 9px 15px;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.workspace-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.workspace-button-primary {
+  background: #111827;
+  color: #ffffff;
+}
+
+.workspace-button-primary:hover:not(:disabled) {
+  background: #1f2937;
+}
+
+.workspace-button-secondary {
+  background: #ffffff;
+
+  border: 1px solid #d1d5db;
+
+  color: #374151;
+}
+
+.workspace-button-secondary:hover:not(:disabled) {
+  background: #f9fafb;
+}
+
+.workspace-button-danger {
+  background: #ffffff;
+
+  border: 1px solid #fecaca;
+
+  color: #dc2626;
+}
+
+.workspace-button-danger:hover:not(:disabled) {
+  background: #fef2f2;
+}
+
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .workspace-header-card {
+    padding: 22px;
+  }
+
+  .workspace-header-content {
+    flex-direction: column;
+  }
+
+  .workspace-header-actions {
+    width: 100%;
+  }
+
+  .workspace-header-actions .workspace-button {
+    flex: 1;
+  }
+
+  .workspace-title-row h1 {
+    font-size: 25px;
+  }
+}

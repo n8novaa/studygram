@@ -1,268 +1,267 @@
+/* =========================================================
+   StudyGram — Discover Page
+   Page-specific styles only.
+   Shared design tokens, buttons, cards, badges and states
+   are handled by app.css.
+   ========================================================= */
+
+
+/* =========================================================
+   Page
+   ========================================================= */
+
 .discover-page {
-  min-height: 100vh;
-  padding: 40px 24px;
-  background: #f7f8fa;
-}
+  width: min(
+    calc(100% - 40px),
+    var(--content-width)
+  );
 
-.discover-container {
-  width: 100%;
-  max-width: 1100px;
   margin: 0 auto;
+  padding: 40px 0 64px;
 }
 
 
-/* Header */
+/* =========================================================
+   Header
+   ========================================================= */
 
 .discover-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+
+  gap: 24px;
   margin-bottom: 32px;
+}
+
+.discover-eyebrow {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: var(--text-muted);
+
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 700;
+
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .discover-header h1 {
   margin: 0;
-  font-size: 32px;
+
+  color: var(--text);
+
+  font-size: 28px;
+  line-height: 1.2;
   font-weight: 700;
-  color: #1f2937;
+
+  letter-spacing: -0.02em;
 }
 
 .discover-header p {
   margin: 8px 0 0;
-  color: #6b7280;
+
+  color: var(--text-muted);
+
   font-size: 15px;
+  line-height: 1.6;
 }
 
 
-/* Alert */
+/* =========================================================
+   Error
+   ========================================================= */
 
-.discover-alert {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  margin-bottom: 24px;
-  padding: 12px 16px;
-
-  border: 1px solid #f1c7c7;
-  border-radius: 8px;
-
-  background: #fff5f5;
-  color: #b42318;
-
-  font-size: 14px;
-}
-
-.discover-alert button {
-  border: none;
-  background: transparent;
-  color: inherit;
-
-  font-size: 20px;
-  line-height: 1;
-
-  cursor: pointer;
+.discover-error {
+  margin-bottom: 20px;
 }
 
 
-/* Workspace grid */
+/* =========================================================
+   Workspace Grid
+   ========================================================= */
 
-.workspace-grid {
+.discover-grid {
   display: grid;
 
   grid-template-columns:
-    repeat(auto-fill, minmax(300px, 1fr));
+    repeat(
+      auto-fill,
+      minmax(280px, 1fr)
+    );
 
   gap: 20px;
 }
 
 
-/* Workspace card */
+/* =========================================================
+   Workspace Card
+   ========================================================= */
 
 .discover-card {
   display: flex;
   flex-direction: column;
 
+  min-width: 0;
   min-height: 250px;
 
-  padding: 20px;
+  padding: 22px;
 
-  background: #ffffff;
+  background: var(--surface);
 
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
 
-  box-shadow:
-    0 2px 6px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-sm);
 
   transition:
     transform 0.15s ease,
-    box-shadow 0.15s ease;
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .discover-card:hover {
   transform: translateY(-2px);
 
-  box-shadow:
-    0 6px 18px rgba(0, 0, 0, 0.07);
+  border-color: var(--border-strong);
+
+  box-shadow: var(--shadow-md);
 }
 
 
-/* Card top */
+/* =========================================================
+   Card Header
+   ========================================================= */
 
-.discover-card-top {
+.discover-card-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
 
-  margin-bottom: 20px;
+  gap: 16px;
+
+  margin-bottom: 16px;
+}
+
+.discover-card-header > div {
+  min-width: 0;
 }
 
 
-/* Workspace avatar */
+/* =========================================================
+   Visibility
+   ========================================================= */
 
-.workspace-avatar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 46px;
-  height: 46px;
-
-  border-radius: 10px;
-
-  background: #eef2ff;
-  color: #4f46e5;
-
-  font-size: 19px;
-  font-weight: 700;
-}
-
-
-/* Visibility */
-
-.visibility-badge {
+.discover-visibility {
   display: inline-flex;
   align-items: center;
 
-  padding: 5px 9px;
+  min-height: 26px;
+
+  margin-bottom: 10px;
+  padding: 0 9px;
 
   border-radius: 999px;
 
+  background: var(--primary-light);
+  color: var(--primary);
+
   font-size: 12px;
+  line-height: 1;
   font-weight: 600;
 }
 
-.visibility-badge.public {
-  background: #ecfdf3;
-  color: #027a48;
+
+/*
+ * Keep the visibility indicator neutral for private
+ * workspaces. The JSX determines the displayed text;
+ * this class is available if visibility-specific
+ * modifiers are added later.
+ */
+
+.discover-visibility.private {
+  background: var(--surface-muted);
+  color: var(--text-muted);
 }
 
-.visibility-badge.private {
-  background: #f3f4f6;
-  color: #4b5563;
-}
 
+/* =========================================================
+   Workspace Name
+   ========================================================= */
 
-/* Card content */
-
-.discover-card-content {
-  flex: 1;
-}
-
-.discover-card-content h2 {
+.discover-card h2 {
   margin: 0;
 
-  color: #111827;
+  color: var(--text);
 
-  font-size: 20px;
+  font-size: 19px;
+  line-height: 1.35;
   font-weight: 650;
 
   word-break: break-word;
 }
 
-.workspace-owner {
-  margin: 7px 0 0;
 
-  color: #6b7280;
+/* =========================================================
+   Description
+   ========================================================= */
 
-  font-size: 13px;
-}
-
-
-/* Metadata */
-
-.workspace-meta {
-  display: flex;
-  align-items: center;
-
-  margin-top: 18px;
-
-  color: #6b7280;
-
-  font-size: 13px;
-}
-
-.meta-divider {
-  margin: 0 7px;
-  color: #9ca3af;
-}
-
-
-/* Actions */
-
-.discover-card-actions {
-  display: flex;
-  gap: 10px;
-
-  margin-top: 24px;
-}
-
-
-/* View button */
-
-.view-workspace-button {
+.discover-description {
   flex: 1;
 
+  margin: 0;
+
+  color: var(--text-muted);
+
+  font-size: 14px;
+  line-height: 1.6;
+
+  word-break: break-word;
+}
+
+
+/* =========================================================
+   Metadata
+   ========================================================= */
+
+.discover-meta {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  gap: 6px 14px;
+
+  margin-top: 20px;
+
+  color: var(--text-muted);
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   Join Button
+   ========================================================= */
+
+.discover-join-button {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  min-height: 38px;
+  width: 100%;
+  min-height: 40px;
 
-  border: 1px solid #d1d5db;
-  border-radius: 7px;
+  margin-top: 20px;
+  padding: 0 16px;
 
-  background: #ffffff;
-  color: #374151;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-sm);
 
-  font-size: 14px;
-  font-weight: 600;
-
-  text-decoration: none;
-
-  transition:
-    background 0.15s ease,
-    border-color 0.15s ease;
-}
-
-.view-workspace-button:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
-}
-
-
-/* Join button */
-
-.join-button {
-  flex: 1;
-
-  min-height: 38px;
-
-  border: 1px solid #4f46e5;
-  border-radius: 7px;
-
-  background: #4f46e5;
+  background: var(--primary);
   color: #ffffff;
 
   font-size: 14px;
@@ -271,91 +270,113 @@
   cursor: pointer;
 
   transition:
-    background 0.15s ease,
-    border-color 0.15s ease;
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
 }
 
-.join-button:hover:not(:disabled) {
-  background: #4338ca;
-  border-color: #4338ca;
+.discover-join-button:hover:not(:disabled) {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
 }
 
-.join-button:disabled {
+.discover-join-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+
+/*
+ * Joined state.
+ */
+
+.discover-join-button.joined {
+  background: var(--success-light);
+  border-color: #bbf7d0;
+  color: var(--success);
+
   cursor: default;
-  opacity: 0.65;
-}
-
-.join-button.joined {
-  background: #ecfdf3;
-  border-color: #a7f3d0;
-  color: #047857;
 }
 
 
-/* Loading / empty / error states */
+/* =========================================================
+   Loading / Empty State
+   ========================================================= */
 
 .discover-state {
   padding: 48px 24px;
 
   text-align: center;
 
-  background: #ffffff;
+  background: var(--surface);
 
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-sm);
 }
 
-.discover-state h1,
 .discover-state h2 {
   margin: 0;
 
-  color: #1f2937;
+  color: var(--text);
+
+  font-size: 18px;
+  line-height: 1.4;
+  font-weight: 650;
 }
 
 .discover-state p {
-  margin: 10px 0 0;
+  margin: 8px 0 0;
 
-  color: #6b7280;
-}
-
-.discover-error {
-  border-color: #f1c7c7;
-}
-
-.discover-state button {
-  margin-top: 20px;
-
-  padding: 9px 16px;
-
-  border: none;
-  border-radius: 7px;
-
-  background: #4f46e5;
-  color: #ffffff;
+  color: var(--text-muted);
 
   font-size: 14px;
-  font-weight: 600;
-
-  cursor: pointer;
-}
-
-.discover-state button:hover {
-  background: #4338ca;
+  line-height: 1.6;
 }
 
 
-/* Responsive */
+/* =========================================================
+   Responsive
+   ========================================================= */
 
 @media (max-width: 700px) {
+
   .discover-page {
-    padding: 28px 16px;
+    width: min(
+      calc(100% - 24px),
+      var(--content-width)
+    );
+
+    padding-top: 24px;
   }
+
+
+  .discover-header {
+    flex-direction: column;
+    align-items: stretch;
+
+    gap: 16px;
+
+    margin-bottom: 24px;
+  }
+
 
   .discover-header h1 {
-    font-size: 27px;
+    font-size: 24px;
   }
 
-  .workspace-grid {
+
+  .discover-grid {
     grid-template-columns: 1fr;
+
+    gap: 16px;
+  }
+
+
+  .discover-card {
+    min-height: 0;
+
+    padding: 20px;
   }
 }

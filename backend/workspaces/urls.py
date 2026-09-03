@@ -18,6 +18,8 @@ from .views.access import (
     WorkspaceJoinRequestListView,
     WorkspaceJoinRequestRejectView,
     WorkspaceJoinView,
+    WorkspaceInvitationCreateView,
+    AcceptInvitationView,
     WorkspaceMemberListView,
     WorkspaceMemberPromoteView,
     WorkspaceMemberDemoteView,
@@ -33,7 +35,12 @@ router.register(
     basename='workspace',
 )
 
+
 urlpatterns = [
+    # ---------------------------------------------------------
+    # Workspace access
+    # ---------------------------------------------------------
+
     path(
         'workspaces/<int:workspace_pk>/join/',
         WorkspaceJoinView.as_view(),
@@ -58,16 +65,30 @@ urlpatterns = [
         name='workspace-join-request-reject',
     ),
 
+    # ---------------------------------------------------------
+    # Invitations
+    # ---------------------------------------------------------
+
+    path(
+        'workspaces/<int:workspace_pk>/invitations/create/',
+        WorkspaceInvitationCreateView.as_view(),
+        name='workspace-invitation-create',
+    ),
+
+    path(
+        'workspaces/invitations/<str:token>/accept/',
+        AcceptInvitationView.as_view(),
+        name='workspace-invitation-accept',
+    ),
+
+    # ---------------------------------------------------------
+    # Folders
+    # ---------------------------------------------------------
+
     path(
         'workspaces/<int:workspace_pk>/folders/',
         WorkspaceFolderListView.as_view(),
         name='workspace-folder-list',
-    ),
-
-    path(
-        'workspaces/<int:workspace_pk>/files/',
-        WorkspaceFileListView.as_view(),
-        name='workspace-file-list',
     ),
 
     path(
@@ -80,6 +101,16 @@ urlpatterns = [
         'workspaces/<int:workspace_pk>/folders/<int:pk>/',
         WorkspaceFolderDetailView.as_view(),
         name='workspace-folder-detail',
+    ),
+
+    # ---------------------------------------------------------
+    # Files
+    # ---------------------------------------------------------
+
+    path(
+        'workspaces/<int:workspace_pk>/files/',
+        WorkspaceFileListView.as_view(),
+        name='workspace-file-list',
     ),
 
     path(
@@ -95,10 +126,14 @@ urlpatterns = [
     ),
 
     path(
-        "workspaces/<int:workspace_pk>/files/<int:pk>/download/",
+        'workspaces/<int:workspace_pk>/files/<int:pk>/download/',
         WorkspaceFileDownloadView.as_view(),
-        name="workspace-file-download",
+        name='workspace-file-download',
     ),
+
+    # ---------------------------------------------------------
+    # Members
+    # ---------------------------------------------------------
 
     path(
         'workspaces/<int:workspace_pk>/members/',
@@ -119,10 +154,11 @@ urlpatterns = [
     ),
 
     path(
-    'workspaces/<int:workspace_pk>/members/<int:user_pk>/remove/',
-    WorkspaceMemberRemoveView.as_view(),
-    name='workspace-member-remove',
-),
+        'workspaces/<int:workspace_pk>/members/<int:user_pk>/remove/',
+        WorkspaceMemberRemoveView.as_view(),
+        name='workspace-member-remove',
+    ),
 ]
+
 
 urlpatterns += router.urls

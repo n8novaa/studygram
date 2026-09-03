@@ -1,56 +1,49 @@
-const API_BASE_URL = 'http://127.0.0.1:8000/api'
+import {
+  apiGet,
+  apiPost,
+} from '../services/api'
 
-export async function login(username, password) {
-  const response = await fetch(`${API_BASE_URL}/auth/token/`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
+
+/*
+ * Authenticate a user and obtain JWT tokens.
+ */
+export async function login(
+  username,
+  password,
+) {
+  return apiPost(
+    '/auth/token/',
+    {
       username,
       password,
-    }),
-  })
-
-  const data = await response.json()
-
-  if (!response.ok) {
-    throw new Error(data.detail || 'Login failed')
-  }
-
-  return data
+    },
+  )
 }
 
-export async function refreshAccessToken(refreshToken) {
-  const response = await fetch(`${API_BASE_URL}/auth/token/refresh/`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
+
+/*
+ * Exchange a refresh token for a new access token.
+ */
+export async function refreshAccessToken(
+  refreshToken,
+) {
+  return apiPost(
+    '/auth/token/refresh/',
+    {
       refresh: refreshToken,
-    }),
-  })
-
-  const data = await response.json()
-
-  if (!response.ok) {
-    throw new Error(data.detail || 'Session expired')
-  }
-
-  return data
+    },
+  )
 }
 
-export async function getCurrentUser(accessToken) {
-  const response = await fetch(`${API_BASE_URL}/auth/me/`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  })
 
-  if (!response.ok) {
-    throw new Error('Could not retrieve user information')
-  }
-
-  return response.json()
+/*
+ * Retrieve the currently authenticated user.
+ */
+export async function getCurrentUser(
+  accessToken,
+) {
+  return apiGet(
+    '/auth/me/',
+    accessToken,
+  )
 }

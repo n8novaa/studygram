@@ -15,11 +15,13 @@ class WorkspaceMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkspaceMembership
         fields = [
+            'user_id',
             'user',
             'role',
             'created',
         ]
         read_only_fields = [
+            'user_id',
             'user',
             'role',
             'created',
@@ -51,7 +53,9 @@ class WorkspaceSerializer(serializers.ModelSerializer):
         ]
 
     def get_members(self, obj):
-        memberships = obj.memberships.select_related('user')
+        # Use the prefetched memberships from WorkspaceViewSet
+        # instead of creating another database queryset.
+        memberships = obj.memberships.all()
 
         return WorkspaceMemberSerializer(
             memberships,
@@ -141,9 +145,13 @@ class AcceptInvitationSerializer(serializers.Serializer):
 
         return attrs
 
+
 class WorkspaceDiscoverSerializer(serializers.ModelSerializer):
     owner = serializers.StringRelatedField(read_only=True)
-    member_count = serializers.SerializerMethodField()
+
+    # This value is supplied by the queryset annotation:
+    # Count('memberships')
+    member_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Workspace
@@ -165,6 +173,3 @@ class WorkspaceDiscoverSerializer(serializers.ModelSerializer):
             'created',
             'updated',
         ]
-
-    def get_member_count(self, obj):
-        return obj.memberships.count()

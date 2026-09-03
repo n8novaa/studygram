@@ -1,14 +1,26 @@
+/* =========================================================
+   StudyGram — Home Page
+   ========================================================= */
+
+
+/* =========================================================
+   Page
+   ========================================================= */
+
 .home-page {
-  width: 100%;
-  max-width: 1100px;
+  width: min(
+    calc(100% - 40px),
+    var(--content-width)
+  );
+
   margin: 0 auto;
-  padding: 48px 32px 64px;
+  padding: 40px 0 64px;
 }
 
 
-/* =========================
+/* =========================================================
    Header
-   ========================= */
+   ========================================================= */
 
 .home-header {
   margin-bottom: 40px;
@@ -16,29 +28,39 @@
 
 .home-eyebrow {
   margin: 0 0 8px;
-  font-size: 0.85rem;
+
+  color: var(--text-muted);
+
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  opacity: 0.6;
 }
 
 .home-header h1 {
   margin: 0;
-  font-size: 2rem;
+
+  color: var(--text);
+
+  font-size: 28px;
   line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .home-subtitle {
   margin: 10px 0 0;
-  font-size: 0.95rem;
-  opacity: 0.65;
+
+  color: var(--text-muted);
+
+  font-size: 15px;
+  line-height: 1.6;
 }
 
 
-/* =========================
+/* =========================================================
    Sections
-   ========================= */
+   ========================================================= */
 
 .home-section {
   width: 100%;
@@ -48,21 +70,34 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
 
+  gap: 20px;
   margin-bottom: 18px;
 }
 
 .section-header h2 {
   margin: 0;
-  font-size: 1.25rem;
+
+  color: var(--text);
+
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 600;
 }
 
 .section-header p {
   margin: 6px 0 0;
-  font-size: 0.9rem;
-  opacity: 0.6;
+
+  color: var(--text-muted);
+
+  font-size: 14px;
+  line-height: 1.5;
 }
+
+
+/* =========================================================
+   Request Count
+   ========================================================= */
 
 .section-count {
   display: inline-flex;
@@ -75,28 +110,29 @@
 
   border-radius: 999px;
 
-  font-size: 0.8rem;
-  font-weight: 600;
+  background: var(--text);
+  color: var(--surface);
 
-  background: #111;
-  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 
-/* =========================
-   Request list
-   ========================= */
+/* =========================================================
+   Request List
+   ========================================================= */
 
 .request-list {
   display: flex;
   flex-direction: column;
+
   gap: 12px;
 }
 
 
-/* =========================
-   Request card
-   ========================= */
+/* =========================================================
+   Request Card
+   ========================================================= */
 
 .request-card {
   display: flex;
@@ -104,20 +140,27 @@
   justify-content: space-between;
 
   gap: 24px;
-
   padding: 18px 20px;
 
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
+  background: var(--surface);
 
-  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+
+  box-shadow: var(--shadow-sm);
 }
+
+
+/* =========================================================
+   Request Content
+   ========================================================= */
 
 .request-content {
   display: flex;
   align-items: center;
 
   min-width: 0;
+
   gap: 14px;
 }
 
@@ -133,9 +176,10 @@
 
   border-radius: 50%;
 
-  background: #f0f0f0;
+  background: var(--surface-muted);
+  color: var(--text);
 
-  font-size: 0.95rem;
+  font-size: 15px;
   font-weight: 600;
 }
 
@@ -146,130 +190,152 @@
 .request-details h3 {
   margin: 0;
 
-  font-size: 0.95rem;
+  color: var(--text);
+
+  font-size: 15px;
+  line-height: 1.4;
   font-weight: 600;
 }
 
 .request-details p {
   margin: 4px 0 0;
 
-  font-size: 0.9rem;
-  opacity: 0.65;
+  color: var(--text-muted);
+
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .request-details strong {
+  color: var(--text);
   font-weight: 600;
-  opacity: 1;
 }
 
 
-/* =========================
-   Actions
-   ========================= */
+/* =========================================================
+   Request Actions
+   ========================================================= */
 
 .request-actions {
   display: flex;
+
   flex-shrink: 0;
+
   gap: 8px;
 }
 
-.button {
-  border: 0;
-  border-radius: 8px;
 
-  padding: 9px 15px;
-
-  font: inherit;
-  font-size: 0.85rem;
-  font-weight: 600;
-
-  cursor: pointer;
-}
-
-.button:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-
-.button-primary {
-  background: #111;
-  color: #fff;
-}
-
-.button-primary:hover:not(:disabled) {
-  background: #2a2a2a;
-}
-
-.button-secondary {
-  background: #f1f1f1;
-  color: #222;
-}
-
-.button-secondary:hover:not(:disabled) {
-  background: #e7e7e7;
-}
+/*
+ * Button styling is intentionally NOT defined here.
+ *
+ * .button
+ * .button-primary
+ * .button-secondary
+ *
+ * are global components provided by app.css.
+ */
 
 
-/* =========================
-   States
-   ========================= */
+/* =========================================================
+   Loading / Empty State
+   ========================================================= */
 
 .home-state {
   padding: 48px 24px;
 
-  border: 1px dashed #d8d8d8;
-  border-radius: 12px;
+  background: var(--surface);
+
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
 
   text-align: center;
 }
 
 .home-state h3 {
   margin: 0;
-  font-size: 1rem;
+
+  color: var(--text);
+
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 600;
 }
 
 .home-state p {
   margin: 7px 0 0;
 
-  font-size: 0.9rem;
-  opacity: 0.6;
+  color: var(--text-muted);
+
+  font-size: 14px;
+  line-height: 1.5;
 }
+
+
+/* =========================================================
+   Error
+   ========================================================= */
 
 .home-error {
   margin-bottom: 14px;
   padding: 12px 14px;
 
-  border-radius: 8px;
+  background: var(--danger-light);
 
-  background: #fff1f1;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm);
 
-  font-size: 0.9rem;
+  color: #991b1b;
+
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 
-/* =========================
+/* =========================================================
    Responsive
-   ========================= */
+   ========================================================= */
 
 @media (max-width: 700px) {
+
   .home-page {
-    padding: 32px 18px 48px;
+    width: min(
+      calc(100% - 24px),
+      var(--content-width)
+    );
+
+    padding-top: 24px;
+    padding-bottom: 48px;
   }
 
-  .home-header h1 {
-    font-size: 1.6rem;
+
+  .home-header {
+    margin-bottom: 32px;
   }
+
+
+  .home-header h1 {
+    font-size: 24px;
+  }
+
+
+  .section-header {
+    align-items: flex-start;
+  }
+
 
   .request-card {
     align-items: flex-start;
     flex-direction: column;
   }
 
+
   .request-actions {
     width: 100%;
   }
 
-  .button {
+
+  .request-actions .button {
     flex: 1;
   }
+
 }

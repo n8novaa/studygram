@@ -1,127 +1,146 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 
 import { useAuth } from '../auth/AuthContext'
+
 import {
   getDiscoveredWorkspaces,
   joinWorkspace,
 } from '../services/workspaceService'
 
+import DiscoverWorkspaceGrid from '../components/discover/DiscoverWorkspaceGrid'
+
 import '../styles/discover.css'
-
-
-function formatRelativeTime(dateString) {
-  const date = new Date(dateString)
-  const now = new Date()
-
-  const difference = Math.floor(
-    (now.getTime() - date.getTime()) / 1000,
-  )
-
-  if (difference < 60) {
-    return 'just now'
-  }
-
-  const minutes = Math.floor(difference / 60)
-
-  if (minutes < 60) {
-    return `${minutes} ${
-      minutes === 1 ? 'minute' : 'minutes'
-    } ago`
-  }
-
-  const hours = Math.floor(minutes / 60)
-
-  if (hours < 24) {
-    return `${hours} ${
-      hours === 1 ? 'hour' : 'hours'
-    } ago`
-  }
-
-  const days = Math.floor(hours / 24)
-
-  if (days < 30) {
-    return `${days} ${
-      days === 1 ? 'day' : 'days'
-    } ago`
-  }
-
-  const months = Math.floor(days / 30)
-
-  if (months < 12) {
-    return `${months} ${
-      months === 1 ? 'month' : 'months'
-    } ago`
-  }
-
-  const years = Math.floor(months / 12)
-
-  return `${years} ${
-    years === 1 ? 'year' : 'years'
-  } ago`
-}
 
 
 function Discover() {
   const { accessToken } = useAuth()
 
-  const [workspaces, setWorkspaces] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [workspaces, setWorkspaces] =
+    useState([])
+
+  const [loading, setLoading] =
+    useState(true)
+
+  const [error, setError] =
+    useState('')
 
   const [joiningWorkspaceId, setJoiningWorkspaceId] =
     useState(null)
 
-  const [joinError, setJoinError] = useState('')
-
-
-  async function loadWorkspaces() {
-    try {
-      setLoading(true)
-      setError('')
-
-      const data =
-        await getDiscoveredWorkspaces(accessToken)
-
-      setWorkspaces(data)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const [joinedWorkspaceIds, setJoinedWorkspaceIds] =
+    useState(new Set())
 
 
   useEffect(() => {
-    if (accessToken) {
-      loadWorkspaces()
+    let cancelled = false
+
+
+    async function loadWorkspaces() {
+      if (!accessToken) {
+        setWorkspaces([])
+        setLoading(false)
+        return
+      }
+
+
+      try {
+        setLoading(true)
+        setError('')
+
+
+        const data =
+          await getDiscoveredWorkspaces(
+            accessToken,
+          )
+
+
+        if (cancelled) {
+          return
+        }
+
+
+        const discovered =
+          Array.isArray(data)
+            ? data
+            : data?.results ?? []
+
+
+        setWorkspaces(discovered)
+
+      } catch (err) {
+
+        if (cancelled) {
+          return
+        }
+
+
+        setError(
+          err?.message ||
+          'Failed to load discoverable workspaces.',
+        )
+
+      } finally {
+
+        if (!cancelled) {
+          setLoading(false)
+        }
+      }
+    }
+
+
+    loadWorkspaces()
+
+
+    return () => {
+      cancelled = true
     }
   }, [accessToken])
 
 
-  async function handleJoin(workspaceId) {
+  async function handleJoin(workspace) {
+    if (!accessToken) {
+      return
+    }
+
+
+    if (
+      joiningWorkspaceId === workspace.id
+    ) {
+      return
+    }
+
+
     try {
-      setJoiningWorkspaceId(workspaceId)
-      setJoinError('')
+      setJoiningWorkspaceId(workspace.id)
+      setError('')
+
 
       await joinWorkspace(
         accessToken,
-        workspaceId,
+        workspace.id,
       )
 
-      setWorkspaces((current) =>
-        current.map((workspace) =>
-          workspace.id === workspaceId
-            ? {
-                ...workspace,
-                joined: true,
-              }
-            : workspace,
-        ),
+
+      setJoinedWorkspaceIds(
+        (current) => {
+          const updated =
+            new Set(current)
+
+          updated.add(workspace.id)
+
+          return updated
+        },
       )
+
     } catch (err) {
-      setJoinError(err.message)
+
+      setError(
+        err?.message ||
+        'Failed to join workspace.',
+      )
+
     } finally {
+
       setJoiningWorkspaceId(null)
     }
   }
@@ -130,33 +149,36 @@ function Discover() {
   if (loading) {
     return (
       <main className="discover-page">
-        <div className="discover-container">
-          <section className="discover-state">
-            <h1>Discover</h1>
-            <p>Loading workspaces...</p>
-          </section>
-        </div>
-      </main>
-    )
-  }
+
+        <header className="discover-header">
+
+          <div>
+
+            <span className="discover-eyebrow">
+              StudyGram
+            </span>
+
+            <h1>
+              Discover Workspaces
+            </h1>
+
+            <p>
+              Find study communities to join.
+            </p>
+
+          </div>
+
+        </header>
 
 
-  if (error) {
-    return (
-      <main className="discover-page">
-        <div className="discover-container">
-          <section className="discover-state discover-error">
-            <h1>Discover</h1>
-            <p>{error}</p>
+        <section className="discover-state">
 
-            <button
-              type="button"
-              onClick={loadWorkspaces}
-            >
-              Try again
-            </button>
-          </section>
-        </div>
+          <p>
+            Loading workspaces...
+          </p>
+
+        </section>
+
       </main>
     )
   }
@@ -164,162 +186,63 @@ function Discover() {
 
   return (
     <main className="discover-page">
-      <div className="discover-container">
 
-        <header className="discover-header">
-          <div>
-            <h1>Discover</h1>
+      <header className="discover-header">
 
-            <p>
-              Find communities and workspaces
-              that interest you.
-            </p>
-          </div>
-        </header>
+        <div>
 
+          <span className="discover-eyebrow">
+            StudyGram
+          </span>
 
-        {joinError && (
-          <div className="discover-alert">
-            <span>{joinError}</span>
+          <h1>
+            Discover Workspaces
+          </h1>
 
-            <button
-              type="button"
-              onClick={() => setJoinError('')}
-            >
-              ×
-            </button>
-          </div>
-        )}
+          <p>
+            Find study communities to join.
+          </p>
+
+        </div>
+
+      </header>
 
 
-        {workspaces.length === 0 ? (
-          <section className="discover-state">
-            <h2>No workspaces yet</h2>
-
-            <p>
-              There are no workspaces available
-              to discover right now.
-            </p>
-          </section>
-        ) : (
-          <section className="workspace-grid">
-
-            {workspaces.map((workspace) => {
-              const isPublic =
-                workspace.visibility === 'public'
-
-              const isJoining =
-                joiningWorkspaceId === workspace.id
-
-              const isJoined =
-                workspace.joined === true
+      {error && (
+        <div className="discover-error">
+          {error}
+        </div>
+      )}
 
 
-              return (
-                <article
-                  key={workspace.id}
-                  className="discover-card"
-                >
+      {workspaces.length === 0 ? (
 
-                  <div className="discover-card-top">
+        <section className="discover-state">
 
-                    <div className="workspace-avatar">
-                      {workspace.name
-                        ?.charAt(0)
-                        .toUpperCase()}
-                    </div>
+          <h2>
+            No workspaces found
+          </h2>
 
-                    <span
-                      className={`visibility-badge ${
-                        isPublic
-                          ? 'public'
-                          : 'private'
-                      }`}
-                    >
-                      {isPublic
-                        ? 'Public'
-                        : 'Private'}
-                    </span>
+          <p>
+            There are currently no public
+            workspaces available to discover.
+          </p>
 
-                  </div>
+        </section>
 
+      ) : (
 
-                  <div className="discover-card-content">
+        <DiscoverWorkspaceGrid
+          workspaces={workspaces}
+          joinedWorkspaceIds={joinedWorkspaceIds}
+          joiningWorkspaceId={
+            joiningWorkspaceId
+          }
+          onJoin={handleJoin}
+        />
 
-                    <h2>
-                      {workspace.name}
-                    </h2>
+      )}
 
-                    <p className="workspace-owner">
-                      Owned by {workspace.owner}
-                    </p>
-
-
-                    <div className="workspace-meta">
-
-                      <span>
-                        {workspace.member_count}{' '}
-                        {workspace.member_count === 1
-                          ? 'member'
-                          : 'members'}
-                      </span>
-
-                      <span className="meta-divider">
-                        ·
-                      </span>
-
-                      <span>
-                        {formatRelativeTime(
-                          workspace.created,
-                        )}
-                      </span>
-
-                    </div>
-
-                  </div>
-
-
-                  <div className="discover-card-actions">
-
-                    <Link
-                      to={`/app/workspaces/${workspace.id}`}
-                      className="view-workspace-button"
-                    >
-                      View
-                    </Link>
-
-
-                    <button
-                      type="button"
-                      className={`join-button ${
-                        isJoined
-                          ? 'joined'
-                          : ''
-                      }`}
-                      onClick={() =>
-                        handleJoin(workspace.id)
-                      }
-                      disabled={
-                        isJoining || isJoined
-                      }
-                    >
-                      {isJoining
-                        ? 'Joining...'
-                        : isJoined
-                          ? 'Joined'
-                          : 'Join'}
-                    </button>
-
-                  </div>
-
-                </article>
-              )
-            })}
-
-          </section>
-        )}
-
-      </div>
     </main>
   )
 }

@@ -1,0 +1,265 @@
+/* =========================================================
+   Workspace Files
+   ========================================================= */
+
+.workspace-files-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  flex-shrink: 0;
+}
+
+.workspace-upload-label {
+  position: relative;
+
+  cursor: pointer;
+}
+
+.workspace-upload-input {
+  position: absolute;
+
+  width: 0;
+  height: 0;
+
+  opacity: 0;
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   Breadcrumb
+   ========================================================= */
+
+.workspace-files-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 2px;
+
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.workspace-breadcrumb-segment {
+  display: inline-flex;
+  align-items: center;
+}
+
+.workspace-breadcrumb-separator {
+  margin: 0 6px;
+
+  color: #d1d5db;
+
+  font-size: 13px;
+}
+
+.workspace-breadcrumb-link {
+  border: 0;
+
+  padding: 0;
+
+  background: none;
+  color: #6b7280;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+.workspace-breadcrumb-link:hover {
+  color: #111827;
+}
+
+
+/* =========================================================
+   Create Folder
+   ========================================================= */
+
+.workspace-files-create-form {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  margin-bottom: 18px;
+}
+
+.workspace-files-input {
+  flex: 1;
+
+  min-width: 0;
+
+  padding: 10px 12px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+
+  background: #ffffff;
+  color: #111827;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  outline: none;
+}
+
+.workspace-files-input:focus {
+  border-color: #9ca3af;
+}
+
+
+/* =========================================================
+   File List
+   ========================================================= */
+
+.workspace-files-list {
+  border-top: 1px solid #f0f0f0;
+}
+
+.workspace-files-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  min-height: 66px;
+
+  padding: 12px 4px;
+
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.workspace-files-item:last-child {
+  border-bottom: 0;
+}
+
+
+/* =========================================================
+   File Item
+   ========================================================= */
+
+.workspace-files-item-main {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  flex: 1;
+  min-width: 0;
+
+  border: 0;
+  padding: 0;
+
+  background: none;
+
+  text-align: left;
+
+  font-family: inherit;
+
+  cursor: pointer;
+}
+
+.workspace-files-file .workspace-files-item-main {
+  cursor: default;
+}
+
+.workspace-files-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 36px;
+  height: 36px;
+
+  flex-shrink: 0;
+
+  border-radius: 8px;
+
+  background: #f3f4f6;
+  color: #374151;
+
+  font-size: 14px;
+}
+
+.workspace-files-folder .workspace-files-icon {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+
+/* =========================================================
+   File Details
+   ========================================================= */
+
+.workspace-files-item-details {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+
+  min-width: 0;
+}
+
+.workspace-files-item-details strong {
+  overflow: hidden;
+
+  color: #374151;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspace-files-item-details span {
+  color: #9ca3af;
+
+  font-size: 12px;
+}
+
+.workspace-empty-hint {
+  margin-top: 8px !important;
+
+  font-size: 13px !important;
+}
+
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .workspace-files-actions {
+    width: 100%;
+
+    flex-direction: column;
+  }
+
+  .workspace-files-actions .workspace-button,
+  .workspace-upload-label {
+    width: 100%;
+
+    text-align: center;
+  }
+
+  .workspace-files-item {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .workspace-files-create-form {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+}

@@ -1,3 +1,5 @@
+from django.db.models import Count
+
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -38,7 +40,12 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
         workspaces = (
             Workspace.objects
             .select_related('owner')
-            .prefetch_related('memberships')
+            .annotate(
+                member_count=Count(
+                    'memberships',
+                    distinct=True,
+                )
+            )
             .all()
         )
 
@@ -73,7 +80,10 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
                 permissions.IsAuthenticated,
             ]
 
-        return [permission() for permission in permission_classes]
+        return [
+            permission()
+            for permission in permission_classes
+        ]
 
     def perform_create(self, serializer):
         workspace = serializer.save(

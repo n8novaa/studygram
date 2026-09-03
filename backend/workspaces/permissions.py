@@ -1,6 +1,6 @@
 from rest_framework.permissions import BasePermission
 
-from .models import WorkspaceMembership
+from .models import Workspace, WorkspaceMembership
 
 
 class IsWorkspaceMember(BasePermission):
@@ -45,19 +45,25 @@ class IsWorkspaceAdmin(BasePermission):
         if not request.user or not request.user.is_authenticated:
             return False
 
-        workspace_id = view.kwargs.get('workspace_pk')
+        workspace_id = (
+            view.kwargs.get("workspace_id")
+            or view.kwargs.get("pk")
+            or view.kwargs.get("workspace_pk")
+        )
 
-        return WorkspaceMembership.objects.filter(
-            workspace_id=workspace_id,
-            user=request.user,
-            role=WorkspaceMembership.Role.ADMIN,
-        ).exists()
+        if not workspace_id:
+            return False
 
-    def has_object_permission(self, request, view, obj):
-        if obj.owner_id == request.user.id:
+        # Workspace owner has admin privileges.
+        if Workspace.objects.filter(
+            id=workspace_id,
+            owner=request.user,
+        ).exists():
             return True
 
-        return obj.memberships.filter(
+        # Workspace admins also have admin privileges.
+        return WorkspaceMembership.objects.filter(
+            workspace_id=workspace_id,
             user=request.user,
             role=WorkspaceMembership.Role.ADMIN,
         ).exists()

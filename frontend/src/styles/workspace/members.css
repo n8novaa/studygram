@@ -1,0 +1,214 @@
+/* =========================================================
+   Members
+   ========================================================= */
+
+.workspace-member-count {
+  color: #6b7280;
+
+  font-size: 13px;
+}
+
+.workspace-member-list {
+  border-top: 1px solid #f0f0f0;
+}
+
+.workspace-member {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  min-height: 66px;
+  padding: 12px 4px;
+
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.workspace-member:last-child {
+  border-bottom: 0;
+}
+
+
+/* =========================================================
+   Avatar
+   ========================================================= */
+
+.workspace-member-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 36px;
+  height: 36px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: #f3f4f6;
+  color: #374151;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   Member Details
+   ========================================================= */
+
+.workspace-member-details {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+
+  min-width: 0;
+}
+
+.workspace-member-details strong {
+  color: #374151;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.workspace-member-details span {
+  color: #9ca3af;
+
+  font-size: 12px;
+
+  text-transform: capitalize;
+}
+
+
+/* =========================================================
+   Current User
+   ========================================================= */
+
+.workspace-member-you {
+  display: inline-block;
+
+  margin-left: 7px;
+  padding: 2px 6px;
+
+  border-radius: 4px;
+
+  background: #f3f4f6;
+  color: #6b7280;
+
+  font-size: 10px;
+  font-weight: 600;
+
+  vertical-align: middle;
+}
+
+
+/* =========================================================
+   Role
+   ========================================================= */
+
+.workspace-role-badge {
+  margin-left: auto;
+
+  padding: 4px 8px;
+
+  border-radius: 5px;
+
+  background: #f3f4f6;
+  color: #6b7280;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   Member Actions
+   ========================================================= */
+
+.workspace-member-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-left: auto;
+}
+
+.workspace-member-action-buttons {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+}
+
+.workspace-member-action {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+
+  padding: 6px 9px;
+
+  background: #ffffff;
+  color: #374151;
+
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.workspace-member-action:hover:not(:disabled) {
+  background: #f9fafb;
+}
+
+.workspace-member-action:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.workspace-member-action-promote {
+  color: #047857;
+
+  border-color: #a7f3d0;
+}
+
+.workspace-member-action-promote:hover:not(:disabled) {
+  background: #ecfdf5;
+}
+
+.workspace-member-action-remove {
+  color: #dc2626;
+
+  border-color: #fecaca;
+}
+
+.workspace-member-action-remove:hover:not(:disabled) {
+  background: #fef2f2;
+}
+
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .workspace-member {
+    align-items: flex-start;
+  }
+
+  .workspace-member-actions {
+    align-items: flex-end;
+    flex-direction: column;
+  }
+
+  .workspace-member-action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .workspace-member-action {
+    width: 70px;
+  }
+}

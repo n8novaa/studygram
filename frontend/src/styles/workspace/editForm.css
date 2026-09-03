@@ -1,0 +1,178 @@
+/* =========================================================
+   Workspace Edit Form
+   ========================================================= */
+
+.workspace-edit-form {
+  display: flex;
+  flex-direction: column;
+
+  gap: 20px;
+}
+
+
+/* =========================================================
+   Fields
+   ========================================================= */
+
+.workspace-detail-field {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.workspace-detail-field label,
+.workspace-detail-visibility legend {
+  color: #374151;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.workspace-detail-field input,
+.workspace-detail-field textarea {
+  width: 100%;
+
+  padding: 10px 12px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+
+  background: #ffffff;
+  color: #111827;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  outline: none;
+}
+
+.workspace-detail-field input:focus,
+.workspace-detail-field textarea:focus {
+  border-color: #9ca3af;
+}
+
+.workspace-detail-field input {
+  height: 42px;
+}
+
+.workspace-detail-field textarea {
+  min-height: 110px;
+
+  resize: vertical;
+}
+
+
+/* =========================================================
+   Visibility
+   ========================================================= */
+
+.workspace-detail-visibility {
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+}
+
+.workspace-detail-radio {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 10px;
+
+  cursor: pointer;
+}
+
+.workspace-detail-radio input {
+  margin-top: 3px;
+}
+
+.workspace-detail-radio span {
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.workspace-detail-radio strong {
+  color: #374151;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.workspace-detail-radio small {
+  color: #9ca3af;
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   Error
+   ========================================================= */
+
+.workspace-detail-form-error {
+  padding: 10px 12px;
+
+  border: 1px solid #fecaca;
+  border-radius: 7px;
+
+  background: #fef2f2;
+  color: #b91c1c;
+
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   Actions
+   ========================================================= */
+
+.workspace-edit-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding-top: 4px;
+}
+
+.workspace-primary-button,
+.workspace-secondary-button {
+  border-radius: 7px;
+
+  padding: 9px 15px;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.workspace-primary-button {
+  border: 1px solid #111827;
+
+  background: #111827;
+  color: #ffffff;
+}
+
+.workspace-secondary-button {
+  border: 1px solid #d1d5db;
+
+  background: #ffffff;
+  color: #374151;
+}
+
+.workspace-primary-button:disabled,
+.workspace-secondary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
