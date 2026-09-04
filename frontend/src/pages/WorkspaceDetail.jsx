@@ -24,8 +24,7 @@ import WorkspaceMembers
 import WorkspaceFiles
   from '../components/workspace/files/WorkspaceFiles'
 
-import "../styles/pages/workspace-detail.css";
-
+import '../styles/pages/workspace-detail.css'
 
 
 function WorkspaceDetail() {
@@ -64,6 +63,9 @@ function WorkspaceDetail() {
   const [formError, setFormError] =
     useState('')
 
+  const [activeSection, setActiveSection] =
+    useState(null)
+
 
   useEffect(() => {
     async function loadWorkspace() {
@@ -84,6 +86,7 @@ function WorkspaceDetail() {
         setWorkspace(data)
 
         setName(data.name || '')
+
         setDescription(
           data.description || '',
         )
@@ -165,7 +168,6 @@ function WorkspaceDetail() {
         )
 
       setWorkspace(updatedWorkspace)
-
       setEditing(false)
     } catch (err) {
       setFormError(
@@ -211,6 +213,13 @@ function WorkspaceDetail() {
 
       setDeleting(false)
     }
+  }
+
+
+  function handleSectionChange(section) {
+    setEditing(false)
+    setFormError('')
+    setActiveSection(section)
   }
 
 
@@ -281,8 +290,8 @@ function WorkspaceDetail() {
 
       <WorkspaceHeader
         workspace={workspace}
-        isOwner={isOwner}
-        isAdmin={isAdmin}
+        isOwner={false}
+        isAdmin={false}
         editing={editing}
         saving={saving}
         deleting={deleting}
@@ -291,54 +300,210 @@ function WorkspaceDetail() {
       />
 
 
-      {editing ? (
+      <nav
+        className="workspace-section-navigation"
+        aria-label="Workspace sections"
+      >
 
-        <WorkspaceEditForm
-          name={name}
-          description={description}
-          visibility={visibility}
-          saving={saving}
-          formError={formError}
-
-          onNameChange={(event) =>
-            setName(event.target.value)
+        <button
+          type="button"
+          className={
+            `workspace-section-button ${
+              activeSection === 'overview'
+                ? 'active'
+                : ''
+            }`
           }
-
-          onDescriptionChange={(event) =>
-            setDescription(
-              event.target.value,
-            )
+          onClick={() =>
+            handleSectionChange('overview')
           }
+        >
+          <span className="workspace-section-button-icon">
+            ◈
+          </span>
 
-          onVisibilityChange={(event) =>
-            setVisibility(
-              event.target.value,
-            )
+          <span className="workspace-section-button-content">
+            <span className="workspace-section-button-title">
+              Overview
+            </span>
+
+            <span className="workspace-section-button-description">
+              Details and information
+            </span>
+          </span>
+
+          <span className="workspace-section-button-arrow">
+            →
+          </span>
+        </button>
+
+
+        <button
+          type="button"
+          className={
+            `workspace-section-button ${
+              activeSection === 'members'
+                ? 'active'
+                : ''
+            }`
           }
+          onClick={() =>
+            handleSectionChange('members')
+          }
+        >
+          <span className="workspace-section-button-icon">
+            ◉
+          </span>
 
-          onSave={handleSave}
-          onCancel={cancelEditing}
-        />
+          <span className="workspace-section-button-content">
+            <span className="workspace-section-button-title">
+              Members
+            </span>
 
-      ) : (
+            <span className="workspace-section-button-description">
+              Workspace community
+            </span>
+          </span>
 
-        <WorkspaceOverview
-          workspace={workspace}
-        />
-
-      )}
-
-
-      <WorkspaceMembers
-        workspace={workspace}
-        isAdmin={isAdmin}
-      />
+          <span className="workspace-section-button-arrow">
+            →
+          </span>
+        </button>
 
 
-      <WorkspaceFiles
-        workspaceId={workspace.id}
-        isAdmin={isAdmin}
-      />
+        <button
+          type="button"
+          className={
+            `workspace-section-button ${
+              activeSection === 'files'
+                ? 'active'
+                : ''
+            }`
+          }
+          onClick={() =>
+            handleSectionChange('files')
+          }
+        >
+          <span className="workspace-section-button-icon">
+            ▦
+          </span>
+
+          <span className="workspace-section-button-content">
+            <span className="workspace-section-button-title">
+              Files
+            </span>
+
+            <span className="workspace-section-button-description">
+              Files and folders
+            </span>
+          </span>
+
+          <span className="workspace-section-button-arrow">
+            →
+          </span>
+        </button>
+
+      </nav>
+
+
+      <div className="workspace-detail-content">
+
+        {activeSection === 'overview' && (
+          <>
+            {!editing && (
+              <div className="workspace-overview-management">
+
+                {(isAdmin || isOwner) && (
+                  <button
+                    type="button"
+                    className="workspace-button workspace-button-secondary"
+                    onClick={startEditing}
+                    disabled={
+                      saving || deleting
+                    }
+                  >
+                    Edit
+                  </button>
+                )}
+
+                {isOwner && (
+                  <button
+                    type="button"
+                    className="workspace-button workspace-button-danger"
+                    onClick={handleDelete}
+                    disabled={
+                      saving || deleting
+                    }
+                  >
+                    {deleting
+                      ? 'Deleting...'
+                      : 'Delete'}
+                  </button>
+                )}
+
+              </div>
+            )}
+
+
+            {editing ? (
+
+              <WorkspaceEditForm
+                name={name}
+                description={description}
+                visibility={visibility}
+                saving={saving}
+                formError={formError}
+
+                onNameChange={(event) =>
+                  setName(
+                    event.target.value,
+                  )
+                }
+
+                onDescriptionChange={(event) =>
+                  setDescription(
+                    event.target.value,
+                  )
+                }
+
+                onVisibilityChange={(event) =>
+                  setVisibility(
+                    event.target.value,
+                  )
+                }
+
+                onSave={handleSave}
+                onCancel={cancelEditing}
+              />
+
+            ) : (
+
+              <WorkspaceOverview
+                workspace={workspace}
+              />
+
+            )}
+
+          </>
+        )}
+
+
+        {activeSection === 'members' && (
+          <WorkspaceMembers
+            workspace={workspace}
+            isAdmin={isAdmin}
+          />
+        )}
+
+
+        {activeSection === 'files' && (
+          <WorkspaceFiles
+            workspaceId={workspace.id}
+            isAdmin={isAdmin}
+          />
+        )}
+
+      </div>
 
     </main>
   )
