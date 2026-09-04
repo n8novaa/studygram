@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import MemberManagementModal from './MemberManagementModal'
-
+import "../../../styles/components/workspace/members/management.css";
 
 function MemberManagement({
   members,

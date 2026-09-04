@@ -11,6 +11,9 @@ import {
 
 import MemberManagement from './MemberManagement'
 
+import "../../../styles/shared/workspace.css";
+import "../../../styles/components/workspace/members/members.css";
+
 
 function WorkspaceMembers({
   workspace,
@@ -176,7 +179,7 @@ function WorkspaceMembers({
 
 
   return (
-    <section className="workspace-detail-card">
+    <section className="workspace-detail-card workspace-members">
 
       <div className="workspace-section-heading">
 

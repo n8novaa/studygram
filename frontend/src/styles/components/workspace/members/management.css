@@ -1,0 +1,9 @@
+/* Member management controls */
+.workspace-member-management-actions { display: flex; gap: 8px; }
+.workspace-member-manage-button {
+  min-height: 34px; padding: 0 12px; border: 1px solid var(--border-strong);
+  border-radius: 7px; background: var(--surface); color: var(--text);
+  font-size: 12px; font-weight: 600;
+}
+.workspace-member-manage-button:hover { background: var(--surface-muted); }
+.workspace-member-manage-button-promote { color: var(--primary); }

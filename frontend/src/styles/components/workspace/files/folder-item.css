@@ -1,0 +1,38 @@
+/* =========================================================
+   Folder Item
+   ========================================================= */
+
+.workspace-files .workspace-files-folder .workspace-files-icon {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.workspace-files .workspace-files-folder .workspace-files-item-main {
+  cursor: pointer;
+}
+
+.workspace-files .workspace-files-folder .workspace-member-action {
+  min-height: 32px;
+  padding: 0 10px;
+
+  border: 1px solid #fecaca;
+  border-radius: 7px;
+
+  background: var(--surface);
+  color: var(--danger);
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.workspace-files .workspace-files-folder .workspace-member-action:hover:not(:disabled) {
+  background: var(--danger-light);
+}
+
+.workspace-files .workspace-files-folder .workspace-member-action:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

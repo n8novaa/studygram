@@ -45,7 +45,7 @@
    Buttons
    ========================================================= */
 
-.workspace-button {
+.workspaces-page .workspace-button {
   min-height: 42px;
 
   padding: 0 17px;
@@ -67,265 +67,19 @@
     background-color 0.15s ease;
 }
 
-.workspace-button:hover {
+.workspaces-page .workspace-button:hover {
   background: #1f2937;
   transform: translateY(-1px);
 }
 
-.workspace-button:active {
+.workspaces-page .workspace-button:active {
   transform: translateY(0);
 }
 
-.workspace-button:disabled {
+.workspaces-page .workspace-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
-}
-
-
-/* =========================================================
-   Workspace list
-   ========================================================= */
-
-.workspace-list {
-  display: grid;
-
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
-
-  gap: 18px;
-}
-
-
-/* =========================================================
-   Workspace card
-   ========================================================= */
-
-.workspace-card {
-  display: flex;
-  flex-direction: column;
-
-  min-height: 245px;
-
-  padding: 22px;
-
-  background: #ffffff;
-
-  border: 1px solid #e5e7eb;
-  border-radius: 13px;
-
-  box-sizing: border-box;
-
-  transition:
-    border-color 0.18s ease,
-    box-shadow 0.18s ease,
-    transform 0.18s ease;
-}
-
-.workspace-card:hover {
-  border-color: #d1d5db;
-
-  box-shadow:
-    0 8px 24px rgba(17, 24, 39, 0.07);
-
-  transform: translateY(-2px);
-}
-
-
-/* =========================================================
-   Card top
-   ========================================================= */
-
-.workspace-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 16px;
-}
-
-.workspace-card-icon {
-  width: 42px;
-  height: 42px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 10px;
-
-  background: #f3f4f6;
-  color: #374151;
-
-  font-size: 16px;
-  font-weight: 700;
-}
-
-
-/* =========================================================
-   Visibility badge
-   ========================================================= */
-
-.workspace-visibility-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-
-  padding: 5px 9px;
-
-  border-radius: 999px;
-
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.workspace-visibility-public {
-  background: #f0fdf4;
-  color: #166534;
-}
-
-.workspace-visibility-private {
-  background: #f9fafb;
-  color: #4b5563;
-}
-
-.workspace-visibility-dot {
-  width: 5px;
-  height: 5px;
-
-  border-radius: 50%;
-
-  background: currentColor;
-}
-
-
-/* =========================================================
-   Card body
-   ========================================================= */
-
-.workspace-card-body {
-  margin-top: 20px;
-}
-
-.workspace-card-title {
-  margin: 0;
-
-  overflow: hidden;
-
-  color: #111827;
-
-  font-size: 18px;
-  font-weight: 650;
-  letter-spacing: -0.25px;
-
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.workspace-description {
-  margin: 8px 0 0;
-
-  display: -webkit-box;
-  overflow: hidden;
-
-  color: #6b7280;
-
-  font-size: 13px;
-  line-height: 1.6;
-
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
-
-/* =========================================================
-   Card metadata
-   ========================================================= */
-
-.workspace-card-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 12px;
-
-  margin-top: auto;
-  padding-top: 20px;
-}
-
-.workspace-member-count {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-
-  color: #4b5563;
-
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.workspace-meta-icon {
-  font-size: 12px;
-}
-
-.workspace-owner {
-  overflow: hidden;
-
-  color: #9ca3af;
-
-  font-size: 11px;
-
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-
-/* =========================================================
-   Card footer
-   ========================================================= */
-
-.workspace-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  margin-top: 18px;
-  padding-top: 15px;
-
-  border-top: 1px solid #f0f1f3;
-}
-
-.workspace-time {
-  color: #9ca3af;
-
-  font-size: 11px;
-}
-
-.workspace-open-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-
-  color: #374151;
-
-  font-size: 12px;
-  font-weight: 600;
-
-  text-decoration: none;
-
-  transition: color 0.15s ease;
-}
-
-.workspace-open-link:hover {
-  color: #111827;
-}
-
-.workspace-open-link span {
-  transition: transform 0.15s ease;
-}
-
-.workspace-open-link:hover span {
-  transform: translateX(3px);
 }
 
 
@@ -675,41 +429,9 @@
 }
 
 
-/* =========================================================
-   Responsive
-   ========================================================= */
 
-@media (max-width: 800px) {
-  .workspace-list {
-    grid-template-columns: 1fr;
-  }
-
-  .workspace-visibility-options {
-    grid-template-columns: 1fr;
-  }
-}
-
-
+/* Responsive page header */
 @media (max-width: 600px) {
-  .workspaces-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .workspaces-header .workspace-button {
-    width: 100%;
-  }
-
-  .workspace-card {
-    padding: 18px;
-  }
-
-  .workspace-card-meta {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .workspace-create {
-    padding: 18px;
-  }
+  .workspaces-header { align-items: flex-start; flex-direction: column; }
+  .workspaces-header .workspaces-page .workspace-button { width: 100%; }
 }

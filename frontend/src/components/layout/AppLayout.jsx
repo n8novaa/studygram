@@ -2,7 +2,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../../auth/AuthContext'
 
-import '../../styles/appLayout.css'
+import '../../styles/layout/app-layout.css'
 
 
 function AppLayout() {

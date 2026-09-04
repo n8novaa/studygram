@@ -1,0 +1,273 @@
+/* =========================================================
+   Create workspace
+   ========================================================= */
+
+.workspace-create {
+  margin-bottom: 28px;
+  padding: 24px;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 13px;
+
+  box-shadow:
+    0 5px 18px rgba(17, 24, 39, 0.04);
+}
+
+.workspace-create-header {
+  margin-bottom: 24px;
+}
+
+.workspace-create-header h2 {
+  margin: 0;
+
+  color: #111827;
+
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.workspace-create-header p {
+  margin: 6px 0 0;
+
+  color: #6b7280;
+
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   Form
+   ========================================================= */
+
+.workspace-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.workspace-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.workspace-field label,
+.workspace-visibility legend {
+  color: #374151;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.workspace-field label span {
+  margin-left: 7px;
+
+  color: #9ca3af;
+
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.workspace-field input,
+.workspace-field textarea {
+  width: 100%;
+
+  padding: 11px 12px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #dfe3e8;
+  border-radius: 8px;
+
+  outline: none;
+
+  background: #ffffff;
+  color: #111827;
+
+  font-family: inherit;
+  font-size: 13px;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.workspace-field input {
+  height: 42px;
+}
+
+.workspace-field textarea {
+  min-height: 96px;
+
+  resize: vertical;
+
+  line-height: 1.5;
+}
+
+.workspace-field input::placeholder,
+.workspace-field textarea::placeholder {
+  color: #adb3bb;
+}
+
+.workspace-field input:focus,
+.workspace-field textarea:focus {
+  border-color: #9ca3af;
+
+  box-shadow:
+    0 0 0 3px rgba(17, 24, 39, 0.06);
+}
+
+.workspace-field input:disabled,
+.workspace-field textarea:disabled {
+  background: #f9fafb;
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   Visibility selection
+   ========================================================= */
+
+.workspace-visibility {
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+}
+
+.workspace-visibility legend {
+  margin-bottom: 10px;
+}
+
+.workspace-visibility-options {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+}
+
+.workspace-visibility-option {
+  position: relative;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 11px;
+
+  padding: 14px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.workspace-visibility-option:hover {
+  background: #fafafa;
+}
+
+.workspace-visibility-option.selected {
+  border-color: #9ca3af;
+  background: #fafafa;
+}
+
+.workspace-visibility-option input {
+  position: absolute;
+
+  opacity: 0;
+  pointer-events: none;
+}
+
+.workspace-option-icon {
+  width: 28px;
+  height: 28px;
+
+  flex: 0 0 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 7px;
+
+  background: #f3f4f6;
+  color: #6b7280;
+
+  font-size: 11px;
+}
+
+.workspace-visibility-option-content {
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.workspace-visibility-option-title {
+  color: #1f2937;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.workspace-visibility-option-description {
+  color: #6b7280;
+
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.workspace-option-check {
+  margin-left: auto;
+
+  color: #111827;
+
+  font-size: 13px;
+
+  opacity: 0;
+}
+
+.workspace-visibility-option.selected
+  .workspace-option-check {
+  opacity: 1;
+}
+
+
+/* =========================================================
+   Form actions
+   ========================================================= */
+
+.workspace-form-actions {
+  display: flex;
+  justify-content: flex-end;
+
+  padding-top: 4px;
+}
+
+.workspace-form-error {
+  margin: 0;
+
+  padding: 10px 12px;
+
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+
+  background: #fef2f2;
+  color: #b91c1c;
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+
+
+@media (max-width: 800px) { .workspace-visibility-options { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .workspace-create { padding: 18px; } }

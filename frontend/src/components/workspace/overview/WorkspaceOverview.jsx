@@ -1,5 +1,7 @@
 import { formatRelativeTime } from '../../../utils/dateUtils'
 
+import "../../../styles/shared/workspace.css";
+import "../../../styles/components/workspace/overview/overview.css";
 
 function WorkspaceOverview({
   workspace,
@@ -22,7 +24,7 @@ function WorkspaceOverview({
 
 
   return (
-    <section className="workspace-detail-card">
+    <section className="workspace-detail-card workspace-overview">
 
       <div className="workspace-section-heading">
 

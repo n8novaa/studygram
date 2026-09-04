@@ -1,3 +1,6 @@
+import "../../../styles/shared/workspace.css";
+import "../../../styles/components/workspace/overview/edit-form.css";
+
 function WorkspaceEditForm({
   name,
   description,

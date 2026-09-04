@@ -15,7 +15,7 @@ import WorkspaceCreateForm
 import WorkspaceList
   from '../components/workspace/WorkspaceList'
 
-import '../styles/workspaces.css'
+import "../styles/pages/workspaces.css";
 
 
 function Workspaces() {

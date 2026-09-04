@@ -1,0 +1,60 @@
+/* =========================================================
+   Workspace Files
+   ========================================================= */
+
+.workspace-files .workspace-files-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  flex-shrink: 0;
+}
+
+.workspace-files .workspace-upload-label {
+  position: relative;
+
+  cursor: pointer;
+}
+
+.workspace-files .workspace-upload-input {
+  position: absolute;
+
+  width: 0;
+  height: 0;
+
+  opacity: 0;
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .workspace-files .workspace-files-actions {
+    width: 100%;
+
+    flex-direction: column;
+  }
+
+  .workspace-files .workspace-files-actions .workspace-button,
+  .workspace-files .workspace-upload-label {
+    width: 100%;
+
+    text-align: center;
+  }
+
+  .workspace-files .workspace-files-item {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .workspace-files .workspace-files-create-form {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+}

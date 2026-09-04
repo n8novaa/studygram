@@ -1,3 +1,6 @@
+import "../../../styles/shared/workspace.css";
+import "../../../styles/components/workspace/files/files.css";
+
 import {
   useCallback,
   useEffect,

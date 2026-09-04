@@ -2,7 +2,7 @@
    Workspace Edit Form
    ========================================================= */
 
-.workspace-edit-form {
+.workspace-edit .workspace-edit-form {
   display: flex;
   flex-direction: column;
 
@@ -14,14 +14,14 @@
    Fields
    ========================================================= */
 
-.workspace-detail-field {
+.workspace-edit .workspace-detail-field {
   display: flex;
   flex-direction: column;
 
   gap: 7px;
 }
 
-.workspace-detail-field label,
+.workspace-edit .workspace-detail-field label,
 .workspace-detail-visibility legend {
   color: #374151;
 
@@ -29,8 +29,8 @@
   font-weight: 600;
 }
 
-.workspace-detail-field input,
-.workspace-detail-field textarea {
+.workspace-edit .workspace-detail-field input,
+.workspace-edit .workspace-detail-field textarea {
   width: 100%;
 
   padding: 10px 12px;
@@ -47,16 +47,16 @@
   outline: none;
 }
 
-.workspace-detail-field input:focus,
-.workspace-detail-field textarea:focus {
+.workspace-edit .workspace-detail-field input:focus,
+.workspace-edit .workspace-detail-field textarea:focus {
   border-color: #9ca3af;
 }
 
-.workspace-detail-field input {
+.workspace-edit .workspace-detail-field input {
   height: 42px;
 }
 
-.workspace-detail-field textarea {
+.workspace-edit .workspace-detail-field textarea {
   min-height: 110px;
 
   resize: vertical;
@@ -79,7 +79,7 @@
   border: 0;
 }
 
-.workspace-detail-radio {
+.workspace-edit .workspace-detail-radio {
   display: flex;
   align-items: flex-start;
 
@@ -88,25 +88,25 @@
   cursor: pointer;
 }
 
-.workspace-detail-radio input {
+.workspace-edit .workspace-detail-radio input {
   margin-top: 3px;
 }
 
-.workspace-detail-radio span {
+.workspace-edit .workspace-detail-radio span {
   display: flex;
   flex-direction: column;
 
   gap: 4px;
 }
 
-.workspace-detail-radio strong {
+.workspace-edit .workspace-detail-radio strong {
   color: #374151;
 
   font-size: 14px;
   font-weight: 600;
 }
 
-.workspace-detail-radio small {
+.workspace-edit .workspace-detail-radio small {
   color: #9ca3af;
 
   font-size: 12px;
@@ -118,7 +118,7 @@
    Error
    ========================================================= */
 
-.workspace-detail-form-error {
+.workspace-edit .workspace-detail-form-error {
   padding: 10px 12px;
 
   border: 1px solid #fecaca;
@@ -135,7 +135,7 @@
    Actions
    ========================================================= */
 
-.workspace-edit-actions {
+.workspace-edit .workspace-edit-actions {
   display: flex;
   align-items: center;
 
@@ -144,8 +144,8 @@
   padding-top: 4px;
 }
 
-.workspace-primary-button,
-.workspace-secondary-button {
+.workspace-edit .workspace-primary-button,
+.workspace-edit .workspace-secondary-button {
   border-radius: 7px;
 
   padding: 9px 15px;
@@ -157,22 +157,22 @@
   cursor: pointer;
 }
 
-.workspace-primary-button {
+.workspace-edit .workspace-primary-button {
   border: 1px solid #111827;
 
   background: #111827;
   color: #ffffff;
 }
 
-.workspace-secondary-button {
+.workspace-edit .workspace-secondary-button {
   border: 1px solid #d1d5db;
 
   background: #ffffff;
   color: #374151;
 }
 
-.workspace-primary-button:disabled,
-.workspace-secondary-button:disabled {
+.workspace-edit .workspace-primary-button:disabled,
+.workspace-edit .workspace-secondary-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

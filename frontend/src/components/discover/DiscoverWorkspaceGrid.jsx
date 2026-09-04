@@ -1,5 +1,5 @@
 import DiscoverWorkspaceCard from './DiscoverWorkspacecard'
-
+import "../../styles/components/discover/workspace-grid.css";
 
 function DiscoverWorkspaceGrid({
   workspaces,

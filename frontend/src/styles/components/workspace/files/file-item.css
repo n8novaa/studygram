@@ -1,0 +1,188 @@
+/* =========================================================
+   File List
+   ========================================================= */
+
+.workspace-files .workspace-files-list {
+  border-top: 1px solid #f0f0f0;
+}
+
+.workspace-files .workspace-files-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  min-height: 66px;
+  padding: 12px 4px;
+
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.workspace-files .workspace-files-item:last-child {
+  border-bottom: 0;
+}
+
+
+/* =========================================================
+   Item Main
+   ========================================================= */
+
+.workspace-files .workspace-files-item-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  flex: 1;
+  min-width: 0;
+
+  border: 0;
+  padding: 0;
+
+  background: none;
+
+  text-align: left;
+  font-family: inherit;
+
+  cursor: pointer;
+}
+
+.workspace-files .workspace-files-file .workspace-files-item-main {
+  cursor: default;
+}
+
+
+/* =========================================================
+   Icon
+   ========================================================= */
+
+.workspace-files .workspace-files-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 36px;
+  height: 36px;
+
+  flex-shrink: 0;
+
+  border-radius: 8px;
+
+  background: #f3f4f6;
+  color: #374151;
+
+  font-size: 14px;
+}
+
+.workspace-files .workspace-files-folder .workspace-files-icon {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+
+/* =========================================================
+   Details
+   ========================================================= */
+
+.workspace-files .workspace-files-item-details {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  min-width: 0;
+}
+
+.workspace-files .workspace-files-item-details strong {
+  overflow: hidden;
+
+  color: #374151;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspace-files .workspace-files-item-details span {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   Empty State
+   ========================================================= */
+
+.workspace-files .workspace-empty-hint {
+  margin-top: 8px !important;
+  font-size: 13px !important;
+}
+
+
+/* =========================================================
+   File Actions
+   ========================================================= */
+
+.workspace-files .workspace-member-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  flex-shrink: 0;
+}
+
+.workspace-files .workspace-member-action {
+  min-height: 32px;
+  padding: 0 10px;
+
+  border: 1px solid var(--border-strong);
+  border-radius: 7px;
+
+  background: var(--surface);
+  color: var(--text-muted);
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.workspace-files .workspace-member-action:hover:not(:disabled) {
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+.workspace-files .workspace-member-action:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.workspace-files .workspace-member-action-remove {
+  color: var(--danger);
+  border-color: #fecaca;
+}
+
+.workspace-files .workspace-member-action-remove:hover:not(:disabled) {
+  background: var(--danger-light);
+}
+
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .workspace-files .workspace-files-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .workspace-files .workspace-member-action-buttons {
+    width: 100%;
+  }
+
+  .workspace-files .workspace-member-action {
+    flex: 1;
+  }
+}

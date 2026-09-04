@@ -1,0 +1,5 @@
+/* Join request list only */
+.request-list { display: flex; flex-direction: column; gap: 12px; }
+.home-state { padding: 48px 24px; background: var(--surface); border: 1px dashed var(--border-strong); border-radius: var(--radius-md); text-align: center; }
+.home-state h3 { margin: 0; color: var(--text); font-size: 16px; line-height: 1.4; font-weight: 600; }
+.home-state p { margin: 7px 0 0; color: var(--text-muted); font-size: 14px; line-height: 1.5; }

@@ -1,3 +1,5 @@
+import "../../styles/components/home/join-request-list.css";
+
 import JoinRequestCard from './JoinRequestCard'
 
 

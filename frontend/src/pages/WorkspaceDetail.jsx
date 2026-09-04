@@ -24,12 +24,8 @@ import WorkspaceMembers
 import WorkspaceFiles
   from '../components/workspace/files/WorkspaceFiles'
 
-import '../styles/workspace/workspaceDetail.css'
-import '../styles/workspace/header.css'
-import '../styles/workspace/overview.css'
-import '../styles/workspace/editForm.css'
-import '../styles/workspace/members.css'
-import '../styles/workspace/files.css'
+import "../styles/pages/workspace-detail.css";
+
 
 
 function WorkspaceDetail() {
@@ -237,7 +233,7 @@ function WorkspaceDetail() {
     return (
       <main className="workspace-detail-page">
 
-        <section className="workspace-detail-state workspace-detail-error">
+        <section className="workspace-detail-state workspace-state-error">
           <p>
             {error}
           </p>

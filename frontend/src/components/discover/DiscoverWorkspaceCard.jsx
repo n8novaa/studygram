@@ -1,3 +1,5 @@
+import "../../styles/components/discover/workspace-card.css";
+
 function DiscoverWorkspaceCard({
   workspace,
   joined,

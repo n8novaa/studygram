@@ -1,5 +1,6 @@
 import { formatRelativeTime } from '../../../utils/dateUtils'
 
+import "../../../styles/components/workspace/files/file-item.css";
 
 function formatFileSize(bytes) {
   if (!bytes || bytes < 0) {

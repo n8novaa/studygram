@@ -32,7 +32,7 @@
    Header Content
    ========================================================= */
 
-.workspace-header-content {
+.workspace-header-card .workspace-header-content {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -40,7 +40,7 @@
   gap: 24px;
 }
 
-.workspace-title-row {
+.workspace-header-card .workspace-title-row {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -48,7 +48,7 @@
   gap: 12px;
 }
 
-.workspace-title-row h1 {
+.workspace-header-card .workspace-title-row h1 {
   margin: 0;
 
   color: #111827;
@@ -63,7 +63,7 @@
    Owner
    ========================================================= */
 
-.workspace-owner {
+.workspace-header-card .workspace-owner {
   margin: 10px 0 0;
 
   color: #6b7280;
@@ -71,7 +71,7 @@
   font-size: 14px;
 }
 
-.workspace-owner strong {
+.workspace-header-card .workspace-owner strong {
   color: #374151;
 }
 
@@ -80,7 +80,7 @@
    Description
    ========================================================= */
 
-.workspace-description {
+.workspace-header-card .workspace-description {
   margin: 24px 0 0;
   padding-top: 20px;
 
@@ -97,7 +97,7 @@
    Visibility
    ========================================================= */
 
-.workspace-visibility-badge {
+.workspace-header-card .workspace-visibility-badge {
   display: inline-flex;
   align-items: center;
 
@@ -109,17 +109,17 @@
   font-weight: 600;
 }
 
-.workspace-visibility-public {
+.workspace-header-card .workspace-visibility-public {
   background: #ecfdf5;
   color: #047857;
 }
 
-.workspace-visibility-private {
+.workspace-header-card .workspace-visibility-private {
   background: #f3f4f6;
   color: #4b5563;
 }
 
-.workspace-visibility-dot {
+.workspace-header-card .workspace-visibility-dot {
   width: 6px;
   height: 6px;
 
@@ -135,7 +135,7 @@
    Header Actions
    ========================================================= */
 
-.workspace-header-actions {
+.workspace-header-card .workspace-header-actions {
   display: flex;
   align-items: center;
 
@@ -144,7 +144,7 @@
   flex-shrink: 0;
 }
 
-.workspace-button {
+.workspace-header-card .workspace-button {
   border: 0;
   border-radius: 7px;
 
@@ -161,21 +161,21 @@
     border-color 0.15s ease;
 }
 
-.workspace-button:disabled {
+.workspace-header-card .workspace-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.workspace-button-primary {
+.workspace-header-card .workspace-header-card .workspace-button-primary {
   background: #111827;
   color: #ffffff;
 }
 
-.workspace-button-primary:hover:not(:disabled) {
+.workspace-header-card .workspace-header-card .workspace-button-primary:hover:not(:disabled) {
   background: #1f2937;
 }
 
-.workspace-button-secondary {
+.workspace-header-card .workspace-header-card .workspace-button-secondary {
   background: #ffffff;
 
   border: 1px solid #d1d5db;
@@ -183,11 +183,11 @@
   color: #374151;
 }
 
-.workspace-button-secondary:hover:not(:disabled) {
+.workspace-header-card .workspace-header-card .workspace-button-secondary:hover:not(:disabled) {
   background: #f9fafb;
 }
 
-.workspace-button-danger {
+.workspace-header-card .workspace-header-card .workspace-button-danger {
   background: #ffffff;
 
   border: 1px solid #fecaca;
@@ -195,7 +195,7 @@
   color: #dc2626;
 }
 
-.workspace-button-danger:hover:not(:disabled) {
+.workspace-header-card .workspace-header-card .workspace-button-danger:hover:not(:disabled) {
   background: #fef2f2;
 }
 
@@ -209,19 +209,19 @@
     padding: 22px;
   }
 
-  .workspace-header-content {
+  .workspace-header-card .workspace-header-content {
     flex-direction: column;
   }
 
-  .workspace-header-actions {
+  .workspace-header-card .workspace-header-actions {
     width: 100%;
   }
 
-  .workspace-header-actions .workspace-button {
+  .workspace-header-card .workspace-header-actions .workspace-header-card .workspace-button {
     flex: 1;
   }
 
-  .workspace-title-row h1 {
+  .workspace-header-card .workspace-title-row h1 {
     font-size: 25px;
   }
 }

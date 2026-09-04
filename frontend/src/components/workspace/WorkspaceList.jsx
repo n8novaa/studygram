@@ -1,3 +1,5 @@
+import "../../styles/components/workspace/list.css";
+
 import WorkspaceCard from './WorkspaceCard'
 
 

@@ -11,7 +11,7 @@ import {
 
 import JoinRequestList from '../components/home/JoinRequestList'
 
-import '../styles/home.css'
+import "../styles/pages/home.css";
 
 
 function AppHome() {

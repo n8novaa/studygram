@@ -2,7 +2,7 @@
    Workspace Overview
    ========================================================= */
 
-.workspace-section-heading {
+.workspace-overview .workspace-section-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -11,7 +11,7 @@
   margin-bottom: 22px;
 }
 
-.workspace-eyebrow {
+.workspace-overview .workspace-eyebrow {
   display: block;
 
   margin-bottom: 5px;
@@ -25,7 +25,7 @@
   text-transform: uppercase;
 }
 
-.workspace-section-heading h2 {
+.workspace-overview .workspace-section-heading h2 {
   margin: 0;
 
   color: #111827;
@@ -39,7 +39,7 @@
    Description
    ========================================================= */
 
-.workspace-detail-description {
+.workspace-overview .workspace-detail-description {
   margin: 0 0 22px;
 
   color: #4b5563;
@@ -53,7 +53,7 @@
    Information Grid
    ========================================================= */
 
-.workspace-info-grid {
+.workspace-overview .workspace-info-grid {
   display: grid;
 
   grid-template-columns:
@@ -63,7 +63,7 @@
   border-left: 1px solid #f0f0f0;
 }
 
-.workspace-info-item {
+.workspace-overview .workspace-info-item {
   display: flex;
   flex-direction: column;
 
@@ -76,14 +76,14 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
-.workspace-info-item span {
+.workspace-overview .workspace-info-item span {
   color: #9ca3af;
 
   font-size: 12px;
   font-weight: 500;
 }
 
-.workspace-info-item strong {
+.workspace-overview .workspace-info-item strong {
   color: #374151;
 
   font-size: 14px;
@@ -96,7 +96,7 @@
    ========================================================= */
 
 @media (max-width: 700px) {
-  .workspace-info-grid {
+  .workspace-overview .workspace-info-grid {
     grid-template-columns: 1fr;
   }
 }

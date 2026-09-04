@@ -1,3 +1,5 @@
+import "../../../styles/components/workspace/files/breadcrumbs.css";
+
 function WorkspaceBreadcrumbs({
   folderPath,
   onNavigate,

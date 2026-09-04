@@ -1,0 +1,50 @@
+/* =========================================================
+   Breadcrumb
+   ========================================================= */
+
+.workspace-files .workspace-files-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 2px;
+
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.workspace-files .workspace-breadcrumb-segment {
+  display: inline-flex;
+  align-items: center;
+}
+
+.workspace-files .workspace-breadcrumb-separator {
+  margin: 0 6px;
+
+  color: #d1d5db;
+
+  font-size: 13px;
+}
+
+.workspace-files .workspace-breadcrumb-link {
+  border: 0;
+
+  padding: 0;
+
+  background: none;
+  color: #6b7280;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+.workspace-files .workspace-breadcrumb-link:hover {
+  color: #111827;
+}
+
+

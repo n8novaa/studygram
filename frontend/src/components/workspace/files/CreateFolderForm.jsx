@@ -1,3 +1,5 @@
+import "../../../styles/components/workspace/files/create-folder-form.css";
+
 function CreateFolderForm({
   name,
   creating,

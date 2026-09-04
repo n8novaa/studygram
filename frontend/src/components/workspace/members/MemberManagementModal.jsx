@@ -5,6 +5,8 @@ import {
   demoteWorkspaceMember,
 } from '../../../services/workspaceMemberService'
 
+import "../../../styles/components/workspace/members/management-modal.css";
+
 
 function MemberManagementModal({
   action,

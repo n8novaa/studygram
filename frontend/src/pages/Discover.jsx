@@ -9,7 +9,7 @@ import {
 
 import DiscoverWorkspaceGrid from '../components/discover/DiscoverWorkspaceGrid'
 
-import '../styles/discover.css'
+import "../styles/pages/discover.css";
 
 
 function Discover() {

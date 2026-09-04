@@ -1,3 +1,5 @@
+import "../../styles/components/home/join-request-card.css";
+
 function JoinRequestCard({
   request,
   processing,

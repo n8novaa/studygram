@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../auth/AuthContext'
 
-import '../styles/login.css'
+import "../styles/pages/login.css";
 
 
 function Login() {

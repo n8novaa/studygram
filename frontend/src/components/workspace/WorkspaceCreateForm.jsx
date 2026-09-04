@@ -1,3 +1,5 @@
+import "../../styles/components/workspace/create-form.css";
+
 function WorkspaceCreateForm({
   name,
   description,

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 
 import { formatRelativeTime } from '../../utils/dateUtils'
 
+import "../../styles/components/workspace/card.css";
 
 function WorkspaceCard({
   workspace,

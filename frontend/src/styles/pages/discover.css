@@ -1,0 +1,153 @@
+/* =========================================================
+   StudyGram — Discover Page
+   Page-specific styles only.
+   Shared design tokens, buttons, cards, badges and states
+   are handled by app.css.
+   ========================================================= */
+
+
+/* =========================================================
+   Page
+   ========================================================= */
+
+.discover-page {
+  width: min(
+    calc(100% - 40px),
+    var(--content-width)
+  );
+
+  margin: 0 auto;
+  padding: 40px 0 64px;
+}
+
+
+/* =========================================================
+   Header
+   ========================================================= */
+
+.discover-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.discover-eyebrow {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: var(--text-muted);
+
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 700;
+
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.discover-header h1 {
+  margin: 0;
+
+  color: var(--text);
+
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 700;
+
+  letter-spacing: -0.02em;
+}
+
+.discover-header p {
+  margin: 8px 0 0;
+
+  color: var(--text-muted);
+
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   Error
+   ========================================================= */
+
+.discover-error {
+  margin-bottom: 20px;
+}
+
+
+/* =========================================================
+   Loading / Empty State
+   ========================================================= */
+
+.discover-state {
+  padding: 48px 24px;
+
+  text-align: center;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-sm);
+}
+
+.discover-state h2 {
+  margin: 0;
+
+  color: var(--text);
+
+  font-size: 18px;
+  line-height: 1.4;
+  font-weight: 650;
+}
+
+.discover-state p {
+  margin: 8px 0 0;
+
+  color: var(--text-muted);
+
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  .discover-page {
+    width: min(
+      calc(100% - 24px),
+      var(--content-width)
+    );
+
+    padding-top: 24px;
+  }
+
+
+  .discover-header {
+    flex-direction: column;
+    align-items: stretch;
+
+    gap: 16px;
+
+    margin-bottom: 24px;
+  }
+
+
+  .discover-header h1 {
+    font-size: 24px;
+  }
+
+
+
+
+}

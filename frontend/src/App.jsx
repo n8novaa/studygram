@@ -11,6 +11,8 @@ import Discover from './pages/discover'
 import Messages from './pages/Messages'
 import WorkspaceDetail from './pages/WorkspaceDetail'
 
+import "./styles/global.css";
+
 function App() {
   return (
     <BrowserRouter>

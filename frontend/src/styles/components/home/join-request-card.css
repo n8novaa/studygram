@@ -1,0 +1,118 @@
+/* =========================================================
+   Request List
+   ========================================================= */
+
+
+/* =========================================================
+   Request Card
+   ========================================================= */
+
+.request-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 24px;
+  padding: 18px 20px;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+
+  box-shadow: var(--shadow-sm);
+}
+
+
+/* =========================================================
+   Request Content
+   ========================================================= */
+
+.request-content {
+  display: flex;
+  align-items: center;
+
+  min-width: 0;
+
+  gap: 14px;
+}
+
+.request-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  width: 42px;
+  height: 42px;
+
+  border-radius: 50%;
+
+  background: var(--surface-muted);
+  color: var(--text);
+
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.request-details {
+  min-width: 0;
+}
+
+.request-details h3 {
+  margin: 0;
+
+  color: var(--text);
+
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.request-details p {
+  margin: 4px 0 0;
+
+  color: var(--text-muted);
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.request-details strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   Request Actions
+   ========================================================= */
+
+.request-actions {
+  display: flex;
+
+  flex-shrink: 0;
+
+  gap: 8px;
+}
+
+
+/*
+ * Button styling is intentionally NOT defined here.
+ *
+ * .button
+ * .request-button-primary
+ * .request-button-secondary
+ *
+ * are global components provided by app.css.
+ */
+
+
+
+/* Responsive request layout */
+@media (max-width: 700px) {
+  .request-card { align-items: flex-start; flex-direction: column; }
+  .request-actions { width: 100%; }
+  .request-actions .request-button { flex: 1; }
+}
