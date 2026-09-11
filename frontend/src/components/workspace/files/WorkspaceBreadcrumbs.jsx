@@ -1,45 +1,40 @@
-import "../../../styles/components/workspace/files/breadcrumbs.css";
+import React from 'react';
+import { HomeIcon } from '../../common/Icons';
 
-function WorkspaceBreadcrumbs({
-  folderPath,
-  onNavigate,
-}) {
+function WorkspaceBreadcrumbs({ folderPath, onNavigate }) {
   return (
-    <nav
-      className="workspace-files-breadcrumb"
-      aria-label="Folder path"
-    >
+    <nav className="workspace-breadcrumbs" aria-label="Folder Breadcrumbs">
       <button
         type="button"
-        className="workspace-breadcrumb-link"
+        className="breadcrumb-item"
         onClick={() => onNavigate(-1)}
       >
-        Root
+        <HomeIcon size={14} />
+        <span>Root</span>
       </button>
 
-      {folderPath.map((folder, index) => (
-        <span
-          className="workspace-breadcrumb-segment"
-          key={folder.id}
-        >
-          <span
-            className="workspace-breadcrumb-separator"
-            aria-hidden="true"
-          >
-            /
-          </span>
+      {folderPath.map((folder, index) => {
+        const isLast = index === folderPath.length - 1;
 
-          <button
-            type="button"
-            className="workspace-breadcrumb-link"
-            onClick={() => onNavigate(index)}
-          >
-            {folder.name}
-          </button>
-        </span>
-      ))}
+        return (
+          <React.Fragment key={folder.id}>
+            <span className="breadcrumb-separator">/</span>
+            {isLast ? (
+              <span className="breadcrumb-current">{folder.name}</span>
+            ) : (
+              <button
+                type="button"
+                className="breadcrumb-item"
+                onClick={() => onNavigate(index)}
+              >
+                {folder.name}
+              </button>
+            )}
+          </React.Fragment>
+        );
+      })}
     </nav>
-  )
+  );
 }
 
-export default WorkspaceBreadcrumbs
+export default WorkspaceBreadcrumbs;

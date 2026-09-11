@@ -1,60 +1,191 @@
 /* =========================================================
-   Workspace Files
+   StudyGram — Workspace Files & Folders Styles (Notion Aesthetic)
    ========================================================= */
 
-.workspace-files .workspace-files-actions {
+.workspace-files {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.workspace-files-actions {
   display: flex;
   align-items: center;
-
-  gap: 8px;
-
-  flex-shrink: 0;
+  gap: 10px;
 }
 
-.workspace-files .workspace-upload-label {
-  position: relative;
+.workspace-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-card-subtle);
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
+  font-size: 13px;
+  flex-wrap: wrap;
+}
 
+.breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
   cursor: pointer;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
 }
 
-.workspace-files .workspace-upload-input {
-  position: absolute;
+.breadcrumb-item:hover {
+  background: rgba(55, 53, 47, 0.08);
+}
 
-  width: 0;
-  height: 0;
+.breadcrumb-separator {
+  color: var(--text-muted);
+}
 
-  opacity: 0;
+.breadcrumb-current {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Files & Folders Grid/List */
+.workspace-files-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.file-item-card,
+.folder-item-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.file-item-card:hover,
+.folder-item-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-highlight);
+}
+
+.item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.item-icon-folder {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--tag-yellow-bg);
+  color: var(--tag-yellow-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid #fde68a;
+}
+
+.item-icon-file {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--tag-blue-bg);
+  color: var(--tag-blue-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid #bfdbfe;
+}
+
+.item-details {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.item-name {
+  font-size: 13.5px;
+  font-weight: 550;
+  color: var(--text-primary);
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+.item-meta {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
 
-/* =========================================================
-   Responsive
-   ========================================================= */
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 
-@media (max-width: 700px) {
-  .workspace-files .workspace-files-actions {
-    width: 100%;
+.item-action-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
 
-    flex-direction: column;
-  }
+.item-action-btn:hover {
+  background: rgba(55, 53, 47, 0.08);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
 
-  .workspace-files .workspace-files-actions .workspace-button,
-  .workspace-files .workspace-upload-label {
-    width: 100%;
+.item-action-btn.btn-delete:hover {
+  background: var(--danger-bg);
+  border-color: var(--danger-border);
+  color: var(--danger-text);
+}
 
-    text-align: center;
-  }
+.upload-file-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  border: 1px solid var(--btn-primary-border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 550;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
 
-  .workspace-files .workspace-files-item {
-    align-items: flex-start;
+.upload-file-label:hover {
+  background: var(--btn-primary-hover);
+}
 
-    flex-direction: column;
-  }
-
-  .workspace-files .workspace-files-create-form {
-    flex-direction: column;
-
-    align-items: stretch;
-  }
+.hidden-file-input {
+  display: none;
 }

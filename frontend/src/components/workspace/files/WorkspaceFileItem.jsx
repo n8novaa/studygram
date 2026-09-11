@@ -1,111 +1,48 @@
-import { formatRelativeTime } from '../../../utils/dateUtils'
+import { formatFileSize, formatRelativeTime } from '../../../utils/formatters';
+import { FileIcon, DownloadIcon, TrashIcon } from '../../common/Icons';
 
-import "../../../styles/components/workspace/files/file-item.css";
-
-function formatFileSize(bytes) {
-  if (!bytes || bytes < 0) {
-    return '0 Bytes'
-  }
-
-  if (bytes < 1024) {
-    return `${bytes} Bytes`
-  }
-
-  const kilobytes = bytes / 1024
-
-  if (kilobytes < 1024) {
-    return `${kilobytes.toFixed(1)} KB`
-  }
-
-  const megabytes = kilobytes / 1024
-
-  if (megabytes < 1024) {
-    return `${megabytes.toFixed(1)} MB`
-  }
-
-  const gigabytes = megabytes / 1024
-
-  return `${gigabytes.toFixed(1)} GB`
-}
-
-
-function WorkspaceFileItem({
-  file,
-  isAdmin,
-  busy,
-  onDownload,
-  onDelete,
-}) {
+function WorkspaceFileItem({ file, isAdmin, busy, onDownload, onDelete }) {
   return (
-    <article
-      className="workspace-files-item workspace-files-file"
-    >
-      <div className="workspace-files-item-main">
-
-        <span
-          className="workspace-files-icon"
-          aria-hidden="true"
-        >
-          ▱
-        </span>
-
-
-        <div className="workspace-files-item-details">
-
-          <strong>
-            {file.name}
-          </strong>
-
-
-          <span>
-            {formatFileSize(file.size)}
-
-            {file.created_at &&
-              ` · ${formatRelativeTime(
-                file.created_at,
-              )}`}
-
-            {file.created_by &&
-              ` · ${file.created_by}`}
-          </span>
-
+    <div className="file-item-card">
+      <div className="item-left">
+        <div className="item-icon-file">
+          <FileIcon size={20} />
         </div>
-
+        <div className="item-details">
+          <span className="item-name" title={file.name}>
+            {file.name}
+          </span>
+          <span className="item-meta">
+            {formatFileSize(file.size)} &bull; {formatRelativeTime(file.created)}
+          </span>
+        </div>
       </div>
 
-
-      <div className="workspace-member-action-buttons">
-
+      <div className="item-actions">
         <button
           type="button"
-          className="workspace-member-action"
+          className="item-action-btn"
           onClick={() => onDownload(file)}
           disabled={busy}
+          title="Download file"
         >
-          {busy
-            ? '...'
-            : 'Download'}
+          <DownloadIcon size={14} />
         </button>
-
 
         {isAdmin && (
           <button
             type="button"
-            className="workspace-member-action workspace-member-action-remove"
+            className="item-action-btn btn-delete"
             onClick={() => onDelete(file)}
             disabled={busy}
+            title="Delete file"
           >
-            {busy
-              ? '...'
-              : 'Delete'}
+            <TrashIcon size={14} />
           </button>
         )}
-
       </div>
-
-    </article>
-  )
+    </div>
+  );
 }
 
-
-export default WorkspaceFileItem
+export default WorkspaceFileItem;

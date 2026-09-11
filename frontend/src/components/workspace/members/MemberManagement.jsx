@@ -1,7 +1,7 @@
-import { useState } from 'react'
-
-import MemberManagementModal from './MemberManagementModal'
-import "../../../styles/components/workspace/members/management.css";
+import { useState } from 'react';
+import MemberManagementModal from './MemberManagementModal';
+import { ShieldIcon, ShareIcon } from '../../common/Icons';
+import '../../../styles/components/workspace/members/management.css';
 
 function MemberManagement({
   members,
@@ -9,38 +9,46 @@ function MemberManagement({
   accessToken,
   isAdmin,
   onMembersChanged,
+  onInvite,
 }) {
-  const [roleAction, setRoleAction] = useState(null)
-
+  const [roleAction, setRoleAction] = useState(null);
 
   if (!isAdmin) {
-    return null
+    return null;
   }
-
 
   return (
     <>
-      <div className="workspace-member-management-actions">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {onInvite && (
+          <button
+            type="button"
+            className="workspace-btn-action workspace-btn-primary"
+            onClick={onInvite}
+            style={{ height: '34px', padding: '0 14px', fontSize: '13px' }}
+          >
+            <ShareIcon size={14} /> Invite
+          </button>
+        )}
 
         <button
           type="button"
-          className="workspace-member-manage-button workspace-member-manage-button-promote"
+          className="workspace-btn-action workspace-btn-secondary"
           onClick={() => setRoleAction('promote')}
+          style={{ height: '34px', padding: '0 14px', fontSize: '13px' }}
         >
-          Promote Member
+          <ShieldIcon size={14} /> Promote
         </button>
-
 
         <button
           type="button"
-          className="workspace-member-manage-button"
+          className="workspace-btn-action workspace-btn-secondary"
           onClick={() => setRoleAction('demote')}
+          style={{ height: '34px', padding: '0 14px', fontSize: '13px' }}
         >
-          Demote Admin
+          Demote
         </button>
-
       </div>
-
 
       {roleAction && (
         <MemberManagementModal
@@ -53,8 +61,7 @@ function MemberManagement({
         />
       )}
     </>
-  )
+  );
 }
 
-
-export default MemberManagement
+export default MemberManagement;

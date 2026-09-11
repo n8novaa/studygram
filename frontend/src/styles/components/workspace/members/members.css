@@ -1,214 +1,132 @@
 /* =========================================================
-   Members
+   StudyGram — Workspace Members Styles (Notion Aesthetic)
    ========================================================= */
 
-.workspace-members .workspace-member-count {
-  color: #6b7280;
-
-  font-size: 13px;
+.workspace-members {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
-.workspace-members .workspace-member-list {
-  border-top: 1px solid #f0f0f0;
-}
-
-.workspace-members .workspace-member {
+.workspace-members-heading-actions {
   display: flex;
   align-items: center;
+  gap: 10px;
+}
 
+.workspace-member-count-badge {
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--tag-gray-bg);
+  color: var(--tag-gray-text);
+  border: 1px solid var(--border-default);
+}
+
+.workspace-member-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.workspace-member {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.workspace-member:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-highlight);
+}
+
+.member-profile-left {
+  display: flex;
+  align-items: center;
   gap: 12px;
-
-  min-height: 66px;
-  padding: 12px 4px;
-
-  border-bottom: 1px solid #f0f0f0;
 }
 
-.workspace-members .workspace-member:last-child {
-  border-bottom: 0;
-}
-
-
-/* =========================================================
-   Avatar
-   ========================================================= */
-
-.workspace-members .workspace-member-avatar {
+.workspace-member-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-
-  width: 36px;
-  height: 36px;
-
-  flex-shrink: 0;
-
-  border-radius: 50%;
-
-  background: #f3f4f6;
-  color: #374151;
-
   font-size: 14px;
   font-weight: 700;
+  flex-shrink: 0;
 }
 
-
-/* =========================================================
-   Member Details
-   ========================================================= */
-
-.workspace-members .workspace-member-details {
+.workspace-member-details {
   display: flex;
   flex-direction: column;
-
-  gap: 3px;
-
-  min-width: 0;
+  gap: 2px;
 }
 
-.workspace-members .workspace-member-details strong {
-  color: #374151;
-
+.workspace-member-name {
   font-size: 14px;
   font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.workspace-members .workspace-member-details span {
-  color: #9ca3af;
-
-  font-size: 12px;
-
-  text-transform: capitalize;
-}
-
-
-/* =========================================================
-   Current User
-   ========================================================= */
-
-.workspace-members .workspace-member-you {
-  display: inline-block;
-
-  margin-left: 7px;
-  padding: 2px 6px;
-
+.workspace-member-you-pill {
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 1px 6px;
   border-radius: 4px;
-
-  background: #f3f4f6;
-  color: #6b7280;
-
-  font-size: 10px;
-  font-weight: 600;
-
-  vertical-align: middle;
+  background: var(--tag-gray-bg);
+  color: var(--tag-gray-text);
+  border: 1px solid var(--border-default);
 }
 
-
-/* =========================================================
-   Role
-   ========================================================= */
-
-.workspace-members .workspace-role-badge {
-  margin-left: auto;
-
-  padding: 4px 8px;
-
-  border-radius: 5px;
-
-  background: #f3f4f6;
-  color: #6b7280;
-
-  font-size: 11px;
-  font-weight: 600;
+.workspace-member-role-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
-
-/* =========================================================
-   Member Actions
-   ========================================================= */
-
-.workspace-members .workspace-member-actions {
+.workspace-member-actions {
   display: flex;
   align-items: center;
-
-  gap: 10px;
-
-  margin-left: auto;
+  gap: 8px;
 }
 
-.workspace-members .workspace-member-action-buttons {
-  display: flex;
-  align-items: center;
-
-  gap: 6px;
-}
-
-.workspace-members .workspace-member-action {
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-
-  padding: 6px 9px;
-
-  background: #ffffff;
-  color: #374151;
-
-  font-family: inherit;
-  font-size: 11px;
+.workspace-role-badge {
+  font-size: 11.5px;
   font-weight: 600;
-
-  cursor: pointer;
+  padding: 3px 9px;
+  border-radius: 4px;
 }
 
-.workspace-members .workspace-member-action:hover:not(:disabled) {
-  background: #f9fafb;
+.role-owner {
+  background: var(--tag-yellow-bg);
+  color: var(--tag-yellow-text);
+  border: 1px solid #fde68a;
 }
 
-.workspace-members .workspace-member-action:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
+.role-admin {
+  background: var(--tag-blue-bg);
+  color: var(--tag-blue-text);
+  border: 1px solid #bfdbfe;
 }
 
-.workspace-members .workspace-member-action-promote {
-  color: #047857;
-
-  border-color: #a7f3d0;
-}
-
-.workspace-members .workspace-member-action-promote:hover:not(:disabled) {
-  background: #ecfdf5;
-}
-
-.workspace-members .workspace-member-action-remove {
-  color: #dc2626;
-
-  border-color: #fecaca;
-}
-
-.workspace-members .workspace-member-action-remove:hover:not(:disabled) {
-  background: #fef2f2;
-}
-
-
-/* =========================================================
-   Responsive
-   ========================================================= */
-
-@media (max-width: 700px) {
-  .workspace-members .workspace-member {
-    align-items: flex-start;
-  }
-
-  .workspace-members .workspace-member-actions {
-    align-items: flex-end;
-    flex-direction: column;
-  }
-
-  .workspace-members .workspace-member-action-buttons {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .workspace-members .workspace-member-action {
-    width: 70px;
-  }
+.role-member {
+  background: var(--tag-gray-bg);
+  color: var(--tag-gray-text);
+  border: 1px solid var(--border-default);
 }

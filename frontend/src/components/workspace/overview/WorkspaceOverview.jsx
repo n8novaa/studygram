@@ -1,126 +1,65 @@
-import { formatRelativeTime } from '../../../utils/dateUtils'
+import { formatRelativeTime } from '../../../utils/dateUtils';
+import { GlobeIcon, LockIcon, UsersIcon, ActivityIcon, ShieldIcon } from '../../common/Icons';
+import '../../../styles/components/workspace/overview/overview.css';
 
-import "../../../styles/shared/workspace.css";
-import "../../../styles/components/workspace/overview/overview.css";
+function WorkspaceOverview({ workspace }) {
+  if (!workspace) return null;
 
-function WorkspaceOverview({
-  workspace,
-}) {
-  if (!workspace) {
-    return null
-  }
-
-
-  const createdAt =
-    new Date(workspace.created).getTime()
-
-  const updatedAt =
-    new Date(workspace.updated).getTime()
-
-  const wasEdited =
-    !Number.isNaN(createdAt) &&
-    !Number.isNaN(updatedAt) &&
-    updatedAt - createdAt > 1000
-
+  const isPublic = workspace.visibility === 'public';
+  const memberCount = workspace.members?.length ?? 0;
 
   return (
-    <section className="workspace-detail-card workspace-overview">
-
+    <section className="workspace-overview">
       <div className="workspace-section-heading">
-
         <div>
-
-          <span className="workspace-eyebrow">
-            Overview
-          </span>
-
-          <h2>
-            Workspace information
-          </h2>
-
+          <h2>Workspace Information</h2>
+          <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+            General details, accessibility settings, and membership summary.
+          </p>
         </div>
-
       </div>
 
-
-      <p className="workspace-detail-description">
-
-        {workspace.description ||
-          'No description provided.'}
-
-      </p>
-
+      <div className="workspace-detail-description">
+        <p style={{ margin: 0, fontWeight: 500 }}>
+          {workspace.description || 'No description provided for this workspace.'}
+        </p>
+      </div>
 
       <div className="workspace-info-grid">
-
         <div className="workspace-info-item">
-
-          <span>
-            Visibility
-          </span>
-
-          <strong>
-            {workspace.visibility === 'public'
-              ? 'Public'
-              : 'Private'}
-          </strong>
-
+          <span>Visibility</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+            {isPublic ? <GlobeIcon size={16} /> : <LockIcon size={16} />}
+            <strong>{isPublic ? 'Public' : 'Private'}</strong>
+          </div>
         </div>
 
-
         <div className="workspace-info-item">
-
-          <span>
-            Members
-          </span>
-
-          <strong>
-            {workspace.members?.length ?? 0}
-          </strong>
-
+          <span>Members</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+            <UsersIcon size={16} />
+            <strong>{memberCount} {memberCount === 1 ? 'member' : 'members'}</strong>
+          </div>
         </div>
 
-
         <div className="workspace-info-item">
-
-          <span>
-            Created
-          </span>
-
-          <strong>
-            {formatRelativeTime(
-              workspace.created,
-            )}
-          </strong>
-
+          <span>Owner</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+            <ShieldIcon size={16} />
+            <strong>@{workspace.owner}</strong>
+          </div>
         </div>
 
-
         <div className="workspace-info-item">
-
-          <span>
-            Activity
-          </span>
-
-          <strong>
-
-            {wasEdited
-              ? `Updated ${formatRelativeTime(
-                  workspace.updated,
-                )}`
-              : `Created ${formatRelativeTime(
-                  workspace.created,
-                )}`}
-
-          </strong>
-
+          <span>Last Activity</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+            <ActivityIcon size={16} />
+            <strong>{formatRelativeTime(workspace.updated || workspace.created)}</strong>
+          </div>
         </div>
-
       </div>
-
     </section>
-  )
+  );
 }
 
-
-export default WorkspaceOverview
+export default WorkspaceOverview;

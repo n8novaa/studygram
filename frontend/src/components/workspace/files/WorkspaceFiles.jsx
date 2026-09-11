@@ -1,14 +1,5 @@
-import "../../../styles/shared/workspace.css";
-import "../../../styles/components/workspace/files/files.css";
-
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from 'react'
-
-import { useAuth } from '../../../auth/AuthContext'
-
+import { useCallback, useEffect, useState } from 'react';
+import { useAuth } from '../../../auth/AuthContext';
 import {
   getWorkspaceFolders,
   createWorkspaceFolder,
@@ -17,474 +8,294 @@ import {
   uploadWorkspaceFile,
   deleteWorkspaceFile,
   downloadWorkspaceFile,
-} from '../../../services/workspaceFileService'
+} from '../../../services/workspaceFileService';
+import WorkspaceBreadcrumbs from './WorkspaceBreadcrumbs';
+import CreateFolderForm from './CreateFolderForm';
+import WorkspaceFolderItem from './WorkspaceFolderItem';
+import WorkspaceFileItem from './WorkspaceFileItem';
+import {
+  FolderPlusIcon,
+  UploadIcon,
+  FolderIcon,
+} from '../../common/Icons';
+import { useToast } from '../../common/ToastContext';
+import '../../../styles/components/workspace/files/files.css';
 
-import WorkspaceBreadcrumbs
-  from './WorkspaceBreadcrumbs'
+function WorkspaceFiles({ workspaceId, isAdmin = false }) {
+  const { accessToken } = useAuth();
+  const { addToast } = useToast();
 
-import CreateFolderForm
-  from './CreateFolderForm'
+  const [folderPath, setFolderPath] = useState([]);
+  const [folders, setFolders] = useState([]);
+  const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [busyItemId, setBusyItemId] = useState(null);
 
-import WorkspaceFolderItem
-  from './WorkspaceFolderItem'
+  const [showCreateFolder, setShowCreateFolder] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
+  const [creatingFolder, setCreatingFolder] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
-import WorkspaceFileItem
-  from './WorkspaceFileItem'
+  const currentFolder = folderPath.length > 0 ? folderPath[folderPath.length - 1] : null;
+  const currentFolderId = currentFolder?.id ?? null;
 
+  const loadContents = useCallback(async () => {
+    if (!accessToken || !workspaceId) return;
 
-function WorkspaceFiles({
-  workspaceId,
-  isAdmin = false,
-}) {
-  const { accessToken } = useAuth()
+    try {
+      setLoading(true);
+      setError('');
 
-  const [folderPath, setFolderPath] =
-    useState([])
+      const [folderData, fileData] = await Promise.all([
+        getWorkspaceFolders(accessToken, workspaceId, currentFolderId),
+        getWorkspaceFiles(accessToken, workspaceId, currentFolderId),
+      ]);
 
-  const [folders, setFolders] =
-    useState([])
-
-  const [files, setFiles] =
-    useState([])
-
-  const [loading, setLoading] =
-    useState(true)
-
-  const [error, setError] =
-    useState('')
-
-  const [busyItemId, setBusyItemId] =
-    useState(null)
-
-  const [showCreateFolder, setShowCreateFolder] =
-    useState(false)
-
-  const [newFolderName, setNewFolderName] =
-    useState('')
-
-  const [creatingFolder, setCreatingFolder] =
-    useState(false)
-
-  const [uploading, setUploading] =
-    useState(false)
-
-
-  const currentFolder =
-    folderPath.length > 0
-      ? folderPath[folderPath.length - 1]
-      : null
-
-  const currentFolderId =
-    currentFolder?.id ?? null
-
-
-  const loadContents = useCallback(
-    async () => {
-      if (
-        !accessToken ||
-        !workspaceId
-      ) {
-        return
-      }
-
-      try {
-        setLoading(true)
-        setError('')
-
-        const [
-          folderData,
-          fileData,
-        ] = await Promise.all([
-          getWorkspaceFolders(
-            accessToken,
-            workspaceId,
-            currentFolderId,
-          ),
-
-          getWorkspaceFiles(
-            accessToken,
-            workspaceId,
-            currentFolderId,
-          ),
-        ])
-
-        setFolders(folderData)
-        setFiles(fileData)
-      } catch (err) {
-        setError(
-          err?.message ||
-          'Failed to load files.',
-        )
-      } finally {
-        setLoading(false)
-      }
-    },
-    [
-      accessToken,
-      workspaceId,
-      currentFolderId,
-    ],
-  )
-
+      setFolders(Array.isArray(folderData) ? folderData : folderData?.results ?? []);
+      setFiles(Array.isArray(fileData) ? fileData : fileData?.results ?? []);
+    } catch (err) {
+      setError(err?.message || 'Failed to load files and folders.');
+    } finally {
+      setLoading(false);
+    }
+  }, [accessToken, workspaceId, currentFolderId]);
 
   useEffect(() => {
-    loadContents()
-  }, [loadContents])
-
+    loadContents();
+  }, [loadContents]);
 
   function openFolder(folder) {
-    setFolderPath((current) => [
-      ...current,
-      {
-        id: folder.id,
-        name: folder.name,
-      },
-    ])
+    setFolderPath((current) => [...current, { id: folder.id, name: folder.name }]);
   }
-
 
   function navigateToIndex(index) {
     if (index < 0) {
-      setFolderPath([])
-      return
+      setFolderPath([]);
+      return;
     }
-
-    setFolderPath((current) =>
-      current.slice(0, index + 1),
-    )
+    setFolderPath((current) => current.slice(0, index + 1));
   }
 
-
-  async function handleCreateFolder(
-    event,
-  ) {
-    event.preventDefault()
-
-    if (!newFolderName.trim()) {
-      return
-    }
+  async function handleCreateFolder(event) {
+    event.preventDefault();
+    if (!newFolderName.trim()) return;
 
     try {
-      setCreatingFolder(true)
-      setError('')
+      setCreatingFolder(true);
+      setError('');
 
-      await createWorkspaceFolder(
-        accessToken,
-        workspaceId,
-        {
-          name: newFolderName.trim(),
-          parent: currentFolderId,
-        },
-      )
+      await createWorkspaceFolder(accessToken, workspaceId, {
+        name: newFolderName.trim(),
+        parent: currentFolderId,
+      });
 
-      setNewFolderName('')
-      setShowCreateFolder(false)
-
-      await loadContents()
+      addToast(`Folder "${newFolderName.trim()}" created!`, 'success');
+      setNewFolderName('');
+      setShowCreateFolder(false);
+      await loadContents();
     } catch (err) {
-      setError(
-        err?.message ||
-        'Failed to create folder.',
-      )
+      setError(err?.message || 'Failed to create folder.');
     } finally {
-      setCreatingFolder(false)
+      setCreatingFolder(false);
     }
   }
 
-
-  async function handleDeleteFolder(
-    folder,
-  ) {
-    const confirmed =
-      window.confirm(
-        `Delete folder "${folder.name}" and everything inside it?`,
-      )
-
-    if (!confirmed) {
-      return
-    }
+  async function handleDeleteFolder(folder) {
+    const confirmed = window.confirm(
+      `Delete folder "${folder.name}" and all its contents?`
+    );
+    if (!confirmed) return;
 
     try {
-      setBusyItemId(
-        `folder-${folder.id}`,
-      )
-
-      setError('')
-
-      await deleteWorkspaceFolder(
-        accessToken,
-        workspaceId,
-        folder.id,
-      )
-
-      await loadContents()
+      setBusyItemId(`folder-${folder.id}`);
+      setError('');
+      await deleteWorkspaceFolder(accessToken, workspaceId, folder.id);
+      addToast(`Folder "${folder.name}" deleted.`, 'info');
+      await loadContents();
     } catch (err) {
-      setError(
-        err?.message ||
-        'Failed to delete folder.',
-      )
+      setError(err?.message || 'Failed to delete folder.');
     } finally {
-      setBusyItemId(null)
+      setBusyItemId(null);
     }
   }
-
 
   async function handleUpload(event) {
-    const file =
-      event.target.files?.[0]
-
-    event.target.value = ''
-
-    if (!file) {
-      return
-    }
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
 
     try {
-      setUploading(true)
-      setError('')
+      setUploading(true);
+      setError('');
 
-      await uploadWorkspaceFile(
-        accessToken,
-        workspaceId,
-        {
-          name: file.name,
-          uploaded_file: file,
-          folder: currentFolderId,
-        },
-      )
+      await uploadWorkspaceFile(accessToken, workspaceId, {
+        name: file.name,
+        uploaded_file: file,
+        folder: currentFolderId,
+      });
 
-      await loadContents()
+      addToast(`Uploaded "${file.name}"!`, 'success');
+      await loadContents();
     } catch (err) {
-      setError(
-        err?.message ||
-        'Failed to upload file.',
-      )
+      setError(err?.message || 'Failed to upload file.');
     } finally {
-      setUploading(false)
+      setUploading(false);
     }
   }
-
 
   async function handleDownload(file) {
     try {
-      setBusyItemId(
-        `file-${file.id}`,
-      )
-
-      setError('')
-
-      await downloadWorkspaceFile(
-        accessToken,
-        workspaceId,
-        file.id,
-        file.name,
-      )
+      setBusyItemId(`file-${file.id}`);
+      setError('');
+      await downloadWorkspaceFile(accessToken, workspaceId, file.id, file.name);
+      addToast(`Downloaded "${file.name}".`, 'success');
     } catch (err) {
-      setError(
-        err?.message ||
-        'Failed to download file.',
-      )
+      setError(err?.message || 'Failed to download file.');
     } finally {
-      setBusyItemId(null)
+      setBusyItemId(null);
     }
   }
-
 
   async function handleDeleteFile(file) {
-    const confirmed =
-      window.confirm(
-        `Delete "${file.name}"?`,
-      )
-
-    if (!confirmed) {
-      return
-    }
+    const confirmed = window.confirm(`Are you sure you want to delete "${file.name}"?`);
+    if (!confirmed) return;
 
     try {
-      setBusyItemId(
-        `file-${file.id}`,
-      )
-
-      setError('')
-
-      await deleteWorkspaceFile(
-        accessToken,
-        workspaceId,
-        file.id,
-      )
-
-      await loadContents()
+      setBusyItemId(`file-${file.id}`);
+      setError('');
+      await deleteWorkspaceFile(accessToken, workspaceId, file.id);
+      addToast(`Deleted "${file.name}".`, 'info');
+      await loadContents();
     } catch (err) {
-      setError(
-        err?.message ||
-        'Failed to delete file.',
-      )
+      setError(err?.message || 'Failed to delete file.');
     } finally {
-      setBusyItemId(null)
+      setBusyItemId(null);
     }
   }
 
-
-  const isEmpty =
-    !loading &&
-    folders.length === 0 &&
-    files.length === 0
-
+  const isEmpty = !loading && folders.length === 0 && files.length === 0;
 
   return (
-    <section className="workspace-detail-card workspace-files">
-
+    <section className="workspace-files">
       <div className="workspace-section-heading">
-
         <div>
-
-          <span className="workspace-eyebrow">
-            Storage
-          </span>
-
-          <h2>
-            Files
-          </h2>
-
+          <h2>Workspace Files & Storage</h2>
+          <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+            Store lecture slides, notes, cheat sheets, and documents.
+          </p>
         </div>
-
 
         {isAdmin && (
           <div className="workspace-files-actions">
-
             <button
               type="button"
-              className="workspace-button workspace-button-secondary"
-              onClick={() =>
-                setShowCreateFolder(
-                  (current) => !current,
-                )
-              }
+              className="workspace-btn-action workspace-btn-secondary"
+              onClick={() => setShowCreateFolder((prev) => !prev)}
               disabled={creatingFolder}
             >
-              {showCreateFolder
-                ? 'Cancel'
-                : 'New Folder'}
+              <FolderPlusIcon size={16} />
+              <span>{showCreateFolder ? 'Cancel' : 'New Folder'}</span>
             </button>
 
-
-            <label className="workspace-button workspace-button-primary workspace-upload-label">
-
-              {uploading
-                ? 'Uploading...'
-                : 'Upload File'}
-
+            <label className="upload-file-label">
+              <UploadIcon size={16} />
+              <span>{uploading ? 'Uploading...' : 'Upload File'}</span>
               <input
                 type="file"
-                className="workspace-upload-input"
+                className="hidden-file-input"
                 onChange={handleUpload}
                 disabled={uploading}
               />
-
             </label>
-
           </div>
         )}
-
       </div>
 
-
-      <WorkspaceBreadcrumbs
-        folderPath={folderPath}
-        onNavigate={navigateToIndex}
-      />
-
+      <WorkspaceBreadcrumbs folderPath={folderPath} onNavigate={navigateToIndex} />
 
       {error && (
-        <p className="workspace-error">
+        <div style={{
+          padding: '12px 16px',
+          background: 'var(--danger-bg)',
+          border: '1px solid var(--danger-border)',
+          borderRadius: '8px',
+          color: '#fb7185',
+          fontSize: '13.5px',
+        }}>
           {error}
-        </p>
+        </div>
       )}
-
 
       {showCreateFolder && isAdmin && (
         <CreateFolderForm
           name={newFolderName}
           creating={creatingFolder}
-          onNameChange={(event) =>
-            setNewFolderName(
-              event.target.value,
-            )
-          }
+          onNameChange={(e) => setNewFolderName(e.target.value)}
           onSubmit={handleCreateFolder}
         />
       )}
 
-
       {loading ? (
-
-        <div className="workspace-empty">
-
-          <p>
-            Loading files...
-          </p>
-
+        <div style={{
+          padding: '48px 20px',
+          textAlign: 'center',
+          color: 'var(--text-muted)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '10px',
+        }}>
+          <span className="spinner" />
+          <p>Loading files & folders...</p>
         </div>
-
       ) : isEmpty ? (
-
-        <div className="workspace-empty">
-
-          <p>
-            {currentFolderId
-              ? 'This folder is empty.'
-              : 'No files or folders yet.'}
+        <div style={{
+          padding: '48px 20px',
+          textAlign: 'center',
+          color: 'var(--text-muted)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '10px',
+        }}>
+          <FolderIcon size={36} />
+          <h4 style={{ color: '#ffffff', margin: 0, fontSize: '16px' }}>
+            {currentFolderId ? 'This folder is empty' : 'No files or folders yet'}
+          </h4>
+          <p style={{ fontSize: '13.5px', margin: 0 }}>
+            {isAdmin
+              ? 'Upload your first study document or create folders to organize materials.'
+              : 'Workspace administrators haven\'t uploaded documents in this folder yet.'}
           </p>
-
-          {!isAdmin && (
-            <p className="workspace-empty-hint">
-              Only workspace admins can
-              upload files.
-            </p>
-          )}
-
         </div>
-
       ) : (
-
-        <div className="workspace-files-list">
-
+        <div className="workspace-files-grid">
           {folders.map((folder) => (
             <WorkspaceFolderItem
               key={folder.id}
               folder={folder}
               isAdmin={isAdmin}
-              busy={
-                busyItemId ===
-                `folder-${folder.id}`
-              }
+              busy={busyItemId === `folder-${folder.id}`}
               onOpen={openFolder}
               onDelete={handleDeleteFolder}
             />
           ))}
-
 
           {files.map((file) => (
             <WorkspaceFileItem
               key={file.id}
               file={file}
               isAdmin={isAdmin}
-              busy={
-                busyItemId ===
-                `file-${file.id}`
-              }
+              busy={busyItemId === `file-${file.id}`}
               onDownload={handleDownload}
               onDelete={handleDeleteFile}
             />
           ))}
-
         </div>
-
       )}
-
     </section>
-  )
+  );
 }
 
-
-export default WorkspaceFiles
+export default WorkspaceFiles;

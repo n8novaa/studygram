@@ -1,211 +1,90 @@
-import { useEffect, useState } from 'react'
-
-import { useAuth } from '../../../auth/AuthContext'
-
-import { normalizeList } from '../../../utils/apiHelpers'
-
+import { useEffect, useState, useCallback } from 'react';
+import { useAuth } from '../../../auth/AuthContext';
+import { normalizeList } from '../../../utils/apiHelpers';
 import {
   getWorkspaceMembers,
   removeWorkspaceMember,
-} from '../../../services/workspaceMemberService'
+} from '../../../services/workspaceMemberService';
+import MemberManagement from './MemberManagement';
+import { UsersIcon } from '../../common/Icons';
+import { useToast } from '../../common/ToastContext';
+import '../../../styles/components/workspace/members/members.css';
 
-import MemberManagement from './MemberManagement'
+function WorkspaceMembers({ workspace, isAdmin = false, onInvite }) {
+  const { accessToken, user } = useAuth();
+  const { addToast } = useToast();
 
-import "../../../styles/shared/workspace.css";
-import "../../../styles/components/workspace/members/members.css";
+  const [members, setMembers] = useState(() => normalizeList(workspace?.members));
+  const [loading, setLoading] = useState(false);
+  const [actionUserId, setActionUserId] = useState(null);
+  const [error, setError] = useState('');
+  const workspaceId = workspace?.id;
 
-
-function WorkspaceMembers({
-  workspace,
-  isAdmin = false,
-}) {
-  const { accessToken, user } = useAuth()
-
-  const [members, setMembers] = useState(
-    () => normalizeList(workspace?.members),
-  )
-
-  const [loading, setLoading] = useState(false)
-  const [actionUserId, setActionUserId] =
-    useState(null)
-
-  const [error, setError] = useState('')
-
-
-  async function loadMembers() {
-    if (
-      !accessToken ||
-      !workspace?.id ||
-      !isAdmin
-    ) {
-      return
-    }
+  const loadMembers = useCallback(async () => {
+    if (!accessToken || !workspaceId) return;
 
     try {
-      setLoading(true)
-      setError('')
-
-      const data =
-        await getWorkspaceMembers(
-          accessToken,
-          workspace.id,
-        )
-
-      setMembers(normalizeList(data))
+      setLoading(true);
+      setError('');
+      const data = await getWorkspaceMembers(accessToken, workspaceId);
+      setMembers(normalizeList(data));
     } catch (err) {
-      setError(
-        err?.message ||
-        'Failed to load workspace members.',
-      )
+      setError(err?.message || 'Failed to load workspace members.');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
-
+  }, [accessToken, workspaceId]);
 
   useEffect(() => {
     if (!isAdmin) {
-      setMembers(
-        normalizeList(workspace?.members),
-      )
-
-      setLoading(false)
-      setError('')
-
-      return
+      setMembers(normalizeList(workspace?.members));
+      return;
     }
-
-    let cancelled = false
-
-
-    async function load() {
-      if (!accessToken || !workspace?.id) {
-        return
-      }
-
-      try {
-        setLoading(true)
-        setError('')
-
-        const data =
-          await getWorkspaceMembers(
-            accessToken,
-            workspace.id,
-          )
-
-        if (cancelled) {
-          return
-        }
-
-        setMembers(normalizeList(data))
-      } catch (err) {
-        if (cancelled) {
-          return
-        }
-
-        setError(
-          err?.message ||
-          'Failed to load workspace members.',
-        )
-      } finally {
-        if (!cancelled) {
-          setLoading(false)
-        }
-      }
-    }
-
-    load()
-
-
-    return () => {
-      cancelled = true
-    }
-  }, [
-    accessToken,
-    workspace?.id,
-    workspace?.members,
-    isAdmin,
-  ])
-
+    loadMembers();
+  }, [workspace?.members, isAdmin, loadMembers]);
 
   function isCurrentUser(member) {
-    return member.user === user?.username
+    return member.user === user?.username;
   }
-
 
   function isOwner(member) {
-    return member.user === workspace.owner
+    return member.user === workspace.owner;
   }
-
-
-  function memberIsAdmin(member) {
-    return member.role === 'admin'
-  }
-
 
   async function handleRemove(member) {
-    if (!isAdmin) {
-      return
-    }
+    if (!isAdmin) return;
 
-    const confirmed = window.confirm(
-      `Remove ${member.user} from this workspace?`,
-    )
-
-    if (!confirmed) {
-      return
-    }
+    const confirmed = window.confirm(`Remove @${member.user} from this workspace?`);
+    if (!confirmed) return;
 
     try {
-      setActionUserId(member.user_id)
-      setError('')
+      setActionUserId(member.user_id);
+      setError('');
 
-      await removeWorkspaceMember(
-        accessToken,
-        workspace.id,
-        member.user_id,
-      )
-
-      await loadMembers()
+      await removeWorkspaceMember(accessToken, workspace.id, member.user_id);
+      addToast(`Removed @${member.user} from workspace.`, 'info');
+      await loadMembers();
     } catch (err) {
-      setError(
-        err?.message ||
-        'Failed to remove member.',
-      )
+      setError(err?.message || 'Failed to remove member.');
     } finally {
-      setActionUserId(null)
+      setActionUserId(null);
     }
   }
 
-
   return (
-    <section className="workspace-detail-card workspace-members">
-
+    <section className="workspace-members">
       <div className="workspace-section-heading">
-
         <div>
-
-          <span className="workspace-eyebrow">
-            Community
-          </span>
-
-          <h2>
-            Members
-          </h2>
-
+          <h2>Community Members</h2>
+          <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+            People with access to study files and collaborative notes.
+          </p>
         </div>
 
-
         <div className="workspace-members-heading-actions">
-
-          <span className="workspace-member-count">
-            {members.length}{' '}
-
-            {members.length === 1
-              ? 'member'
-              : 'members'}
+          <span className="workspace-member-count-badge">
+            {members.length} {members.length === 1 ? 'member' : 'members'}
           </span>
-
 
           <MemberManagement
             members={members}
@@ -213,155 +92,110 @@ function WorkspaceMembers({
             accessToken={accessToken}
             isAdmin={isAdmin}
             onMembersChanged={loadMembers}
+            onInvite={onInvite}
           />
-
         </div>
-
       </div>
 
-
       {error && (
-        <p className="workspace-error">
+        <div style={{
+          padding: '12px 16px',
+          background: 'var(--danger-bg)',
+          border: '1px solid var(--danger-border)',
+          borderRadius: '8px',
+          color: '#fb7185',
+          fontSize: '13.5px',
+        }}>
           {error}
-        </p>
+        </div>
       )}
-
 
       {loading ? (
-
-        <div className="workspace-empty">
-
-          <p>
-            Loading members...
-          </p>
-
+        <div style={{
+          padding: '48px 20px',
+          textAlign: 'center',
+          color: 'var(--text-muted)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '10px',
+        }}>
+          <span className="spinner" />
+          <p>Loading members...</p>
         </div>
-
-      ) : members.length > 0 ? (
-
+      ) : members.length === 0 ? (
+        <div style={{
+          padding: '48px 20px',
+          textAlign: 'center',
+          color: 'var(--text-muted)',
+        }}>
+          <UsersIcon size={36} />
+          <p>No members found.</p>
+        </div>
+      ) : (
         <div className="workspace-member-list">
-
           {members.map((member) => {
-            const admin =
-              memberIsAdmin(member)
-
-            const owner =
-              isOwner(member)
-
-            const currentUser =
-              isCurrentUser(member)
-
-            const busy =
-              actionUserId === member.user_id
-
+            const memberOwner = isOwner(member);
+            const memberAdmin = member.role === 'admin';
+            const currentUser = isCurrentUser(member);
+            const busy = actionUserId === member.user_id;
 
             return (
-              <div
-                className="workspace-member"
-                key={member.user_id}
-              >
+              <div className="workspace-member" key={member.user_id}>
+                <div className="member-profile-left">
+                  <div className="workspace-member-avatar">
+                    {(member.user || 'U').charAt(0).toUpperCase()}
+                  </div>
 
-                <div className="workspace-member-avatar">
-
-                  {member.user
-                    ?.charAt(0)
-                    ?.toUpperCase()}
-
-                </div>
-
-
-                <div className="workspace-member-details">
-
-                  <strong>
-
-                    {member.user}
-
-                    {currentUser && (
-                      <span className="workspace-member-you">
-                        You
-                      </span>
-                    )}
-
-                  </strong>
-
-
-                  <span>
-
-                    {owner
-                      ? 'Owner'
-                      : admin
+                  <div className="workspace-member-details">
+                    <span className="workspace-member-name">
+                      @{member.user}
+                      {currentUser && (
+                        <span className="workspace-member-you-pill">You</span>
+                      )}
+                    </span>
+                    <span className="workspace-member-role-subtitle">
+                      {memberOwner
+                        ? 'Workspace Creator'
+                        : memberAdmin
                         ? 'Administrator'
-                        : 'Member'}
-
-                  </span>
-
+                        : 'Standard Member'}
+                    </span>
+                  </div>
                 </div>
-
 
                 <div className="workspace-member-actions">
+                  <span
+                    className={`workspace-role-badge ${
+                      memberOwner
+                        ? 'role-owner'
+                        : memberAdmin
+                        ? 'role-admin'
+                        : 'role-member'
+                    }`}
+                  >
+                    {memberOwner ? 'Owner' : memberAdmin ? 'Admin' : 'Member'}
+                  </span>
 
-                  {owner ? (
-
-                    <span className="workspace-role-badge">
-                      Owner
-                    </span>
-
-                  ) : currentUser ? (
-
-                    <span className="workspace-role-badge">
-                      {admin
-                        ? 'Administrator'
-                        : 'Member'}
-                    </span>
-
-                  ) : isAdmin ? (
-
+                  {isAdmin && !memberOwner && !currentUser && (
                     <button
                       type="button"
-                      className="workspace-member-action workspace-member-action-remove"
-                      onClick={() =>
-                        handleRemove(member)
-                      }
+                      className="workspace-btn-action workspace-btn-danger"
+                      style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}
+                      onClick={() => handleRemove(member)}
                       disabled={busy}
                     >
-                      {busy
-                        ? 'Working...'
-                        : 'Remove'}
+                      {busy ? 'Removing...' : 'Remove'}
                     </button>
-
-                  ) : (
-
-                    <span className="workspace-role-badge">
-                      {admin
-                        ? 'Administrator'
-                        : 'Member'}
-                    </span>
-
                   )}
-
                 </div>
-
               </div>
-            )
+            );
           })}
-
         </div>
-
-      ) : (
-
-        <div className="workspace-empty">
-
-          <p>
-            No members found.
-          </p>
-
-        </div>
-
       )}
-
     </section>
-  )
+  );
 }
 
-
-export default WorkspaceMembers
+export default WorkspaceMembers;

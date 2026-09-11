@@ -1,6 +1,13 @@
-import { Link } from 'react-router-dom'
-import "../../styles/components/workspace/header.css";
-
+import { Link } from 'react-router-dom';
+import {
+  ArrowLeftIcon,
+  GlobeIcon,
+  LockIcon,
+  EditIcon,
+  TrashIcon,
+  ShareIcon,
+} from '../common/Icons';
+import '../../styles/components/workspace/header.css';
 
 function WorkspaceHeader({
   workspace,
@@ -11,33 +18,22 @@ function WorkspaceHeader({
   deleting,
   onEdit,
   onDelete,
+  onInvite,
 }) {
-  const isPublic =
-    workspace.visibility === 'public'
-
+  const isPublic = workspace.visibility === 'public';
+  const memberCount = workspace.members?.length ?? 0;
 
   return (
-    <>
-      <Link
-        to="/app/workspaces"
-        className="workspace-back-link"
-      >
-        ← Back to Workspaces
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <Link to="/app/workspaces" className="workspace-back-link">
+        <ArrowLeftIcon size={16} /> Back to Workspaces
       </Link>
 
-
-      <section className="workspace-card workspace-header-card">
-
+      <section className="workspace-header-card">
         <div className="workspace-header-content">
-
           <div>
-
             <div className="workspace-title-row">
-
-              <h1>
-                {workspace.name}
-              </h1>
-
+              <h1>{workspace.name}</h1>
               <span
                 className={`workspace-visibility-badge ${
                   isPublic
@@ -45,70 +41,57 @@ function WorkspaceHeader({
                     : 'workspace-visibility-private'
                 }`}
               >
-                {isPublic
-                  ? 'Public'
-                  : 'Private'}
+                {isPublic ? <GlobeIcon size={13} /> : <LockIcon size={13} />}
+                <span>{isPublic ? 'Public Workspace' : 'Private Workspace'}</span>
               </span>
-
             </div>
 
-
-            <p className="workspace-owner">
-              Owner:{' '}
-              <strong>
-                {workspace.owner}
-              </strong>
+            <p className="workspace-owner-info">
+              Owned by <strong>@{workspace.owner}</strong> &bull; {memberCount} {memberCount === 1 ? 'member' : 'members'}
             </p>
-
           </div>
 
-
-          {(isAdmin || isOwner) && !editing && (
-            <div className="workspace-header-actions">
-
+          <div className="workspace-header-actions">
+            {isAdmin && onInvite && (
               <button
                 type="button"
-                className="workspace-button workspace-button-secondary"
-                onClick={onEdit}
-                disabled={
-                  saving || deleting
-                }
+                className="workspace-btn-action workspace-btn-primary"
+                onClick={onInvite}
               >
-                Edit
+                <ShareIcon size={15} /> Invite Members
               </button>
+            )}
 
+            {(isAdmin || isOwner) && !editing && (
+              <button
+                type="button"
+                className="workspace-btn-action workspace-btn-secondary"
+                onClick={onEdit}
+                disabled={saving || deleting}
+              >
+                <EditIcon size={15} /> Edit
+              </button>
+            )}
 
-              {isOwner && (
-                <button
-                  type="button"
-                  className="workspace-button workspace-button-danger"
-                  onClick={onDelete}
-                  disabled={
-                    saving || deleting
-                  }
-                >
-                  {deleting
-                    ? 'Deleting...'
-                    : 'Delete'}
-                </button>
-              )}
-
-            </div>
-          )}
-
+            {isOwner && !editing && (
+              <button
+                type="button"
+                className="workspace-btn-action workspace-btn-danger"
+                onClick={onDelete}
+                disabled={saving || deleting}
+              >
+                <TrashIcon size={15} /> {deleting ? 'Deleting...' : 'Delete'}
+              </button>
+            )}
+          </div>
         </div>
 
-
         {workspace.description && (
-          <p className="workspace-description">
-            {workspace.description}
-          </p>
+          <p className="workspace-header-desc">{workspace.description}</p>
         )}
-
       </section>
-    </>
-  )
+    </div>
+  );
 }
 
-
-export default WorkspaceHeader
+export default WorkspaceHeader;

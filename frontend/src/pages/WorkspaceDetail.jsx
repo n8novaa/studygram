@@ -1,513 +1,258 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-
-import { useAuth } from '../auth/AuthContext'
-
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
 import {
   deleteWorkspace,
   getWorkspace,
   updateWorkspace,
-} from '../services/workspaceService'
-
-import WorkspaceHeader
-  from '../components/workspace/WorkspaceHeader'
-
-import WorkspaceOverview
-  from '../components/workspace/overview/WorkspaceOverview'
-
-import WorkspaceEditForm
-  from '../components/workspace/overview/WorkspaceEditForm'
-
-import WorkspaceMembers
-  from '../components/workspace/members/workspaceMembers'
-
-import WorkspaceFiles
-  from '../components/workspace/files/WorkspaceFiles'
-
-import '../styles/pages/workspace-detail.css'
-
+} from '../services/workspaceService';
+import WorkspaceHeader from '../components/workspace/WorkspaceHeader';
+import WorkspaceOverview from '../components/workspace/overview/WorkspaceOverview';
+import WorkspaceEditForm from '../components/workspace/overview/WorkspaceEditForm';
+import WorkspaceMembers from '../components/workspace/members/workspaceMembers';
+import WorkspaceFiles from '../components/workspace/files/WorkspaceFiles';
+import WorkspaceInviteModal from '../components/workspace/members/WorkspaceInviteModal';
+import {
+  FolderIcon,
+  UsersIcon,
+  SparklesIcon,
+} from '../components/common/Icons';
+import { useToast } from '../components/common/ToastContext';
+import '../styles/pages/workspace-detail.css';
 
 function WorkspaceDetail() {
-  const { id } = useParams()
-  const navigate = useNavigate()
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { accessToken, user } = useAuth();
+  const { addToast } = useToast();
 
-  const { accessToken, user } = useAuth()
+  const [workspace, setWorkspace] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const [workspace, setWorkspace] =
-    useState(null)
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
-  const [loading, setLoading] =
-    useState(true)
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [visibility, setVisibility] = useState('private');
+  const [formError, setFormError] = useState('');
 
-  const [error, setError] =
-    useState('')
-
-  const [editing, setEditing] =
-    useState(false)
-
-  const [saving, setSaving] =
-    useState(false)
-
-  const [deleting, setDeleting] =
-    useState(false)
-
-  const [name, setName] =
-    useState('')
-
-  const [description, setDescription] =
-    useState('')
-
-  const [visibility, setVisibility] =
-    useState('private')
-
-  const [formError, setFormError] =
-    useState('')
-
-  const [activeSection, setActiveSection] =
-    useState(null)
-
+  // Default to 'overview' so content is immediately visible on mount
+  const [activeSection, setActiveSection] = useState('overview');
 
   useEffect(() => {
     async function loadWorkspace() {
-      if (!accessToken) {
-        return
-      }
+      if (!accessToken) return;
 
       try {
-        setLoading(true)
-        setError('')
+        setLoading(true);
+        setError('');
+        const data = await getWorkspace(accessToken, id);
 
-        const data =
-          await getWorkspace(
-            accessToken,
-            id,
-          )
-
-        setWorkspace(data)
-
-        setName(data.name || '')
-
-        setDescription(
-          data.description || '',
-        )
-
-        setVisibility(
-          data.visibility || 'private',
-        )
+        setWorkspace(data);
+        setName(data.name || '');
+        setDescription(data.description || '');
+        setVisibility(data.visibility || 'private');
       } catch (err) {
-        setError(
-          err?.message ||
-          'Failed to load workspace.',
-        )
+        setError(err?.message || 'Failed to load workspace.');
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
 
-    loadWorkspace()
-  }, [accessToken, id])
-
+    loadWorkspace();
+  }, [accessToken, id]);
 
   function startEditing() {
-    setName(workspace.name || '')
-
-    setDescription(
-      workspace.description || '',
-    )
-
-    setVisibility(
-      workspace.visibility || 'private',
-    )
-
-    setFormError('')
-    setEditing(true)
+    setName(workspace.name || '');
+    setDescription(workspace.description || '');
+    setVisibility(workspace.visibility || 'private');
+    setFormError('');
+    setEditing(true);
   }
-
 
   function cancelEditing() {
-    setName(workspace.name || '')
-
-    setDescription(
-      workspace.description || '',
-    )
-
-    setVisibility(
-      workspace.visibility || 'private',
-    )
-
-    setFormError('')
-    setEditing(false)
+    setName(workspace.name || '');
+    setDescription(workspace.description || '');
+    setVisibility(workspace.visibility || 'private');
+    setFormError('');
+    setEditing(false);
   }
-
 
   async function handleSave(event) {
-    event.preventDefault()
+    event.preventDefault();
 
     if (!name.trim()) {
-      setFormError(
-        'Workspace name is required.',
-      )
-
-      return
+      setFormError('Workspace name is required.');
+      return;
     }
 
     try {
-      setSaving(true)
-      setFormError('')
+      setSaving(true);
+      setFormError('');
 
-      const updatedWorkspace =
-        await updateWorkspace(
-          accessToken,
-          id,
-          {
-            name: name.trim(),
-            description:
-              description.trim(),
-            visibility,
-          },
-        )
+      const updatedWorkspace = await updateWorkspace(accessToken, id, {
+        name: name.trim(),
+        description: description.trim(),
+        visibility,
+      });
 
-      setWorkspace(updatedWorkspace)
-      setEditing(false)
+      setWorkspace(updatedWorkspace);
+      setEditing(false);
+      addToast('Workspace updated successfully!', 'success');
     } catch (err) {
-      setFormError(
-        err?.message ||
-        'Failed to update workspace.',
-      )
+      setFormError(err?.message || 'Failed to update workspace.');
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
   }
-
 
   async function handleDelete() {
-    const confirmed =
-      window.confirm(
-        'Are you sure you want to delete this workspace? This action cannot be undone.',
-      )
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this workspace? All uploaded files and notes will be permanently lost.'
+    );
 
-    if (!confirmed) {
-      return
-    }
+    if (!confirmed) return;
 
     try {
-      setDeleting(true)
-      setError('')
+      setDeleting(true);
+      setError('');
 
-      await deleteWorkspace(
-        accessToken,
-        id,
-      )
-
-      navigate(
-        '/app/workspaces',
-        {
-          replace: true,
-        },
-      )
+      await deleteWorkspace(accessToken, id);
+      addToast('Workspace deleted.', 'info');
+      navigate('/app/workspaces', { replace: true });
     } catch (err) {
-      setError(
-        err?.message ||
-        'Failed to delete workspace.',
-      )
-
-      setDeleting(false)
+      setError(err?.message || 'Failed to delete workspace.');
+      setDeleting(false);
     }
   }
 
-
   function handleSectionChange(section) {
-    setEditing(false)
-    setFormError('')
-    setActiveSection(section)
+    setEditing(false);
+    setFormError('');
+    setActiveSection(section);
   }
-
 
   if (loading) {
     return (
       <main className="workspace-detail-page">
-
-        <section className="workspace-detail-state">
-          <p>
-            Loading workspace...
-          </p>
-        </section>
-
+        <div className="workspace-detail-card" style={{ alignItems: 'center', justifyContent: 'center' }}>
+          <span className="spinner" />
+          <p style={{ color: 'var(--text-muted)' }}>Loading workspace details...</p>
+        </div>
       </main>
-    )
+    );
   }
 
-
-  if (error) {
+  if (error || !workspace) {
     return (
       <main className="workspace-detail-page">
-
-        <section className="workspace-detail-state workspace-state-error">
-          <p>
-            {error}
-          </p>
-        </section>
-
+        <div className="workspace-detail-card" style={{ borderColor: 'var(--danger-border)', alignItems: 'center' }}>
+          <p style={{ color: '#fb7185' }}>{error || 'Workspace not found.'}</p>
+        </div>
       </main>
-    )
+    );
   }
 
-
-  if (!workspace) {
-    return (
-      <main className="workspace-detail-page">
-
-        <section className="workspace-detail-state">
-          <p>
-            Workspace not found.
-          </p>
-        </section>
-
-      </main>
-    )
-  }
-
-
-  const currentUsername =
-    user?.username
-
-  const isOwner =
-    workspace.owner === currentUsername
-
-  const currentMember =
-    workspace.members?.find(
-      (member) =>
-        member.user === currentUsername,
-    )
-
-  const isAdmin =
-    isOwner ||
-    currentMember?.role === 'admin'
-
+  const currentUsername = user?.username;
+  const isOwner = workspace.owner === currentUsername;
+  const currentMember = workspace.members?.find((m) => m.user === currentUsername);
+  const isAdmin = isOwner || currentMember?.role === 'admin';
 
   return (
     <main className="workspace-detail-page">
-
+      {/* Header with real permissions and invite trigger */}
       <WorkspaceHeader
         workspace={workspace}
-        isOwner={false}
-        isAdmin={false}
+        isOwner={isOwner}
+        isAdmin={isAdmin}
         editing={editing}
         saving={saving}
         deleting={deleting}
         onEdit={startEditing}
         onDelete={handleDelete}
+        onInvite={() => setShowInviteModal(true)}
       />
 
-
-      <nav
-        className="workspace-section-navigation"
-        aria-label="Workspace sections"
-      >
+      {/* Tabs Navigation */}
+      <nav className="workspace-tabs-nav" aria-label="Workspace sections">
+        <button
+          type="button"
+          className={`workspace-tab-btn ${activeSection === 'overview' ? 'active' : ''}`}
+          onClick={() => handleSectionChange('overview')}
+        >
+          <SparklesIcon size={16} />
+          <span>Overview</span>
+        </button>
 
         <button
           type="button"
-          className={
-            `workspace-section-button ${
-              activeSection === 'overview'
-                ? 'active'
-                : ''
-            }`
-          }
-          onClick={() =>
-            handleSectionChange('overview')
-          }
+          className={`workspace-tab-btn ${activeSection === 'files' ? 'active' : ''}`}
+          onClick={() => handleSectionChange('files')}
         >
-          <span className="workspace-section-button-icon">
-            ◈
-          </span>
-
-          <span className="workspace-section-button-content">
-            <span className="workspace-section-button-title">
-              Overview
-            </span>
-
-            <span className="workspace-section-button-description">
-              Details and information
-            </span>
-          </span>
-
-          <span className="workspace-section-button-arrow">
-            →
-          </span>
+          <FolderIcon size={16} />
+          <span>Files & Storage</span>
         </button>
-
 
         <button
           type="button"
-          className={
-            `workspace-section-button ${
-              activeSection === 'members'
-                ? 'active'
-                : ''
-            }`
-          }
-          onClick={() =>
-            handleSectionChange('members')
-          }
+          className={`workspace-tab-btn ${activeSection === 'members' ? 'active' : ''}`}
+          onClick={() => handleSectionChange('members')}
         >
-          <span className="workspace-section-button-icon">
-            ◉
-          </span>
-
-          <span className="workspace-section-button-content">
-            <span className="workspace-section-button-title">
-              Members
-            </span>
-
-            <span className="workspace-section-button-description">
-              Workspace community
-            </span>
-          </span>
-
-          <span className="workspace-section-button-arrow">
-            →
-          </span>
+          <UsersIcon size={16} />
+          <span>Members ({workspace.members?.length ?? 0})</span>
         </button>
-
-
-        <button
-          type="button"
-          className={
-            `workspace-section-button ${
-              activeSection === 'files'
-                ? 'active'
-                : ''
-            }`
-          }
-          onClick={() =>
-            handleSectionChange('files')
-          }
-        >
-          <span className="workspace-section-button-icon">
-            ▦
-          </span>
-
-          <span className="workspace-section-button-content">
-            <span className="workspace-section-button-title">
-              Files
-            </span>
-
-            <span className="workspace-section-button-description">
-              Files and folders
-            </span>
-          </span>
-
-          <span className="workspace-section-button-arrow">
-            →
-          </span>
-        </button>
-
       </nav>
 
-
-      <div className="workspace-detail-content">
-
+      {/* Detail Content Card */}
+      <div className="workspace-detail-card">
         {activeSection === 'overview' && (
           <>
-            {!editing && (
-              <div className="workspace-overview-management">
-
-                {(isAdmin || isOwner) && (
-                  <button
-                    type="button"
-                    className="workspace-button workspace-button-secondary"
-                    onClick={startEditing}
-                    disabled={
-                      saving || deleting
-                    }
-                  >
-                    Edit
-                  </button>
-                )}
-
-                {isOwner && (
-                  <button
-                    type="button"
-                    className="workspace-button workspace-button-danger"
-                    onClick={handleDelete}
-                    disabled={
-                      saving || deleting
-                    }
-                  >
-                    {deleting
-                      ? 'Deleting...'
-                      : 'Delete'}
-                  </button>
-                )}
-
-              </div>
-            )}
-
-
             {editing ? (
-
               <WorkspaceEditForm
                 name={name}
                 description={description}
                 visibility={visibility}
                 saving={saving}
                 formError={formError}
-
-                onNameChange={(event) =>
-                  setName(
-                    event.target.value,
-                  )
-                }
-
-                onDescriptionChange={(event) =>
-                  setDescription(
-                    event.target.value,
-                  )
-                }
-
-                onVisibilityChange={(event) =>
-                  setVisibility(
-                    event.target.value,
-                  )
-                }
-
+                onNameChange={(e) => setName(e.target.value)}
+                onDescriptionChange={(e) => setDescription(e.target.value)}
+                onVisibilityChange={(e) => setVisibility(e.target.value)}
                 onSave={handleSave}
                 onCancel={cancelEditing}
               />
-
             ) : (
-
-              <WorkspaceOverview
-                workspace={workspace}
-              />
-
+              <WorkspaceOverview workspace={workspace} />
             )}
-
           </>
         )}
 
+        {activeSection === 'files' && (
+          <WorkspaceFiles workspaceId={workspace.id} isAdmin={isAdmin} />
+        )}
 
         {activeSection === 'members' && (
           <WorkspaceMembers
             workspace={workspace}
             isAdmin={isAdmin}
+            onInvite={() => setShowInviteModal(true)}
           />
         )}
-
-
-        {activeSection === 'files' && (
-          <WorkspaceFiles
-            workspaceId={workspace.id}
-            isAdmin={isAdmin}
-          />
-        )}
-
       </div>
 
+      {/* Invite Modal */}
+      {showInviteModal && (
+        <WorkspaceInviteModal
+          workspace={workspace}
+          accessToken={accessToken}
+          onClose={() => setShowInviteModal(false)}
+        />
+      )}
     </main>
-  )
+  );
 }
 
-
-export default WorkspaceDetail
+export default WorkspaceDetail;

@@ -158,6 +158,7 @@ class WorkspaceDiscoverSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'name',
+            'description',
             'owner',
             'visibility',
             'member_count',
@@ -167,6 +168,7 @@ class WorkspaceDiscoverSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id',
             'name',
+            'description',
             'owner',
             'visibility',
             'member_count',

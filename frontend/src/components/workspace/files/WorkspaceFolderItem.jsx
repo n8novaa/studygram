@@ -1,55 +1,39 @@
-function WorkspaceFolderItem({
-  folder,
-  isAdmin,
-  busy,
-  onOpen,
-  onDelete,
-}) {
+import { FolderIcon, TrashIcon } from '../../common/Icons';
+
+function WorkspaceFolderItem({ folder, isAdmin, busy, onOpen, onDelete }) {
   return (
-    <article
-      className="workspace-files-item workspace-files-folder"
-      key={`folder-${folder.id}`}
-    >
-      <button
-        type="button"
-        className="workspace-files-item-main"
+    <div className="folder-item-card">
+      <div
+        className="item-left"
         onClick={() => onOpen(folder)}
+        style={{ cursor: 'pointer' }}
       >
-        <span
-          className="workspace-files-icon"
-          aria-hidden="true"
-        >
-          ▦
-        </span>
-
-        <div className="workspace-files-item-details">
-          <strong>
-            {folder.name}
-          </strong>
-
-          <span>
-            Folder
-            {folder.created_by
-              ? ` · ${folder.created_by}`
-              : ''}
-          </span>
+        <div className="item-icon-folder">
+          <FolderIcon size={20} />
         </div>
-      </button>
+        <div className="item-details">
+          <span className="item-name" title={folder.name}>
+            {folder.name}
+          </span>
+          <span className="item-meta">Folder &bull; Click to open</span>
+        </div>
+      </div>
 
       {isAdmin && (
-        <button
-          type="button"
-          className="workspace-member-action workspace-member-action-remove"
-          onClick={() => onDelete(folder)}
-          disabled={busy}
-        >
-          {busy
-            ? '...'
-            : 'Delete'}
-        </button>
+        <div className="item-actions">
+          <button
+            type="button"
+            className="item-action-btn btn-delete"
+            onClick={() => onDelete(folder)}
+            disabled={busy}
+            title="Delete folder"
+          >
+            <TrashIcon size={14} />
+          </button>
+        </div>
       )}
-    </article>
-  )
+    </div>
+  );
 }
 
-export default WorkspaceFolderItem
+export default WorkspaceFolderItem;

@@ -1,12 +1,122 @@
 /* =========================================================
-   StudyGram — Application Layout
+   StudyGram — Application Layout & Sidebar
+   Refined Minimalist Architecture
+   ========================================================= */
+
+
+/* =========================================================
+   Application Shell
    ========================================================= */
 
 .app-layout {
   min-height: 100vh;
+
   display: flex;
-  background: #f6f7f9;
-  color: #17191c;
+
+  position: relative;
+
+  background-color: var(--bg-app, #f6f7f9);
+  color: var(--text-primary, #1f2937);
+}
+
+
+/* =========================================================
+   Mobile Top Bar
+   ========================================================= */
+
+.mobile-header {
+  display: none;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+
+  height: 52px;
+
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 16px;
+
+  background: rgba(255, 255, 255, 0.96);
+
+  border-bottom: 1px solid
+    var(--border-default, #e5e7eb);
+
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.03);
+
+  backdrop-filter: blur(10px);
+
+  z-index: 900;
+}
+
+.mobile-header-brand {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  min-width: 0;
+}
+
+.mobile-menu-toggle {
+  display: flex;
+
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 4px;
+
+  width: 32px;
+  height: 32px;
+
+  padding: 0;
+
+  background: transparent;
+
+  border: 1px solid transparent;
+  border-radius: 7px;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease;
+}
+
+.mobile-menu-toggle:hover {
+  background: var(--bg-hover, #f3f4f6);
+
+  border-color:
+    var(--border-default, #e5e7eb);
+}
+
+.mobile-menu-toggle:focus-visible {
+  outline: 2px solid
+    var(--primary, #2563eb);
+
+  outline-offset: 2px;
+}
+
+.hamburger-line {
+  width: 18px;
+  height: 1.75px;
+
+  background-color:
+    var(--text-primary, #1f2937);
+
+  border-radius: 999px;
+
+  transition:
+    transform 0.16s ease,
+    opacity 0.16s ease;
+}
+
+.sidebar-backdrop {
+  display: none;
 }
 
 
@@ -16,145 +126,294 @@
 
 .app-sidebar {
   position: fixed;
+
   top: 0;
   left: 0;
-  width: 250px;
+
+  width: var(--sidebar-width, 248px);
   height: 100vh;
 
   display: flex;
   flex-direction: column;
 
-  background: #ffffff;
-  border-right: 1px solid #e5e7eb;
+  background: var(--bg-sidebar, #ffffff);
 
-  z-index: 100;
+  border-right: 1px solid
+    var(--border-default, #e5e7eb);
+
+  box-shadow:
+    1px 0 0 rgba(0, 0, 0, 0.01);
+
+  z-index: 1000;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  user-select: none;
 }
 
 
 /* =========================================================
-   Brand
+   Brand Section
    ========================================================= */
 
 .sidebar-brand {
-  height: 72px;
+  height: 56px;
 
   display: flex;
   align-items: center;
 
-  padding: 0 24px;
+  gap: 10px;
 
-  border-bottom: 1px solid #f0f1f3;
+  padding: 0 17px;
+
+  border-bottom: 1px solid
+    var(--border-subtle, #f0f1f3);
 }
 
-.sidebar-brand h2 {
-  margin: 0;
-
-  font-size: 21px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-
-  color: #111827;
-}
-
-
-/* =========================================================
-   Navigation
-   ========================================================= */
-
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-
-  padding: 20px 12px;
-}
-
-.sidebar-link {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-
-  min-height: 44px;
-
-  padding: 0 13px;
-
-  border-radius: 9px;
-
-  color: #6b7280;
-  text-decoration: none;
-
-  font-size: 14px;
-  font-weight: 500;
-
-  transition:
-    background-color 0.15s ease,
-    color 0.15s ease;
-}
-
-.sidebar-link:hover {
-  background: #f3f4f6;
-  color: #1f2937;
-}
-
-.sidebar-link.active {
-  background: #eef2ff;
-  color: #4338ca;
-  font-weight: 600;
-}
-
-.sidebar-link-icon {
-  width: 22px;
+.brand-logo-icon {
+  width: 28px;
+  height: 28px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  font-size: 18px;
+  flex-shrink: 0;
+
+  border-radius: 7px;
+
+  background:
+    var(--primary, #2563eb);
+
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 700;
+
   line-height: 1;
 
-  color: inherit;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-
-/* =========================================================
-   Account section
-   ========================================================= */
-
-.sidebar-account {
-  margin-top: auto;
-
-  padding: 16px 14px;
-
-  border-top: 1px solid #f0f1f3;
-}
-
-.account-info {
+.brand-info {
   display: flex;
-  align-items: center;
-  gap: 11px;
+  flex-direction: column;
 
   min-width: 0;
 
-  margin-bottom: 14px;
+  line-height: 1.15;
 }
 
-.account-avatar {
-  width: 38px;
-  height: 38px;
+.brand-title {
+  margin: 0;
 
-  flex: 0 0 38px;
+  color:
+    var(--text-primary, #1f2937);
+
+  font-size: 13.5px;
+  font-weight: 650;
+
+  letter-spacing: -0.015em;
+}
+
+.brand-tag {
+  margin-top: 2px;
+
+  color:
+    var(--text-muted, #6b7280);
+
+  font-size: 10.5px;
+  font-weight: 500;
+
+  letter-spacing: 0.005em;
+}
+
+
+/* =========================================================
+   Sidebar Navigation
+   ========================================================= */
+
+.sidebar-nav {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+
+  padding: 14px 10px;
+
+  overflow-y: auto;
+
+  scrollbar-width: thin;
+}
+
+.sidebar-nav-section-label {
+  padding: 9px 9px 6px;
+
+  color:
+    var(--text-muted, #6b7280);
+
+  font-size: 10px;
+  font-weight: 650;
+
+  letter-spacing: 0.07em;
+
+  text-transform: uppercase;
+}
+
+.sidebar-link {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  height: 34px;
+
+  padding: 0 10px;
+
+  border: 1px solid transparent;
+  border-radius: 7px;
+
+  color:
+    var(--text-secondary, #4b5563);
+
+  font-size: 13px;
+  font-weight: 500;
+
+  letter-spacing: -0.01em;
+
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.sidebar-link:hover {
+  background:
+    var(--bg-hover, #f5f6f8);
+
+  color:
+    var(--text-primary, #1f2937);
+}
+
+.sidebar-link.active {
+  background: #ffffff;
+
+  color:
+    var(--text-primary, #1f2937);
+
+  font-weight: 600;
+
+  border-color:
+    rgba(0, 0, 0, 0.06);
+
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.sidebar-link.active::before {
+  content: "";
+
+  position: absolute;
+
+  left: -1px;
+  top: 7px;
+  bottom: 7px;
+
+  width: 2px;
+
+  background:
+    var(--primary, #2563eb);
+
+  border-radius: 0 2px 2px 0;
+}
+
+.sidebar-link-icon {
+  width: 20px;
+  height: 20px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
+  flex-shrink: 0;
+
+  color: inherit;
+
+  opacity: 0.82;
+
+  transition:
+    opacity 0.16s ease;
+}
+
+.sidebar-link:hover .sidebar-link-icon,
+.sidebar-link.active .sidebar-link-icon {
+  opacity: 1;
+}
+
+
+/* =========================================================
+   Sidebar Account Footer
+   ========================================================= */
+
+.sidebar-account {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  padding: 12px;
+
+  background:
+    var(--bg-sidebar, #ffffff);
+
+  border-top: 1px solid
+    var(--border-default, #e5e7eb);
+}
+
+.account-info {
+  min-width: 0;
+
+  flex: 1;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+}
+
+.account-avatar {
+  width: 28px;
+  height: 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
   border-radius: 50%;
 
-  background: #111827;
-  color: #ffffff;
+  background: #e7e5e4;
 
-  font-size: 14px;
-  font-weight: 600;
+  border: 1px solid #d6d3d1;
+
+  color:
+    var(--text-primary, #1f2937);
+
+  font-size: 11.5px;
+  font-weight: 700;
+
+  line-height: 1;
 }
 
 .account-details {
@@ -162,176 +421,210 @@
 
   display: flex;
   flex-direction: column;
+
   gap: 2px;
+
+  line-height: 1.2;
 }
 
 .account-name {
   overflow: hidden;
 
-  color: #1f2937;
+  color:
+    var(--text-primary, #1f2937);
 
-  font-size: 14px;
+  font-size: 12.5px;
   font-weight: 600;
 
-  text-overflow: ellipsis;
   white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .account-label {
-  color: #9ca3af;
+  color:
+    var(--text-muted, #6b7280);
 
-  font-size: 12px;
-  font-weight: 400;
+  font-size: 10.5px;
+  font-weight: 450;
+
+  white-space: nowrap;
 }
 
 
 /* =========================================================
-   Logout
+   Sign Out
    ========================================================= */
 
 .logout-button {
-  width: 100%;
+  flex-shrink: 0;
 
-  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-  padding: 0 12px;
+  gap: 6px;
 
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  min-width: 76px;
+  height: 30px;
 
-  background: #ffffff;
-  color: #6b7280;
+  padding: 0 9px;
+
+  border: 1px solid transparent;
+  border-radius: 7px;
+
+  background: transparent;
+
+  color:
+    var(--text-muted, #6b7280);
 
   font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 11.5px;
+  font-weight: 550;
+
+  white-space: nowrap;
 
   cursor: pointer;
 
   transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease,
-    color 0.15s ease;
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease;
 }
 
 .logout-button:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
-  color: #111827;
+  background:
+    var(--danger-light, #fef2f2);
+
+  border-color:
+    rgba(220, 38, 38, 0.12);
+
+  color:
+    var(--danger, #dc2626);
+}
+
+.logout-button:focus-visible {
+  outline: 2px solid
+    var(--primary, #2563eb);
+
+  outline-offset: 2px;
+}
+
+.logout-button svg {
+  flex-shrink: 0;
 }
 
 
 /* =========================================================
-   Main content
+   Main Content Canvas
    ========================================================= */
 
 .app-content {
-  width: calc(100% - 250px);
+  width: calc(
+    100% - var(--sidebar-width, 248px)
+  );
 
   min-height: 100vh;
 
-  margin-left: 250px;
+  margin-left:
+    var(--sidebar-width, 248px);
 
-  padding: 32px;
+  padding: 32px 40px;
 
   box-sizing: border-box;
 }
 
 
 /* =========================================================
-   Responsive
+   Responsive — Tablet / Mobile
    ========================================================= */
 
-@media (max-width: 900px) {
+@media (max-width: 868px) {
+
+  .mobile-header {
+    display: flex;
+  }
+
+  .sidebar-backdrop {
+    display: block;
+
+    position: fixed;
+
+    inset: 0;
+
+    background:
+      rgba(15, 15, 15, 0.35);
+
+    backdrop-filter: blur(2px);
+
+    z-index: 950;
+  }
+
   .app-sidebar {
-    width: 220px;
+    width: min(
+      var(--sidebar-width, 248px),
+      86vw
+    );
+
+    transform: translateX(-100%);
+
+    box-shadow: none;
+  }
+
+  .app-sidebar.open {
+    transform: translateX(0);
+
+    box-shadow:
+      8px 0 30px rgba(0, 0, 0, 0.10);
   }
 
   .app-content {
-    width: calc(100% - 220px);
-    margin-left: 220px;
+    width: 100%;
 
-    padding: 24px;
+    margin-left: 0;
+
+    margin-top: 52px;
+
+    padding: 24px 20px;
   }
 }
 
 
-@media (max-width: 700px) {
-  .app-sidebar {
-    width: 72px;
+/* =========================================================
+   Responsive — Small Mobile
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .mobile-header {
+    padding: 0 14px;
+  }
+
+  .app-content {
+    padding: 20px 16px;
   }
 
   .sidebar-brand {
-    justify-content: center;
-    padding: 0;
-  }
-
-  .sidebar-brand h2 {
-    font-size: 0;
-  }
-
-  .sidebar-brand h2::after {
-    content: "S";
-
-    font-size: 21px;
-    font-weight: 700;
-  }
-
-  .sidebar-nav {
-    padding: 16px 10px;
-  }
-
-  .sidebar-link {
-    justify-content: center;
-
-    padding: 0;
-
-    gap: 0;
-  }
-
-  .sidebar-link span:last-child {
-    display: none;
-  }
-
-  .sidebar-link-icon {
-    width: auto;
+    padding: 0 15px;
   }
 
   .sidebar-account {
     padding: 12px 10px;
   }
-
-  .account-info {
-    justify-content: center;
-  }
-
-  .account-details {
-    display: none;
-  }
-
-  .logout-button {
-    padding: 0;
-
-    font-size: 0;
-  }
-
-  .logout-button::after {
-    content: "↪";
-
-    font-size: 17px;
-  }
-
-  .app-content {
-    width: calc(100% - 72px);
-    margin-left: 72px;
-
-    padding: 20px;
-  }
 }
 
 
-@media (max-width: 480px) {
+/* =========================================================
+   Responsive — Narrow Mobile Sidebar
+   ========================================================= */
+
+@media (max-width: 360px) {
+
+  .app-sidebar {
+    width: 82vw;
+  }
+
   .app-content {
-    padding: 16px;
+    padding-left: 14px;
+    padding-right: 14px;
   }
 }

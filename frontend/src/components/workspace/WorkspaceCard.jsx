@@ -1,41 +1,18 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
+import { formatRelativeTime } from '../../utils/dateUtils';
+import { UsersIcon, LockIcon, GlobeIcon, ArrowRightIcon } from '../common/Icons';
+import '../../styles/components/workspace/card.css';
 
-import { formatRelativeTime } from '../../utils/dateUtils'
-
-import "../../styles/components/workspace/card.css";
-
-function WorkspaceCard({
-  workspace,
-}) {
-  const isPublic =
-    workspace.visibility === 'public'
-
-  const memberCount =
-    workspace.members?.length ?? 0
-
-  const createdTime =
-    new Date(workspace.created).getTime()
-
-  const updatedTime =
-    new Date(workspace.updated).getTime()
-
-  const wasEdited =
-    !Number.isNaN(createdTime) &&
-    !Number.isNaN(updatedTime) &&
-    updatedTime - createdTime > 1000
-
+function WorkspaceCard({ workspace }) {
+  const isPublic = workspace.visibility === 'public';
+  const memberCount = workspace.members?.length ?? 0;
 
   return (
     <article className="workspace-card">
-
       <div className="workspace-card-top">
-
         <div className="workspace-card-icon">
-          {workspace.name
-            ?.charAt(0)
-            ?.toUpperCase()}
+          {workspace.name?.charAt(0)?.toUpperCase() || 'W'}
         </div>
-
 
         <span
           className={`workspace-visibility-badge ${
@@ -44,93 +21,46 @@ function WorkspaceCard({
               : 'workspace-visibility-private'
           }`}
         >
-
-          <span className="workspace-visibility-dot" />
-
-          {isPublic
-            ? 'Public'
-            : 'Private'}
-
+          {isPublic ? <GlobeIcon size={13} /> : <LockIcon size={13} />}
+          <span>{isPublic ? 'Public' : 'Private'}</span>
         </span>
-
       </div>
-
 
       <div className="workspace-card-body">
-
-        <h2 className="workspace-card-title">
-          {workspace.name}
-        </h2>
-
-
-        <p className="workspace-description">
-
-          {workspace.description ||
-            'No description provided.'}
-
+        <h2 className="workspace-card-title">{workspace.name}</h2>
+        <p className="workspace-card-description">
+          {workspace.description || 'No description provided.'}
         </p>
-
       </div>
-
 
       <div className="workspace-card-meta">
-
         <div className="workspace-member-count">
-
-          <span className="workspace-meta-icon">
-            👥
-          </span>
-
+          <UsersIcon size={15} />
           <span>
-
-            {memberCount}{' '}
-
-            {memberCount === 1
-              ? 'member'
-              : 'members'}
-
+            {memberCount} {memberCount === 1 ? 'member' : 'members'}
           </span>
-
         </div>
 
-
-        <span className="workspace-owner">
-
-          Owner: {workspace.owner}
-
+        <span className="workspace-owner-tag">
+          Owner: <strong>{workspace.owner}</strong>
         </span>
-
       </div>
 
-
       <div className="workspace-card-footer">
-
         <span className="workspace-time">
-
-          {wasEdited
-            ? `Updated ${formatRelativeTime(
-                workspace.updated,
-              )}`
-            : `Created ${formatRelativeTime(
-                workspace.created,
-              )}`}
-
+          Updated {formatRelativeTime(workspace.updated || workspace.created)}
         </span>
-
 
         <Link
           className="workspace-open-link"
           to={`/app/workspaces/${workspace.id}`}
         >
-          Open
-          <span>→</span>
+          <span>Open</span>
+          <ArrowRightIcon size={13} />
         </Link>
-
       </div>
-
     </article>
-  )
+  );
 }
 
-
-export default WorkspaceCard
+export default WorkspaceCard;

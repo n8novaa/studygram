@@ -12,9 +12,17 @@ async function handleResponse(response) {
   return data
 }
 
-export async function discoverWorkspaces(accessToken) {
+export async function discoverWorkspaces(accessToken, search = '') {
+  const params = new URLSearchParams()
+
+  if (search.trim()) {
+    params.set('search', search.trim())
+  }
+
+  const queryString = params.toString()
+
   const response = await fetch(
-    '/api/workspaces/discover/',
+    `/api/workspaces/discover/${queryString ? `?${queryString}` : ''}`,
     {
       method: 'GET',
       headers: {

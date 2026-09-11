@@ -17,7 +17,7 @@ function WorkspaceEditForm({
   onCancel,
 }) {
   return (
-    <section className="workspace-detail-card">
+    <section className="workspace-detail-card workspace-edit">
 
       <div className="workspace-section-heading">
 

@@ -1,4 +1,4 @@
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
@@ -37,6 +37,11 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
         url_path='discover',
     )
     def discover(self, request):
+        search = request.query_params.get(
+            'search',
+            ''
+        ).strip()
+
         workspaces = (
             Workspace.objects
             .select_related('owner')
@@ -46,8 +51,13 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
                     distinct=True,
                 )
             )
-            .all()
         )
+
+        if search:
+            workspaces = workspaces.filter(
+                Q(name__icontains=search) |
+                Q(description__icontains=search)
+            )
 
         serializer = WorkspaceDiscoverSerializer(
             workspaces,
