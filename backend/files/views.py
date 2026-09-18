@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 
-from rest_framework import generics, status
+from rest_framework import generics, serializers, status
 from rest_framework.permissions import IsAuthenticated
 
 from workspaces.models import Workspace
@@ -234,10 +234,14 @@ class WorkspaceFileCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         uploaded_file = self.request.FILES.get("uploaded_file")
-
+        if not uploaded_file:
+            raise serializers.ValidationError(
+                {"uploaded_file": "A file is required."}
+            )
         serializer.save(
             workspace=self.get_workspace(),
             created_by=self.request.user,
+            uploaded_file=uploaded_file,
             file_type=(
                 uploaded_file.content_type
                 if uploaded_file

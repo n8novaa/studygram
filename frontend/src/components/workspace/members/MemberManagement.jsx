@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import MemberManagementModal from './MemberManagementModal';
 import { ShieldIcon, ShareIcon } from '../../common/Icons';
-import '../../../styles/components/workspace/members/management.css';
+import '../../../styles/components/workspace/members/management-modal.css';
 
 function MemberManagement({
   members,
@@ -19,7 +19,7 @@ function MemberManagement({
 
   return (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div className="workspace-member-management-actions">
         {onInvite && (
           <button
             type="button"
@@ -33,18 +33,18 @@ function MemberManagement({
 
         <button
           type="button"
-          className="workspace-btn-action workspace-btn-secondary"
+          className="workspace-member-manage-button workspace-member-manage-button-promote"
           onClick={() => setRoleAction('promote')}
-          style={{ height: '34px', padding: '0 14px', fontSize: '13px' }}
+          
         >
           <ShieldIcon size={14} /> Promote
         </button>
 
         <button
           type="button"
-          className="workspace-btn-action workspace-btn-secondary"
+          className="workspace-member-manage-button"
           onClick={() => setRoleAction('demote')}
-          style={{ height: '34px', padding: '0 14px', fontSize: '13px' }}
+          
         >
           Demote
         </button>

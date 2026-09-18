@@ -6,9 +6,11 @@ import {
   removeWorkspaceMember,
 } from '../../../services/workspaceMemberService';
 import MemberManagement from './MemberManagement';
+import RemoveMemberModal from './RemoveMemberModal'
 import { UsersIcon } from '../../common/Icons';
 import { useToast } from '../../common/ToastContext';
 import '../../../styles/components/workspace/members/members.css';
+import '../../../styles/components/workspace/members/management-modal.css'
 
 function WorkspaceMembers({ workspace, isAdmin = false, onInvite }) {
   const { accessToken, user } = useAuth();
@@ -18,6 +20,8 @@ function WorkspaceMembers({ workspace, isAdmin = false, onInvite }) {
   const [loading, setLoading] = useState(false);
   const [actionUserId, setActionUserId] = useState(null);
   const [error, setError] = useState('');
+  const [removeMember, setRemoveMember] =
+  useState(null)
   const workspaceId = workspace?.id;
 
   const loadMembers = useCallback(async () => {
@@ -51,28 +55,43 @@ function WorkspaceMembers({ workspace, isAdmin = false, onInvite }) {
     return member.user === workspace.owner;
   }
 
-  async function handleRemove(member) {
-    if (!isAdmin) return;
-
-    const confirmed = window.confirm(`Remove @${member.user} from this workspace?`);
-    if (!confirmed) return;
-
-    try {
-      setActionUserId(member.user_id);
-      setError('');
-
-      await removeWorkspaceMember(accessToken, workspace.id, member.user_id);
-      addToast(`Removed @${member.user} from workspace.`, 'info');
-      await loadMembers();
-    } catch (err) {
-      setError(err?.message || 'Failed to remove member.');
-    } finally {
-      setActionUserId(null);
-    }
+function handleRemove(member) {
+  if (!isAdmin) {
+    return
   }
 
+  setError('')
+  setRemoveMember(member)
+}
+
+async function confirmRemoveMember() {
+  if (!removeMember || !isAdmin) {
+    return
+  }
+
+  try {
+    setActionUserId(removeMember.user_id)
+    setError('')
+
+    await removeWorkspaceMember(
+      accessToken,
+      workspace.id,
+      removeMember.user_id,
+    )
+
+    setRemoveMember(null)
+
+    await loadMembers()
+  } catch (err) {
+    throw err
+  } finally {
+    setActionUserId(null)
+  }
+}
+
   return (
-    <section className="workspace-members">
+    <>
+      <section className="workspace-members">
       <div className="workspace-section-heading">
         <div>
           <h2>Community Members</h2>
@@ -194,8 +213,18 @@ function WorkspaceMembers({ workspace, isAdmin = false, onInvite }) {
           })}
         </div>
       )}
-    </section>
-  );
+      </section>
+
+      {removeMember && (
+        <RemoveMemberModal
+          member={removeMember}
+          onClose={() => setRemoveMember(null)}
+          onConfirm={confirmRemoveMember}
+          busy={actionUserId === removeMember.user_id}
+        />
+      )}
+    </>
+  )
 }
 
 export default WorkspaceMembers;
