@@ -29,6 +29,12 @@ from .views.access import (
 from .views.channels import (
     WorkspaceChannelListCreateView,
     WorkspaceChannelDetailView,
+    
+)
+
+from .views.channel_messages import (
+    WorkspaceChannelMessageListCreateView,
+    WorkspaceChannelMessageDetailView,
 )
 
 
@@ -157,6 +163,18 @@ urlpatterns = [
         'workspaces/<int:workspace_pk>/channels/<int:channel_pk>/',
         WorkspaceChannelDetailView.as_view(),
         name='workspace-channel-detail',
+    ),
+
+    path(
+        'workspaces/<int:workspace_pk>/channels/<int:channel_pk>/messages/',
+        WorkspaceChannelMessageListCreateView.as_view(),
+        name='workspace-channel-message-list-create',
+    ),
+
+    path(
+        'workspaces/<int:workspace_pk>/channels/<int:channel_pk>/messages/<int:message_pk>/',
+        WorkspaceChannelMessageDetailView.as_view(),
+        name='workspace-channel-message-detail',
     ),
 
     # ---------------------------------------------------------
