@@ -28,6 +28,7 @@ from .views.access import (
 
 from .views.channels import (
     WorkspaceChannelListCreateView,
+    WorkspaceChannelDetailView,
 )
 
 
@@ -144,6 +145,18 @@ urlpatterns = [
         'workspaces/<int:workspace_pk>/channels/',
         WorkspaceChannelListCreateView.as_view(),
         name='workspace-channel-list-create',
+    ),
+
+    path(
+        'workspaces/<int:workspace_pk>/channels/',
+        WorkspaceChannelListCreateView.as_view(),
+        name='workspace-channel-list-create',
+    ),
+
+    path(
+        'workspaces/<int:workspace_pk>/channels/<int:channel_pk>/',
+        WorkspaceChannelDetailView.as_view(),
+        name='workspace-channel-detail',
     ),
 
     # ---------------------------------------------------------

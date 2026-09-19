@@ -375,3 +375,355 @@ class WorkspaceChannelListCreateTests(APITestCase):
             ).count(),
             1,
         )
+
+    def test_admin_can_update_channel(self):
+        channel = WorkspaceChannel.objects.create(
+            workspace=self.workspace,
+            name="general",
+            description="Old description",
+            created_by=self.owner,
+        )
+
+        self.client.force_authenticate(
+            user=self.admin,
+        )
+
+        url = reverse(
+            "workspace-channel-detail",
+            kwargs={
+                "workspace_pk": self.workspace.pk,
+                "channel_pk": channel.pk,
+            },
+        )
+
+        response = self.client.patch(
+            url,
+            {
+                "name": "general-updated",
+                "description": "Updated description",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        channel.refresh_from_db()
+
+        self.assertEqual(
+            channel.name,
+            "general-updated",
+        )
+
+        self.assertEqual(
+            channel.description,
+            "Updated description",
+        )
+
+
+    def test_owner_can_update_channel(self):
+        channel = WorkspaceChannel.objects.create(
+            workspace=self.workspace,
+            name="general",
+            description="Old description",
+            created_by=self.owner,
+        )
+
+        self.client.force_authenticate(
+            user=self.owner,
+        )
+
+        url = reverse(
+            "workspace-channel-detail",
+            kwargs={
+                "workspace_pk": self.workspace.pk,
+                "channel_pk": channel.pk,
+            },
+        )
+
+        response = self.client.patch(
+            url,
+            {
+                "description": "Owner updated description",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        channel.refresh_from_db()
+
+        self.assertEqual(
+            channel.description,
+            "Owner updated description",
+        )
+
+
+    def test_member_cannot_update_channel(self):
+        channel = WorkspaceChannel.objects.create(
+            workspace=self.workspace,
+            name="general",
+            description="Original description",
+            created_by=self.owner,
+        )
+
+        self.client.force_authenticate(
+            user=self.member,
+        )
+
+        url = reverse(
+            "workspace-channel-detail",
+            kwargs={
+                "workspace_pk": self.workspace.pk,
+                "channel_pk": channel.pk,
+            },
+        )
+
+        response = self.client.patch(
+            url,
+            {
+                "description": "Should not update",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+
+        channel.refresh_from_db()
+
+        self.assertEqual(
+            channel.description,
+            "Original description",
+        )
+
+
+    def test_admin_can_delete_channel(self):
+        channel = WorkspaceChannel.objects.create(
+            workspace=self.workspace,
+            name="general",
+            description="General discussion",
+            created_by=self.owner,
+        )
+
+        self.client.force_authenticate(
+            user=self.admin,
+        )
+
+        url = reverse(
+            "workspace-channel-detail",
+            kwargs={
+                "workspace_pk": self.workspace.pk,
+                "channel_pk": channel.pk,
+            },
+        )
+
+        response = self.client.delete(url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_204_NO_CONTENT,
+        )
+
+        self.assertFalse(
+            WorkspaceChannel.objects.filter(
+                pk=channel.pk,
+            ).exists()
+        )
+
+
+    def test_owner_can_delete_channel(self):
+        channel = WorkspaceChannel.objects.create(
+            workspace=self.workspace,
+            name="general",
+            description="General discussion",
+            created_by=self.owner,
+        )
+
+        self.client.force_authenticate(
+            user=self.owner,
+        )
+
+        url = reverse(
+            "workspace-channel-detail",
+            kwargs={
+                "workspace_pk": self.workspace.pk,
+                "channel_pk": channel.pk,
+            },
+        )
+
+        response = self.client.delete(url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_204_NO_CONTENT,
+        )
+
+        self.assertFalse(
+            WorkspaceChannel.objects.filter(
+                pk=channel.pk,
+            ).exists()
+        )
+
+
+    def test_member_cannot_delete_channel(self):
+        channel = WorkspaceChannel.objects.create(
+            workspace=self.workspace,
+            name="general",
+            description="General discussion",
+            created_by=self.owner,
+        )
+
+        self.client.force_authenticate(
+            user=self.member,
+        )
+
+        url = reverse(
+            "workspace-channel-detail",
+            kwargs={
+                "workspace_pk": self.workspace.pk,
+                "channel_pk": channel.pk,
+            },
+        )
+
+        response = self.client.delete(url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+
+        self.assertTrue(
+            WorkspaceChannel.objects.filter(
+                pk=channel.pk,
+            ).exists()
+        )
+
+    def test_non_member_cannot_update_channel(self):
+        channel = WorkspaceChannel.objects.create(
+            workspace=self.workspace,
+            name="general",
+            description="Original description",
+            created_by=self.owner,
+        )
+
+        self.client.force_authenticate(
+            user=self.outsider,
+        )
+
+        url = reverse(
+            "workspace-channel-detail",
+            kwargs={
+                "workspace_pk": self.workspace.pk,
+                "channel_pk": channel.pk,
+            },
+        )
+
+        response = self.client.patch(
+            url,
+            {
+                "description": "Should not update",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+
+        channel.refresh_from_db()
+
+        self.assertEqual(
+            channel.description,
+            "Original description",
+        )
+
+
+    def test_non_member_cannot_delete_channel(self):
+        channel = WorkspaceChannel.objects.create(
+            workspace=self.workspace,
+            name="general",
+            description="General discussion",
+            created_by=self.owner,
+        )
+
+        self.client.force_authenticate(
+            user=self.outsider,
+        )
+
+        url = reverse(
+            "workspace-channel-detail",
+            kwargs={
+                "workspace_pk": self.workspace.pk,
+                "channel_pk": channel.pk,
+            },
+        )
+
+        response = self.client.delete(url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+
+        self.assertTrue(
+            WorkspaceChannel.objects.filter(
+                pk=channel.pk,
+            ).exists()
+        )
+
+
+    def test_duplicate_channel_name_is_rejected_on_update(self):
+        channel = WorkspaceChannel.objects.create(
+            workspace=self.workspace,
+            name="general",
+            description="General discussion",
+            created_by=self.owner,
+        )
+
+        other_channel = WorkspaceChannel.objects.create(
+            workspace=self.workspace,
+            name="resources",
+            description="Study resources",
+            created_by=self.owner,
+        )
+
+        self.client.force_authenticate(
+            user=self.admin,
+        )
+
+        url = reverse(
+            "workspace-channel-detail",
+            kwargs={
+                "workspace_pk": self.workspace.pk,
+                "channel_pk": other_channel.pk,
+            },
+        )
+
+        response = self.client.patch(
+            url,
+            {
+                "name": "general",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+
+        other_channel.refresh_from_db()
+
+        self.assertEqual(
+            other_channel.name,
+            "resources",
+        )
