@@ -67,3 +67,13 @@ class IsWorkspaceAdmin(BasePermission):
             user=request.user,
             role=WorkspaceMembership.Role.ADMIN,
         ).exists()
+
+
+def is_workspace_member(user, workspace_id):
+    if not user or not user.is_authenticated:
+        return False
+
+    return WorkspaceMembership.objects.filter(
+        workspace_id=workspace_id,
+        user=user,
+    ).exists()

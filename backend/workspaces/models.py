@@ -76,6 +76,72 @@ class WorkspaceMembership(models.Model):
             f'({self.role})'
         )
 
+class WorkspaceChannel(models.Model):
+    workspace = models.ForeignKey(
+        Workspace,
+        on_delete=models.CASCADE,
+        related_name='channels',
+    )
+
+    name = models.CharField(max_length=100)
+
+    description = models.TextField(blank=True)
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='created_workspace_channels',
+    )
+
+    created = models.DateTimeField(auto_now_add=True)
+
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['workspace', 'name'],
+                name='unique_workspace_channel_name',
+            ),
+        ]
+
+        ordering = ['created']
+
+    def __str__(self):
+        return f'{self.workspace.name} - #{self.name}'
+
+
+class WorkspaceChannelMessage(models.Model):
+    channel = models.ForeignKey(
+        WorkspaceChannel,
+        on_delete=models.CASCADE,
+        related_name='messages',
+    )
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='workspace_channel_messages',
+    )
+
+    body = models.TextField()
+
+    created = models.DateTimeField(auto_now_add=True)
+
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['created']
+
+    def __str__(self):
+        return (
+            f'{self.user.username} in '
+            f'#{self.channel.name}: '
+            f'{self.body[:50]}'
+        )
+
+    
 
 class WorkspaceJoinRequest(models.Model):
     class Status(models.TextChoices):

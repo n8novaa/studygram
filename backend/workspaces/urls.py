@@ -26,6 +26,10 @@ from .views.access import (
     WorkspaceMemberRemoveView,
 )
 
+from .views.channels import (
+    WorkspaceChannelListCreateView,
+)
+
 
 router = DefaultRouter()
 
@@ -129,6 +133,17 @@ urlpatterns = [
         'workspaces/<int:workspace_pk>/files/<int:pk>/download/',
         WorkspaceFileDownloadView.as_view(),
         name='workspace-file-download',
+    ),
+
+
+    # ---------------------------------------------------------
+    # Channels
+    # ---------------------------------------------------------
+
+    path(
+        'workspaces/<int:workspace_pk>/channels/',
+        WorkspaceChannelListCreateView.as_view(),
+        name='workspace-channel-list-create',
     ),
 
     # ---------------------------------------------------------

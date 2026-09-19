@@ -1,11 +1,15 @@
 from django.utils import timezone
 from rest_framework import serializers
 
+from base.api.serializers import UserSerializer
+
 from .models import (
     Workspace,
     WorkspaceInvitation,
     WorkspaceJoinRequest,
     WorkspaceMembership,
+    WorkspaceChannel,
+    WorkspaceChannelMessage,
 )
 
 
@@ -175,3 +179,66 @@ class WorkspaceDiscoverSerializer(serializers.ModelSerializer):
             'created',
             'updated',
         ]
+
+class WorkspaceChannelSerializer(serializers.ModelSerializer):
+    created_by = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = WorkspaceChannel
+        fields = [
+            'id',
+            'workspace',
+            'name',
+            'description',
+            'created_by',
+            'created',
+            'updated',
+        ]
+        read_only_fields = [
+            'id',
+            'workspace',
+            'created_by',
+            'created',
+            'updated',
+        ]
+
+    def validate_name(self, value):
+        value = value.strip()
+
+        if not value:
+            raise serializers.ValidationError(
+                'Channel name cannot be empty.'
+            )
+
+        return value
+
+class WorkspaceChannelMessageSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = WorkspaceChannelMessage
+        fields = [
+            'id',
+            'channel',
+            'user',
+            'body',
+            'created',
+            'updated',
+        ]
+        read_only_fields = [
+            'id',
+            'channel',
+            'user',
+            'created',
+            'updated',
+        ]
+
+    def validate_body(self, value):
+        value = value.strip()
+
+        if not value:
+            raise serializers.ValidationError(
+                'Message body cannot be empty.'
+            )
+
+        return value
