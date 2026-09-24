@@ -1,0 +1,247 @@
+[33mcommit c6e8f7711b9d074c49fa8c5f5b1b34e29aa5604e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Sat Sep 19 21:49:07 2026 +0530
+
+    add workspace channel messages API
+
+[33mcommit e501b8d4849ea5ea31cdfc98eeeac12368e633be[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Sat Sep 19 21:21:24 2026 +0530
+
+    add workspace channel management API
+
+[33mcommit a0f28eb18f326babeba767c916c076004ac0a4c6[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Sat Sep 19 17:36:04 2026 +0530
+
+    add workspace channel list and create API
+
+[33mcommit 9d28f34564915366cd2f7d23db7eb19e3bd5de70[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Fri Sep 18 17:56:08 2026 +0530
+
+    fix workspace file upload and member management UI
+
+[33mcommit 9d0fb4e23540018d52648d24806b8f3ad46442a2[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Fri Sep 11 11:01:22 2026 +0530
+
+    feat: redesign UI and restore study collaboration features
+
+[33mcommit 0697e44eabc014a7f8130347c40ed95bf80fb66b[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Fri Sep 4 11:08:47 2026 +0530
+
+    refactor(workspace): simplify detail navigation and overview actions
+
+[33mcommit b1d73e787570a19e4cbbb88d3efd8958f640ae4e[m[33m ([m[1;31morigin/main[m[33m)[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Fri Sep 4 09:55:32 2026 +0530
+
+    refactor frontend styles and stabilize workspace UI
+
+[33mcommit 2cfac605f54052ce564509a0542fa1d3bad1fa4f[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Thu Sep 3 12:14:07 2026 +0530
+
+    Implement workspace member and file management
+    
+    Refactor workspace components, services, and styles for better code organization
+
+[33mcommit 9fffee96b0f4559286a6a4c1a7f89add216e2f2c[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Tue Sep 1 09:46:28 2026 +0530
+
+    Harden workspace access and join request workflows
+    
+    Refactor join-request management to use centralized workspace admin authorization.
+    
+    Preserve authenticated-user access to public workspace joining and private
+    workspace join requests while restricting request listing, approval, and
+    rejection to workspace administrators.
+    
+    Make join-request approval atomic so membership creation and request status
+    updates succeed or roll back together.
+    
+    Add end-to-end lifecycle coverage for private workspace requests, including
+    submission, rejection, resubmission, approval, membership creation, duplicate
+    request prevention, and post-approval join protection.
+    
+    Verify the complete workspace test suite passes.
+
+[33mcommit 5cac67496525f9ab2f248ec41ef24b65b2d19a36[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Tue Sep 1 09:20:12 2026 +0530
+
+    Complete workspace member management
+    
+    Implement workspace member administration with centralized admin authorization.
+    
+    Add member listing, role promotion, admin demotion, and member removal.
+    Protect the workspace owner from demotion and removal and prevent admins
+    from removing themselves.
+    
+    Enforce workspace membership and administrator permissions across all
+    member-management operations.
+    
+    Add comprehensive automated tests covering authentication, authorization,
+    role transitions, owner protection, self-removal protection, non-member
+    handling, nonexistent users, and membership integrity.
+
+[33mcommit b0771d949cdb7c9c3ed45ab83b0e691454c6fd44[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Tue Sep 1 09:14:15 2026 +0530
+
+    Implement workspace member administration
+    
+    Add centralized workspace admin authorization for member-management endpoints.
+    
+    Implement workspace member listing with admin-only access.
+    Add member promotion and admin demotion endpoints.
+    Prevent workspace owners from being demoted.
+    Prevent non-members and unauthorized users from modifying membership roles.
+    Add comprehensive automated tests covering authentication, authorization,
+    promotion, demotion, owner protection, and membership integrity.
+    
+    Refactor member-management views to use the shared IsWorkspaceAdmin
+    permission instead of duplicating authorization logic.
+
+[33mcommit 27d0225d92bcd4fab81696e7bb4dda614efc08cc[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Mon Aug 31 15:54:30 2026 +0530
+
+    Add secure workspace file downloads
+    
+    Implement workspace-scoped file download access for members and admins using streaming FileResponse. Enforce authentication, workspace membership, and workspace-level file isolation, while preventing access to files from other workspaces. Add comprehensive automated tests covering successful downloads, authorization, cross-workspace isolation, nonexistent files, and download headers.
+
+[33mcommit dfdb30ba045e27a028b8219f5e0336928b732e97[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Mon Aug 31 15:42:30 2026 +0530
+
+    Complete workspace file management
+    
+    Implement complete workspace file and folder management with hierarchical folders, admin-only uploads and modifications, member read access, file rename and movement, root and nested folder support, file deletion with physical storage cleanup, workspace-scoped resource access, cross-workspace isolation, and comprehensive automated test coverage.
+
+[33mcommit e2d69e470a56d3a6c1903bd64da9275d699af1bf[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Mon Aug 31 15:33:32 2026 +0530
+
+    Add workspace file access and modification management
+    
+    Implement workspace-scoped file listing and detail access with member read permissions and admin-only modification. Add file rename and folder movement, support moving files between nested folders and the workspace root, enforce cross-workspace folder isolation, prevent direct file replacement through PUT, and expand automated tests for file management permissions and workspace boundaries.
+
+[33mcommit 9805e304f30f83e7e334ac68b435feb88a65f812[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Mon Aug 31 15:04:56 2026 +0530
+
+    Implement workspace filesystem foundation and access control
+    
+    Add hierarchical workspace folders with root and nested folder support, folder CRUD operations, workspace-boundary validation, admin-only file uploads, file metadata tracking, folder-targeted uploads, member file access, workspace-scoped file detail endpoints, and comprehensive automated tests covering permissions and cross-workspace isolation.
+
+[33mcommit 438af447877a73335efd86a3db46f0337c990b1e[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Mon Aug 31 08:49:52 2026 +0530
+
+    feat: complete workspace management and discovery
+
+[33mcommit a32e5151754a51aaf600e478eb8aa96b321fb991[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Sun Aug 30 17:09:10 2026 +0530
+
+    refactor: split workspace and access views
+
+[33mcommit 00915c97e484a8df6f3360f22b45f7980b525143[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Sun Aug 30 09:03:04 2026 +0530
+
+    Implement workspace visibility and management
+
+[33mcommit b8d6a89641c79a1e8763332f59966cab4a79206e[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Sun Aug 30 00:09:38 2026 +0530
+
+    feat(workspaces): add public/private visibility, join requests, and admin approval workflow
+
+[33mcommit ae49250d981136c7f63f074c384d8cdbbf70c71c[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Fri Aug 28 10:06:48 2026 +0530
+
+    feat: implement workspace management and frontend integration
+
+[33mcommit 6d1c42160eea725905cb4821445210e70a7fcd74[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Thu Aug 27 08:37:41 2026 +0530
+
+     add workspace authorization
+
+[33mcommit e02f223123ae2cb646a42c280c7abde97c1289bb[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Sat Aug 22 17:36:28 2026 +0530
+
+     establish React authentication foundation
+
+[33mcommit 702995a6a2293f84351e21efaeb9ab06606d7e4d[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Sat Aug 22 10:46:06 2026 +0530
+
+    feat: initialize React frontend
+
+[33mcommit 474d7521bbade76b57b49744ae4e9bde4faa47a3[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Sat Aug 22 10:01:37 2026 +0530
+
+    refactor: establish StudyGram foundation
+
+[33mcommit ecacb8905ef67fabebcdc355b5c4ae444416e0b7[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Fri Jan 9 11:06:56 2026 +0530
+
+    implement message deletion and media config
+
+[33mcommit fba80ea592e1d96e5fff7d86c9fb8b325ec83015[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Fri Jan 9 10:46:50 2026 +0530
+
+    implement authentication flow
+
+[33mcommit b8a47a0acd6eadac6ca534e8e4bb1ab2597c018b[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Fri Jan 9 10:38:38 2026 +0530
+
+    implement user profile and settings
+
+[33mcommit 5ac56f0e32e0231c62fa4d7eeddc549853211dfe[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Fri Jan 9 10:21:12 2026 +0530
+
+    implement room CRUD operations
+
+[33mcommit 08eac5230cf345267d9284b8a569b1b97cccbc43[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Tue Jan 6 20:55:37 2026 +0530
+
+    implement room detail, messaging and auto-join
+
+[33mcommit bb16d8757726f9d1054a9aa9bc7befe7d7c211a7[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Tue Jan 6 20:18:33 2026 +0530
+
+    feat: implement home page room listing and search
+
+[33mcommit abf41f74f67d6ea9b84efec328ac299dd199be60[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Sun Jan 4 20:56:08 2026 +0530
+
+    Finalize core models, admin setup, and initial migrations
+
+[33mcommit 336448cfcf850aa03a28374459ee6254b480f28c[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Sat Jan 3 19:59:10 2026 +0530
+
+    create base app and register it
+
+[33mcommit a0b5c93427efb3cd1faadbe95e51f3bacd405cc8[m
+Author: basil <basilpaul71136@gmail.com>
+Date:   Sat Jan 3 19:45:23 2026 +0530
+
+    Initial Django project setup

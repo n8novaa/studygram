@@ -11,11 +11,14 @@ import WorkspaceOverview from '../components/workspace/overview/WorkspaceOvervie
 import WorkspaceEditForm from '../components/workspace/overview/WorkspaceEditForm';
 import WorkspaceMembers from '../components/workspace/members/workspaceMembers';
 import WorkspaceFiles from '../components/workspace/files/WorkspaceFiles';
+import WorkspaceChannels from '../components/workspace/channels/WorkspaceChannels';
 import WorkspaceInviteModal from '../components/workspace/members/WorkspaceInviteModal';
+import ConfirmModal from '../components/common/ConfirmModal';
 import {
   FolderIcon,
   UsersIcon,
   SparklesIcon,
+  HashIcon,
 } from '../components/common/Icons';
 import { useToast } from '../components/common/ToastContext';
 import '../styles/pages/workspace-detail.css';
@@ -33,6 +36,7 @@ function WorkspaceDetail() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
 
   const [name, setName] = useState('');
@@ -111,18 +115,13 @@ function WorkspaceDetail() {
   }
 
   async function handleDelete() {
-    const confirmed = window.confirm(
-      'Are you sure you want to delete this workspace? All uploaded files and notes will be permanently lost.'
-    );
-
-    if (!confirmed) return;
-
     try {
       setDeleting(true);
       setError('');
 
       await deleteWorkspace(accessToken, id);
       addToast('Workspace deleted.', 'info');
+      setShowDeleteModal(false);
       navigate('/app/workspaces', { replace: true });
     } catch (err) {
       setError(err?.message || 'Failed to delete workspace.');
@@ -151,7 +150,7 @@ function WorkspaceDetail() {
     return (
       <main className="workspace-detail-page">
         <div className="workspace-detail-card" style={{ borderColor: 'var(--danger-border)', alignItems: 'center' }}>
-          <p style={{ color: '#fb7185' }}>{error || 'Workspace not found.'}</p>
+          <p style={{ color: 'var(--danger-text)' }}>{error || 'Workspace not found.'}</p>
         </div>
       </main>
     );
@@ -173,7 +172,7 @@ function WorkspaceDetail() {
         saving={saving}
         deleting={deleting}
         onEdit={startEditing}
-        onDelete={handleDelete}
+        onDelete={() => setShowDeleteModal(true)}
         onInvite={() => setShowInviteModal(true)}
       />
 
@@ -186,6 +185,15 @@ function WorkspaceDetail() {
         >
           <SparklesIcon size={16} />
           <span>Overview</span>
+        </button>
+
+        <button
+          type="button"
+          className={`workspace-tab-btn ${activeSection === 'channels' ? 'active' : ''}`}
+          onClick={() => handleSectionChange('channels')}
+        >
+          <HashIcon size={16} />
+          <span>Channels</span>
         </button>
 
         <button
@@ -207,41 +215,58 @@ function WorkspaceDetail() {
         </button>
       </nav>
 
-      {/* Detail Content Card */}
-      <div className="workspace-detail-card">
-        {activeSection === 'overview' && (
-          <>
-            {editing ? (
-              <WorkspaceEditForm
-                name={name}
-                description={description}
-                visibility={visibility}
-                saving={saving}
-                formError={formError}
-                onNameChange={(e) => setName(e.target.value)}
-                onDescriptionChange={(e) => setDescription(e.target.value)}
-                onVisibilityChange={(e) => setVisibility(e.target.value)}
-                onSave={handleSave}
-                onCancel={cancelEditing}
-              />
-            ) : (
-              <WorkspaceOverview workspace={workspace} />
-            )}
-          </>
-        )}
+      {/* Content Area */}
+      {activeSection === 'channels' ? (
+        <WorkspaceChannels workspace={workspace} isAdmin={isAdmin} />
+      ) : (
+        <div className="workspace-detail-card">
+          {activeSection === 'overview' && (
+            <>
+              {editing ? (
+                <WorkspaceEditForm
+                  name={name}
+                  description={description}
+                  visibility={visibility}
+                  saving={saving}
+                  formError={formError}
+                  onNameChange={(e) => setName(e.target.value)}
+                  onDescriptionChange={(e) => setDescription(e.target.value)}
+                  onVisibilityChange={(e) => setVisibility(e.target.value)}
+                  onSave={handleSave}
+                  onCancel={cancelEditing}
+                />
+              ) : (
+                <WorkspaceOverview workspace={workspace} />
+              )}
+            </>
+          )}
 
-        {activeSection === 'files' && (
-          <WorkspaceFiles workspaceId={workspace.id} isAdmin={isAdmin} />
-        )}
+          {activeSection === 'files' && (
+            <WorkspaceFiles workspaceId={workspace.id} isAdmin={isAdmin} />
+          )}
 
-        {activeSection === 'members' && (
-          <WorkspaceMembers
-            workspace={workspace}
-            isAdmin={isAdmin}
-            onInvite={() => setShowInviteModal(true)}
-          />
-        )}
-      </div>
+          {activeSection === 'members' && (
+            <WorkspaceMembers
+              workspace={workspace}
+              isAdmin={isAdmin}
+              onInvite={() => setShowInviteModal(true)}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Delete Workspace Confirm Modal */}
+      {showDeleteModal && (
+        <ConfirmModal
+          title="Delete Workspace"
+          message="Are you sure you want to delete this workspace? All uploaded files, channels, and notes will be permanently lost. This action cannot be undone."
+          confirmText="Delete Workspace"
+          variant="danger"
+          loading={deleting}
+          onConfirm={handleDelete}
+          onCancel={() => setShowDeleteModal(false)}
+        />
+      )}
 
       {/* Invite Modal */}
       {showInviteModal && (

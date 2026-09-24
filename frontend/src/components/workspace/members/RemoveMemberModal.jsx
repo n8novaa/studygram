@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { CloseIcon } from '../../common/Icons';
 
 function RemoveMemberModal({
   member,
@@ -7,6 +8,17 @@ function RemoveMemberModal({
   busy,
 }) {
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.key === 'Escape' && !busy) {
+        onClose();
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [busy, onClose]);
 
   async function handleConfirm() {
     setError('');
@@ -47,7 +59,7 @@ function RemoveMemberModal({
             disabled={busy}
             aria-label="Close"
           >
-            ×
+            <CloseIcon size={16} />
           </button>
         </div>
 

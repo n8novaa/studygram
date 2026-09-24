@@ -32,55 +32,71 @@ export function ToastProvider({ children }) {
         gap: '8px',
         pointerEvents: 'none'
       }}>
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            className={`toast-item toast-${toast.type} animate-fade-in`}
-            style={{
-              pointerEvents: 'auto',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '10px 14px',
-              background: '#ffffff',
-              border: '1px solid #dfdfdc',
-              borderRadius: '8px',
-              boxShadow: '0 4px 16px rgba(15, 15, 15, 0.1), 0 1px 3px rgba(15, 15, 15, 0.05)',
-              color: '#37352f',
-              fontSize: '13.5px',
-              fontWeight: '500',
-              maxWidth: '360px'
-            }}
-          >
-            <span style={{
-              color: toast.type === 'error' ? '#c5221f' : toast.type === 'success' ? '#137333' : '#2383e2',
-              display: 'flex',
-              alignItems: 'center'
-            }}>
-              {toast.type === 'success' ? <CheckIcon size={15} /> : <ShieldIcon size={15} />}
-            </span>
-            <span style={{ flex: 1, lineHeight: 1.4 }}>{toast.message}</span>
-            <button
-              type="button"
-              onClick={() => removeToast(toast.id)}
+        {toasts.map((toast) => {
+          const iconColor =
+            toast.type === 'error'
+              ? 'var(--danger)'
+              : toast.type === 'success'
+              ? 'var(--success)'
+              : 'var(--text-secondary)';
+
+          const borderColor =
+            toast.type === 'error'
+              ? 'var(--danger-border)'
+              : toast.type === 'success'
+              ? 'var(--success-border)'
+              : 'var(--border-default)';
+
+          return (
+            <div
+              key={toast.id}
+              className={`toast-item toast-${toast.type} animate-fade-in`}
               style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#9b9a97',
-                cursor: 'pointer',
+                pointerEvents: 'auto',
                 display: 'flex',
-                padding: '2px'
+                alignItems: 'center',
+                gap: '10px',
+                padding: '10px 14px',
+                background: 'var(--bg-card)',
+                border: `1px solid ${borderColor}`,
+                borderRadius: 'var(--radius-md)',
+                boxShadow: 'var(--shadow-md)',
+                color: 'var(--text-primary)',
+                fontSize: '13.5px',
+                fontWeight: '500',
+                maxWidth: '360px',
+                animation: 'fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
               }}
             >
-              <CloseIcon size={13} />
-            </button>
-          </div>
-        ))}
+              <span style={{ color: iconColor, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                {toast.type === 'success' ? <CheckIcon size={15} /> : <ShieldIcon size={15} />}
+              </span>
+              <span style={{ flex: 1, lineHeight: 1.4 }}>{toast.message}</span>
+              <button
+                type="button"
+                onClick={() => removeToast(toast.id)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  padding: '2px',
+                  flexShrink: 0,
+                }}
+                aria-label="Dismiss notification"
+              >
+                <CloseIcon size={13} />
+              </button>
+            </div>
+          );
+        })}
       </div>
     </ToastContext.Provider>
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useToast() {
   const context = useContext(ToastContext);
   if (!context) {

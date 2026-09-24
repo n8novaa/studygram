@@ -13,6 +13,7 @@ import WorkspaceBreadcrumbs from './WorkspaceBreadcrumbs';
 import CreateFolderForm from './CreateFolderForm';
 import WorkspaceFolderItem from './WorkspaceFolderItem';
 import WorkspaceFileItem from './WorkspaceFileItem';
+import ConfirmModal from '../../common/ConfirmModal';
 import {
   FolderPlusIcon,
   UploadIcon,
@@ -36,6 +37,11 @@ function WorkspaceFiles({ workspaceId, isAdmin = false }) {
   const [newFolderName, setNewFolderName] = useState('');
   const [creatingFolder, setCreatingFolder] = useState(false);
   const [uploading, setUploading] = useState(false);
+
+  // Confirm delete modals
+  const [confirmDeleteFolder, setConfirmDeleteFolder] = useState(null);
+  const [confirmDeleteFile, setConfirmDeleteFile] = useState(null);
+  const [deletingItem, setDeletingItem] = useState(false);
 
   const currentFolder = folderPath.length > 0 ? folderPath[folderPath.length - 1] : null;
   const currentFolderId = currentFolder?.id ?? null;
@@ -102,21 +108,26 @@ function WorkspaceFiles({ workspaceId, isAdmin = false }) {
   }
 
   async function handleDeleteFolder(folder) {
-    const confirmed = window.confirm(
-      `Delete folder "${folder.name}" and all its contents?`
-    );
-    if (!confirmed) return;
+    setConfirmDeleteFolder(folder);
+  }
+
+  async function confirmFolderDelete() {
+    const folder = confirmDeleteFolder;
+    if (!folder) return;
 
     try {
+      setDeletingItem(true);
       setBusyItemId(`folder-${folder.id}`);
       setError('');
       await deleteWorkspaceFolder(accessToken, workspaceId, folder.id);
       addToast(`Folder "${folder.name}" deleted.`, 'info');
+      setConfirmDeleteFolder(null);
       await loadContents();
     } catch (err) {
       setError(err?.message || 'Failed to delete folder.');
     } finally {
       setBusyItemId(null);
+      setDeletingItem(false);
     }
   }
 
@@ -158,19 +169,26 @@ function WorkspaceFiles({ workspaceId, isAdmin = false }) {
   }
 
   async function handleDeleteFile(file) {
-    const confirmed = window.confirm(`Are you sure you want to delete "${file.name}"?`);
-    if (!confirmed) return;
+    setConfirmDeleteFile(file);
+  }
+
+  async function confirmFileDelete() {
+    const file = confirmDeleteFile;
+    if (!file) return;
 
     try {
+      setDeletingItem(true);
       setBusyItemId(`file-${file.id}`);
       setError('');
       await deleteWorkspaceFile(accessToken, workspaceId, file.id);
       addToast(`Deleted "${file.name}".`, 'info');
+      setConfirmDeleteFile(null);
       await loadContents();
     } catch (err) {
       setError(err?.message || 'Failed to delete file.');
     } finally {
       setBusyItemId(null);
+      setDeletingItem(false);
     }
   }
 
@@ -219,8 +237,8 @@ function WorkspaceFiles({ workspaceId, isAdmin = false }) {
           padding: '12px 16px',
           background: 'var(--danger-bg)',
           border: '1px solid var(--danger-border)',
-          borderRadius: '8px',
-          color: '#fb7185',
+          borderRadius: 'var(--radius-md)',
+          color: 'var(--danger-text)',
           fontSize: '13.5px',
         }}>
           {error}
@@ -293,6 +311,31 @@ function WorkspaceFiles({ workspaceId, isAdmin = false }) {
             />
           ))}
         </div>
+      )}
+      {/* Folder delete confirm */}
+      {confirmDeleteFolder && (
+        <ConfirmModal
+          title="Delete Folder"
+          message={`Delete "${confirmDeleteFolder.name}" and all its contents? This cannot be undone.`}
+          confirmText="Delete Folder"
+          variant="danger"
+          loading={deletingItem}
+          onConfirm={confirmFolderDelete}
+          onCancel={() => setConfirmDeleteFolder(null)}
+        />
+      )}
+
+      {/* File delete confirm */}
+      {confirmDeleteFile && (
+        <ConfirmModal
+          title="Delete File"
+          message={`Are you sure you want to delete "${confirmDeleteFile.name}"? This cannot be undone.`}
+          confirmText="Delete File"
+          variant="danger"
+          loading={deletingItem}
+          onConfirm={confirmFileDelete}
+          onCancel={() => setConfirmDeleteFile(null)}
+        />
       )}
     </section>
   );

@@ -236,7 +236,7 @@ function Workspaces() {
         </div>
       ) : error ? (
         <div className="workspace-state-card" style={{ borderColor: 'var(--danger-border)' }}>
-          <p style={{ color: '#fb7185' }}>{error}</p>
+          <p style={{ color: 'var(--danger-text)' }}>{error}</p>
         </div>
       ) : workspaces.length === 0 ? (
         <div className="workspace-state-card">

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createWorkspaceInvitation } from '../../../services/workspaceService';
 import { CopyIcon, CheckIcon, CloseIcon, ShareIcon, SparklesIcon } from '../../common/Icons';
 import { useToast } from '../../common/ToastContext';
@@ -10,6 +10,16 @@ function WorkspaceInviteModal({ workspace, accessToken, onClose }) {
   const [error, setError] = useState('');
 
   const { addToast } = useToast();
+
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.key === 'Escape' && !generating) {
+        onClose();
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [generating, onClose]);
 
   async function handleGenerateInvitation() {
     try {

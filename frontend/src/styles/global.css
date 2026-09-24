@@ -216,6 +216,21 @@ a {
   border-color: #fca5a5;
 }
 
+.confirm-btn-danger {
+  background: var(--danger);
+  color: #ffffff;
+  border: 1px solid var(--danger);
+}
+
+.confirm-btn-danger:hover:not(:disabled) {
+  background: var(--danger-hover);
+  border-color: var(--danger-hover);
+}
+
+.confirm-btn-danger:disabled {
+  opacity: 0.6;
+}
+
 /* Visibility Badges */
 .workspace-visibility-badge {
   display: inline-flex;

@@ -66,26 +66,29 @@ function handleRemove(member) {
 
 async function confirmRemoveMember() {
   if (!removeMember || !isAdmin) {
-    return
+    return;
   }
 
+  const memberName = removeMember.user || 'member';
+
   try {
-    setActionUserId(removeMember.user_id)
-    setError('')
+    setActionUserId(removeMember.user_id);
+    setError('');
 
     await removeWorkspaceMember(
       accessToken,
       workspace.id,
       removeMember.user_id,
-    )
+    );
 
-    setRemoveMember(null)
-
-    await loadMembers()
+    setRemoveMember(null);
+    await loadMembers();
+    addToast(`Removed @${memberName} from workspace.`, 'info');
   } catch (err) {
-    throw err
+    setError(err?.message || 'Failed to remove member.');
+    addToast(err?.message || 'Failed to remove member.', 'error');
   } finally {
-    setActionUserId(null)
+    setActionUserId(null);
   }
 }
 
@@ -121,8 +124,8 @@ async function confirmRemoveMember() {
           padding: '12px 16px',
           background: 'var(--danger-bg)',
           border: '1px solid var(--danger-border)',
-          borderRadius: '8px',
-          color: '#fb7185',
+          borderRadius: 'var(--radius-md)',
+          color: 'var(--danger-text)',
           fontSize: '13.5px',
         }}>
           {error}

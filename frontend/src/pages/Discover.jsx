@@ -212,8 +212,8 @@ function Discover() {
           padding: '12px 16px',
           background: 'var(--danger-bg)',
           border: '1px solid var(--danger-border)',
-          borderRadius: '8px',
-          color: '#fb7185',
+          borderRadius: 'var(--radius-md)',
+          color: 'var(--danger-text)',
           fontSize: '13.5px',
         }}>
           {error}

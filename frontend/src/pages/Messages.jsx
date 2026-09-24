@@ -18,6 +18,7 @@ import {
   CloseIcon,
 } from '../components/common/Icons';
 import { useToast } from '../components/common/ToastContext';
+import ConfirmModal from '../components/common/ConfirmModal';
 import '../styles/pages/messages.css';
 
 function Messages() {
@@ -42,6 +43,20 @@ function Messages() {
   const [creatingRoom, setCreatingRoom] = useState(false);
   const [createModalError, setCreateModalError] = useState('');
 
+  // Delete room confirm modal
+  const [showDeleteRoomModal, setShowDeleteRoomModal] = useState(false);
+  const [deletingRoom, setDeletingRoom] = useState(false);
+
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'Escape' && showCreateModal && !creatingRoom) {
+        setShowCreateModal(false);
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showCreateModal, creatingRoom]);
+
   // Load Rooms list
   const loadRooms = useCallback(async () => {
     if (!accessToken) return;
@@ -60,11 +75,11 @@ function Messages() {
         return current;
       });
     } catch (err) {
-      console.error(err);
+      addToast(err?.message || 'Failed to load study rooms.', 'error');
     } finally {
       setLoadingRooms(false);
     }
-  }, [accessToken, searchRoomQuery]);
+  }, [accessToken, searchRoomQuery, addToast]);
 
   useEffect(() => {
     let isMounted = true;
@@ -85,11 +100,11 @@ function Messages() {
       const data = await getRoomMessages(accessToken, roomId);
       setMessages(Array.isArray(data) ? data : data?.results ?? []);
     } catch (err) {
-      console.error(err);
+      addToast(err?.message || 'Failed to load messages.', 'error');
     } finally {
       setLoadingMessages(false);
     }
-  }, [accessToken]);
+  }, [accessToken, addToast]);
 
   const selectedRoomId = selectedRoom?.id;
 
@@ -172,18 +187,18 @@ function Messages() {
 
   async function handleDeleteRoom() {
     if (!selectedRoom) return;
-    const confirmed = window.confirm(
-      `Delete room "${selectedRoom.name}"? This action cannot be undone.`
-    );
-    if (!confirmed) return;
 
     try {
+      setDeletingRoom(true);
       await deleteRoom(accessToken, selectedRoom.id);
       addToast(`Room "${selectedRoom.name}" deleted.`, 'info');
+      setShowDeleteRoomModal(false);
       setSelectedRoom(null);
       await loadRooms();
     } catch (err) {
       addToast(err.message || 'Failed to delete room.', 'error');
+    } finally {
+      setDeletingRoom(false);
     }
   }
 
@@ -279,7 +294,7 @@ function Messages() {
                   <button
                     type="button"
                     className="item-action-btn btn-delete"
-                    onClick={handleDeleteRoom}
+                    onClick={() => setShowDeleteRoomModal(true)}
                     title="Delete study room"
                   >
                     <TrashIcon size={14} />
@@ -371,6 +386,19 @@ function Messages() {
         )}
       </section>
 
+      {/* Delete Room Confirm Modal */}
+      {showDeleteRoomModal && selectedRoom && (
+        <ConfirmModal
+          title="Delete Study Room"
+          message={`Are you sure you want to delete "${selectedRoom.name}"? All messages in this room will be permanently lost.`}
+          confirmText="Delete Room"
+          variant="danger"
+          loading={deletingRoom}
+          onConfirm={handleDeleteRoom}
+          onCancel={() => setShowDeleteRoomModal(false)}
+        />
+      )}
+
       {/* Create Room Modal */}
       {showCreateModal && (
         <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && setShowCreateModal(false)}>
@@ -449,8 +477,8 @@ function Messages() {
                   padding: '10px 14px',
                   background: 'var(--danger-bg)',
                   border: '1px solid var(--danger-border)',
-                  borderRadius: '8px',
-                  color: '#fb7185',
+                  borderRadius: 'var(--radius-md)',
+                  color: 'var(--danger-text)',
                   fontSize: '13px',
                 }}>
                   {createModalError}

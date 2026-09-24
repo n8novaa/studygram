@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { registerUser } from '../auth/authService';
@@ -15,9 +15,15 @@ function Register() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { loginUser } = useAuth();
+  const { user, loginUser, loading: authLoading } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user && !authLoading) {
+      navigate('/app', { replace: true });
+    }
+  }, [user, authLoading, navigate]);
 
   async function handleSubmit(event) {
     event.preventDefault();

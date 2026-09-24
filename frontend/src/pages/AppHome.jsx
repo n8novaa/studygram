@@ -29,7 +29,7 @@ function AppHome() {
   const [joinRequests, setJoinRequests] = useState([]);
  
   const [loading, setLoading] = useState(true);
-  const [, setError] = useState('');
+  const [error, setError] = useState('');
   const [processingRequestId, setProcessingRequestId] = useState(null);
 
   useEffect(() => {
@@ -207,6 +207,37 @@ function AppHome() {
           </Link>
         </div>
       </section>
+
+      {error && (
+        <div style={{
+          padding: '12px 16px',
+          background: 'var(--danger-bg)',
+          border: '1px solid var(--danger-border)',
+          borderRadius: 'var(--radius-md)',
+          color: 'var(--danger-text)',
+          fontSize: '13px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={() => setError('')}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'inherit',
+              display: 'flex',
+              padding: '2px',
+            }}
+            aria-label="Dismiss error"
+          >
+            <CloseIcon size={14} />
+          </button>
+        </div>
+      )}
 
       {/* Pending Join Requests */}
       <section className="home-section home-requests-section">
