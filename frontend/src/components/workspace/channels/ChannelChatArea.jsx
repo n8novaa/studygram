@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { HashIcon } from '../../common/Icons';
 import { useToast } from '../../common/ToastContext';
+
 import {
   sendChannelMessage,
   deleteChannelMessage,
@@ -26,6 +27,7 @@ function ChannelChatArea({
   onEditChannel,
   showMembers,
   onToggleMembers,
+  onToggleSidebar,
   onOpenMobileSidebar,
   onMessageSent,
   onMessageUpdated,
@@ -46,6 +48,41 @@ function ChannelChatArea({
   const [highlightedMessageId, setHighlightedMessageId] = useState(null);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
+  const [showChannelDescription, setShowChannelDescription] = useState(false);
+  const descriptionPanelRef = useRef(null);
+  const channelNameButtonRef = useRef(null);
+
+  useEffect(() => {
+  setShowChannelDescription(false);
+}, [channel?.id]);
+
+useEffect(() => {
+  if (!showChannelDescription) return;
+
+  function handleOutsideClick(event) {
+    if (
+      descriptionPanelRef.current &&
+      !descriptionPanelRef.current.contains(event.target) &&
+      !channelNameButtonRef.current?.contains(event.target)
+    ) {
+      setShowChannelDescription(false);
+    }
+  }
+
+  function handleEscape(event) {
+    if (event.key === 'Escape') {
+      setShowChannelDescription(false);
+    }
+  }
+
+  document.addEventListener('mousedown', handleOutsideClick);
+  document.addEventListener('keydown', handleEscape);
+
+  return () => {
+    document.removeEventListener('mousedown', handleOutsideClick);
+    document.removeEventListener('keydown', handleEscape);
+  };
+}, [showChannelDescription]);
 
   useEffect(() => {
     if (channel?.id) {
@@ -256,7 +293,24 @@ function ChannelChatArea({
         onEditChannel={onEditChannel}
         onToggleMembers={onToggleMembers}
         onOpenMobileSidebar={onOpenMobileSidebar}
+        onToggleSidebar={onToggleSidebar}
+        showChannelDescription={showChannelDescription}
+        onToggleChannelDescription={() =>
+          setShowChannelDescription((prev) => !prev)
+        }
+        channelNameButtonRef={channelNameButtonRef}
       />
+
+      {showChannelDescription && (
+        <div
+          ref={descriptionPanelRef}
+          className="channel-description-panel"
+          role="region"
+          aria-label={`${channel.name} description`}
+        >
+          <p>{channel.description || 'No description available.'}</p>
+        </div>
+      )}
 
       <div className="channel-messages-stream">
         <ChannelWelcome channel={channel} />

@@ -11,6 +11,13 @@
   user-select: none;
   padding: 14px 10px;
   gap: 16px;
+  min-width: 0;
+  opacity: 1;
+  transform: translateX(0);
+
+  transition:
+    transform 300ms ease-in-out,
+    opacity 200ms ease-in-out;
 }
 
 .members-group {

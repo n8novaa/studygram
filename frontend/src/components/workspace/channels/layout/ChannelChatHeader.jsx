@@ -14,35 +14,37 @@ function ChannelChatHeader({
   onEditChannel,
   onToggleMembers,
   onOpenMobileSidebar,
+  onToggleSidebar,
+  showChannelDescription,
+  onToggleChannelDescription,
+  channelNameButtonRef,
 }) {
   return (
     <header className="channel-chat-header">
       <div className="channel-header-left">
-        {onOpenMobileSidebar && (
+        {(onToggleSidebar || onOpenMobileSidebar) && (
           <button
             type="button"
             className="chat-header-btn mobile-channels-btn"
-            onClick={onOpenMobileSidebar}
-            title="View channels"
-            aria-label="View channels"
+            onClick={onToggleSidebar || onOpenMobileSidebar}
+            title="Toggle channels sidebar"
+            aria-label="Toggle channels sidebar"
           >
             <MenuIcon size={16} />
           </button>
         )}
 
-        <div className="channel-header-title-box">
+        <button
+          ref={channelNameButtonRef}
+          type="button"
+          className="channel-header-title-box"
+          onClick={onToggleChannelDescription}
+          aria-expanded={showChannelDescription}
+          aria-label={`Toggle description for ${channel.name}`}
+        >
           <HashIcon size={18} />
           <span>{channel.name}</span>
-        </div>
-
-        {channel.description && (
-          <>
-            <div className="channel-header-divider" />
-            <span className="channel-header-topic" title={channel.description}>
-              {channel.description}
-            </span>
-          </>
-        )}
+        </button>
       </div>
 
       <div className="channel-header-actions">

@@ -222,9 +222,8 @@
   order: 2;
 }
 
-.discord-message-row.other-message .discord-hover-actions {
-  order: 3;
-}
+
+
 
 /* Subsequent grouped messages */
 .discord-message-row.is-grouped {
@@ -276,6 +275,7 @@
   gap: 2px;
 
   position: relative;
+  isolation: isolate;
 }
 
 .discord-message-header {
@@ -426,22 +426,20 @@
 ========================================= */
 
 .discord-hover-actions {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: calc(100% + 10px);
+  right: auto;
   z-index: 10;
-
-  flex-shrink: 0;
-  align-self: flex-end;
 
   display: flex;
   align-items: center;
   gap: 3px;
-
   padding: 3px;
 
   background: var(--bg-card);
   border: 1px solid var(--border-default);
   border-radius: 8px;
-
   box-shadow: var(--shadow-sm);
 
   opacity: 0;
@@ -449,7 +447,6 @@
   pointer-events: none;
 
   transform: translateY(3px);
-
   transition:
     opacity var(--transition-fast),
     transform var(--transition-fast),
@@ -461,8 +458,20 @@
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-
   transform: translateY(0);
+}
+
+/* Other members' messages: actions on the right of the message content */
+.discord-message-row.other-message .discord-hover-actions {
+  top: 0;
+  left: calc(100% + 10px);
+  right: auto;
+}
+
+/* Your messages: actions on the left of the message content */
+.discord-message-row.own-message .discord-hover-actions {
+  left: auto;
+  right: calc(100% + 10px);
 }
 
 /* =========================================
@@ -993,3 +1002,31 @@
   color: var(--text-muted);
 }
 
+/* Expandable channel description */
+.channel-description-panel {
+  flex-shrink: 0;
+  padding: 12px 20px;
+  background: #fff;
+  border-bottom: 1px solid var(--border-default);
+  animation: channel-description-expand 160ms ease-out;
+}
+
+.channel-description-panel p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+@keyframes channel-description-expand {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

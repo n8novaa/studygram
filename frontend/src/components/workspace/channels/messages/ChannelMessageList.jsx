@@ -1,5 +1,6 @@
 import { formatDateHeader } from '../chat/messageUtils';
 import ChannelMessageItem from './ChannelMessageItem';
+import React from 'react';
 
 function ChannelMessageList({
   workspace,
@@ -42,7 +43,7 @@ function ChannelMessageList({
       ) : null}
 
       {processedMessages.map((message) => (
-        <div key={message.renderKey}>
+        <React.Fragment key={message.renderKey}>
           {message.showDateDivider && (
             <div className="chat-date-divider">
               <span className="chat-date-label">
@@ -75,7 +76,7 @@ function ChannelMessageList({
             onReaction={onReaction}
             onReply={onReply}
           />
-        </div>
+        </React.Fragment>
       ))}
 
       <div ref={messagesEndRef} />

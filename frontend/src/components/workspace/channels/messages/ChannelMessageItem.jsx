@@ -152,7 +152,7 @@ function ChannelMessageItem({
             />
           </>
         )}
-      </div>
+      
 
       <div className="discord-hover-actions">
         <ChannelMessageReactions
@@ -178,6 +178,7 @@ function ChannelMessageItem({
           onDeleteMessage={onDeleteMessage}
         />
       </div>
+    </div>
     </div>
   );
 }

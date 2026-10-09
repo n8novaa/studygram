@@ -24,6 +24,7 @@ function WorkspaceChannels({ workspace, isAdmin }) {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingChannel, setEditingChannel] = useState(null);
@@ -151,7 +152,7 @@ function WorkspaceChannels({ workspace, isAdmin }) {
     <div
       className={`workspace-channels-layout ${
         showMembers ? 'with-members-open' : ''
-      }`}
+      } ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}
     >
       {/* 1. Left: Discord Channels Sidebar */}
       <ChannelSidebar
@@ -183,6 +184,13 @@ function WorkspaceChannels({ workspace, isAdmin }) {
         isAdmin={isAdmin}
         onEditChannel={(ch) => setEditingChannel(ch)}
         showMembers={showMembers}
+        onToggleSidebar={() => {
+          if (window.matchMedia('(max-width: 680px)').matches) {
+            setMobileSidebarOpen((prev) => !prev);
+          } else {
+            setSidebarCollapsed((prev) => !prev);
+          }
+        }}
         onToggleMembers={() => setShowMembers((prev) => !prev)}
         onOpenMobileSidebar={() => setMobileSidebarOpen(true)}
         onMessageSent={handleMessageSent}
