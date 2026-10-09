@@ -1,0 +1,23 @@
+/* =========================================================
+   StudyGram — Discord-Style Workspace Channels & Chat Styles
+   Minimalist Modern Architecture & Discord UI Paradigm
+   ========================================================= */
+
+.workspace-channels-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  height: 700px;
+  min-height: 560px;
+  background: #ffffff;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.workspace-channels-layout.with-members-open {
+  grid-template-columns: 240px 1fr 220px;
+}
+

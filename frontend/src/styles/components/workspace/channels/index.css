@@ -1,0 +1,12 @@
+/* StudyGram Workspace Channels CSS
+   Split from the original stylesheet without changing rule contents.
+   Keep import order unchanged: duplicate selectors rely on cascade order.
+*/
+@import './00-base-layout.css';
+@import './01-sidebar.css';
+@import './02-chat-and-messages.css';
+@import './03-members.css';
+@import './04-modals.css';
+@import './05-states-and-responsive.css';
+@import './06-replies-and-more-actions.css';
+@import './07-message-header-ordering.css';

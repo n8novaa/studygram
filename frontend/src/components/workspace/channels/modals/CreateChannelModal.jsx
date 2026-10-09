@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { createWorkspaceChannel } from '../../../services/workspaceChannelService';
-import { HashIcon, CloseIcon } from '../../common/Icons';
-import { useToast } from '../../common/ToastContext';
+import { createWorkspaceChannel } from '../../../../services/workspaceChannelService';
+import { HashIcon, CloseIcon } from '../../../common/Icons';
+import { useToast } from '../../../common/ToastContext';
 
 function slugifyChannelName(input) {
   return input

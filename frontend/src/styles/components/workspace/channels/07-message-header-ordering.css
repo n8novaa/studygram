@@ -1,0 +1,54 @@
+/* =========================================================
+   Message Header Ordering
+   Own messages:  timestamp → role badge → username → avatar
+   Other messages: avatar → username → role badge → timestamp
+   ========================================================= */
+
+/* Own messages: timestamp, badge, username */
+.discord-message-row.own-message .discord-message-header .discord-message-timestamp {
+  order: 1;
+}
+
+.discord-message-row.own-message .discord-message-header .discord-role-pill {
+  order: 2;
+}
+
+.discord-message-row.own-message .discord-message-header .discord-message-author {
+  order: 3;
+}
+
+/* Other messages: username, badge, timestamp */
+.discord-message-row.other-message .discord-message-header .discord-message-author {
+  order: 1;
+}
+
+.discord-message-row.other-message .discord-message-header .discord-role-pill {
+  order: 2;
+}
+
+.discord-message-row.other-message .discord-message-header .discord-message-timestamp {
+  order: 3;
+}
+
+/* Keep own-message headers anchored to the right */
+.discord-message-row.own-message .discord-message-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+/* Keep other-message headers anchored to the left */
+.discord-message-row.other-message .discord-message-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+/* Prevent header items from stretching or shifting */
+.discord-message-header .discord-message-timestamp,
+.discord-message-header .discord-role-pill,
+.discord-message-header .discord-message-author {
+  flex: 0 0 auto;
+}

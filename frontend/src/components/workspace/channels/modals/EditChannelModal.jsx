@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import {
   updateWorkspaceChannel,
   deleteWorkspaceChannel,
-} from '../../../services/workspaceChannelService';
-import { HashIcon, CloseIcon, TrashIcon } from '../../common/Icons';
-import { useToast } from '../../common/ToastContext';
-import ConfirmModal from '../../common/ConfirmModal';
+} from '../../../../services/workspaceChannelService';
+import { HashIcon, CloseIcon, TrashIcon } from '../../../common/Icons';
+import { useToast } from '../../../common/ToastContext';
+import ConfirmModal from '../../../common/ConfirmModal';
 
 function slugifyChannelName(input) {
   return input

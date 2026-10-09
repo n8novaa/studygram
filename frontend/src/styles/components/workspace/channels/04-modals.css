@@ -1,0 +1,160 @@
+/* =========================================================
+   4. Modals (Create & Edit Channel)
+   ========================================================= */
+
+.channel-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: fadeIn 0.12s ease;
+}
+
+.channel-modal-dialog {
+  background: #ffffff;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  width: 100%;
+  max-width: 440px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.channel-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.channel-modal-header h3 {
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.channel-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.channel-modal-close-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.channel-modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.channel-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.channel-field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.channel-name-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #fafaf9;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 0 10px;
+  gap: 6px;
+  transition: all var(--transition-fast);
+}
+
+.channel-name-input-wrapper:focus-within {
+  border-color: #18181b;
+  box-shadow: 0 0 0 1px #18181b;
+  background: #ffffff;
+}
+
+.channel-name-input-prefix {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.channel-name-input {
+  flex: 1;
+  height: 36px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.channel-desc-textarea {
+  width: 100%;
+  background: #fafaf9;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--text-primary);
+  outline: none;
+  resize: vertical;
+  min-height: 60px;
+  transition: all var(--transition-fast);
+}
+
+.channel-desc-textarea:focus {
+  border-color: #18181b;
+  box-shadow: 0 0 0 1px #18181b;
+  background: #ffffff;
+}
+
+.channel-input-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.channel-modal-error {
+  font-size: 12px;
+  color: #ef4444;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-xs);
+  padding: 8px 10px;
+}
+
+.channel-modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border-default);
+  background: #fafaf9;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+

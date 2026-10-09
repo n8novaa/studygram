@@ -1,0 +1,110 @@
+/* =========================================================
+   5. Empty & Loading States
+   ========================================================= */
+
+.channel-empty-state {
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  padding: 40px 20px;
+  color: var(--text-muted);
+}
+
+.channel-empty-state h4 {
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.channel-empty-state p {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  max-width: 320px;
+  margin: 0;
+}
+
+/* Responsive queries */
+@media (max-width: 900px) {
+  .workspace-channels-layout.with-members-open {
+    grid-template-columns: 220px 1fr;
+  }
+  .channel-members-sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .workspace-channels-layout {
+    grid-template-columns: 1fr;
+    height: 600px;
+  }
+  .channel-sidebar {
+    display: none;
+  }
+  .channel-sidebar.mobile-open {
+    display: flex;
+    position: absolute;
+    inset: 0 0 0 0;
+    width: 260px;
+    z-index: 50;
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+.discord-replied-message {
+  position: relative;
+
+  margin-bottom: 6px;
+  padding: 6px 10px 6px 12px;
+
+  border-left: 3px solid var(--accent);
+  border-radius: 5px;
+
+  background: var(--bg-secondary);
+
+  max-width: min(520px, 100%);
+
+  overflow: hidden;
+
+  cursor: pointer;
+
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.discord-replied-message:hover {
+  background: var(--bg-hover);
+  border-left-color: var(--accent-hover, var(--accent));
+}
+
+.discord-replied-message-author {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+
+  color: var(--accent);
+
+  margin-bottom: 1px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.discord-replied-message-text {
+  font-size: 12px;
+  line-height: 17px;
+
+  color: var(--text-secondary);
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+

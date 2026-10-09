@@ -4,13 +4,13 @@ import {
   getWorkspaceChannels,
   getChannelMessages,
 } from '../../../services/workspaceChannelService';
-import ChannelSidebar from './ChannelSidebar';
+import ChannelSidebar from './sidebar/ChannelSidebar';
 import ChannelChatArea from './ChannelChatArea';
-import ChannelMemberList from './ChannelMemberList';
-import CreateChannelModal from './CreateChannelModal';
-import EditChannelModal from './EditChannelModal';
+import ChannelMemberList from './sidebar/ChannelMemberList';
+import CreateChannelModal from './modals/CreateChannelModal';
+import EditChannelModal from './modals/EditChannelModal';
 import { useToast } from '../../common/ToastContext';
-import '../../../styles/components/workspace/channels/workspace-channels.css';
+import '../../../styles/components/workspace/channels/index.css';
 
 function WorkspaceChannels({ workspace, isAdmin }) {
   const { accessToken, user } = useAuth();

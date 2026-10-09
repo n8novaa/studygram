@@ -1,4 +1,4 @@
-import { HashIcon, PlusIcon, SettingsIcon, CloseIcon } from '../../common/Icons';
+import { HashIcon, PlusIcon, SettingsIcon, CloseIcon } from '../../../common/Icons';
 
 function ChannelSidebar({
   channels = [],

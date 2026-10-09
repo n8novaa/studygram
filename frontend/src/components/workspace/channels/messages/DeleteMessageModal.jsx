@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CloseIcon } from '../../common/Icons';
+import { CloseIcon } from '../../../common/Icons';
 
 function DeleteMessageModal({
   message,

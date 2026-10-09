@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ShieldIcon, UsersIcon } from '../../common/Icons';
+import { ShieldIcon, UsersIcon } from '../../../common/Icons';
 
 function getAvatarColor(username = '') {
   const colors = [
