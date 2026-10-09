@@ -12,8 +12,9 @@ __pycache__/
 # Django
 db.sqlite3
 *.log
-local_settings.py
 media/
+workspace_files/
+backend/workspace_files/
 
 # Environment variables
 .env

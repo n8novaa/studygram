@@ -421,6 +421,54 @@
   background: rgba(0, 0, 0, 0.025);
 }
 
+.discord-message-row.highlighted {
+  background: var(--bg-hover);
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px var(--accent);
+  transition:
+    background var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.discord-message-row.own-message {
+  justify-content: flex-end;
+}
+.discord-message-row.own-message .discord-message-gutter {
+  order: 2;
+}
+
+.discord-message-row.own-message .discord-message-body-wrap {
+  order: 1;
+}
+
+.discord-message-row.own-message .discord-hover-actions {
+  order: 1;
+}
+
+.discord-message-row.own-message .discord-message-body-wrap {
+  order: 2;
+}
+
+.discord-message-row.own-message .discord-message-gutter {
+  order: 3;
+}
+
+.discord-message-row.other-message {
+  justify-content: flex-start;
+}
+
+.discord-message-row.other-message .discord-message-gutter {
+  order: 1;
+}
+
+.discord-message-row.other-message .discord-message-body-wrap {
+  order: 2;
+}
+
+.discord-message-row.other-message .discord-hover-actions {
+  order: 3;
+}
+
 /* Subsequent grouped messages */
 .discord-message-row.is-grouped {
   padding-top: 2px;
@@ -461,33 +509,59 @@
 }
 
 .discord-message-body-wrap {
-  flex: 1;
-  overflow: hidden;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 75%;
+  overflow: visible;
+
   display: flex;
   flex-direction: column;
   gap: 2px;
+
+  position: relative;
 }
 
 .discord-message-header {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: 6px;
+  row-gap: 2px;
+  min-height: 20px;
 }
 
 .discord-message-author {
+  margin: 0;
   font-size: 13.5px;
   font-weight: 650;
   color: var(--text-primary);
   cursor: pointer;
+  line-height: 1.3;
 }
 
+/* User role badges */
 .discord-role-pill {
-  font-size: 9.5px;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 9px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  padding: 1px 5px;
-  border-radius: 4px;
+  letter-spacing: 0.06em;
+
+  padding: 3px 7px;
+  border-radius: 5px;
+
+  line-height: 1;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.discord-role-pill.owner {
+  background: #fff7e6;
+  color: #a16207;
+  border: 1px solid #f3d28b;
 }
 
 .discord-role-pill.admin {
@@ -496,15 +570,11 @@
   border: 1px solid #dbeafe;
 }
 
-.discord-role-pill.owner {
-  background: #fefce8;
-  color: #b45309;
-  border: 1px solid #fef08a;
-}
-
 .discord-message-timestamp {
   font-size: 11px;
   color: var(--text-muted);
+  font-weight: 400;
+  white-space: nowrap;
 }
 
 .discord-message-text {
@@ -515,46 +585,519 @@
   word-break: break-word;
 }
 
-/* Floating Hover Action Bar */
-.discord-hover-actions {
-  position: absolute;
-  top: -12px;
-  right: 12px;
-  background: #ffffff;
+.message-edited-label {
+  margin-left: 6px;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.message-edit-container {
+  margin-top: 2px;
+  max-width: 100%;
+}
+
+.message-edit-container textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 7px 9px;
+  min-height: 42px;
+
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-sm);
+  border-radius: 6px;
+
+  background: #ffffff;
+  color: var(--text-primary);
+
+  font-family: inherit;
+  font-size: 13.5px;
+  line-height: 1.5;
+
+  resize: none;
+  outline: none;
+}
+
+.message-edit-container textarea:focus {
+  border-color: var(--border-default);
+  box-shadow: none;
+}
+
+.message-edit-actions {
   display: flex;
   align-items: center;
-  box-shadow: var(--shadow-sm);
-  padding: 2px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--transition-fast);
-  z-index: 5;
+  gap: 6px;
+  margin-top: 5px;
 }
 
-.discord-message-row:hover .discord-hover-actions {
-  opacity: 1;
-  pointer-events: auto;
-}
+.message-edit-actions button {
+  padding: 4px 9px;
+  border: 1px solid var(--border-default);
+  border-radius: 5px;
 
-.discord-action-btn {
-  background: transparent;
-  border: none;
+  background: #ffffff;
   color: var(--text-secondary);
+
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.4;
+
+  cursor: pointer;
+}
+
+.message-edit-actions button:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.message-edit-actions button:last-child {
+  background: #18181b;
+  border-color: #18181b;
+  color: #ffffff;
+}
+
+.message-edit-actions button:last-child:hover {
+  background: #09090b;
+}
+
+/* Floating Hover Action Bar */
+
+/* =========================================
+   Message Hover Action Bar
+========================================= */
+
+.discord-hover-actions {
+  position: relative;
+  z-index: 10;
+
+  flex-shrink: 0;
+  align-self: flex-end;
+
+  display: flex;
+  align-items: center;
+  gap: 3px;
+
+  padding: 3px;
+
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+
+  box-shadow: var(--shadow-sm);
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transform: translateY(3px);
+
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast),
+    visibility var(--transition-fast);
+}
+
+.discord-message-row:hover .discord-hover-actions,
+.discord-message-row:focus-within .discord-hover-actions {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+
+  transform: translateY(0);
+}
+
+/* =========================================
+   Reaction Picker
+========================================= */
+
+.message-reaction-picker {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0;
+  margin: 0;
+
+  border: none;
+}
+
+.message-reaction-options {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  padding: 5px;
+
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 9px;
+
+  box-shadow: var(--shadow-md);
+
+  white-space: nowrap;
+  z-index: 30;
+
+  animation: reaction-picker-enter 120ms ease-out;
+}
+
+.discord-message-row.own-message .message-reaction-options {
+  left: auto;
+  right: 0;
+}
+
+@keyframes reaction-picker-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Emoji picker trigger */
+
+.message-reaction-trigger {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 6px;
+
+  background: transparent;
+  color: var(--text-secondary);
+
+  font-size: 19px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.message-reaction-trigger:hover,
+.message-reaction-trigger.active {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* Emoji options */
+
+.message-reaction-emoji {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+
+  padding: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 6px;
+
+  background: transparent;
+
+  font-size: 17px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.message-reaction-emoji:hover {
+  background: var(--bg-hover);
+  transform: scale(1.1);
+}
+
+.message-reaction-emoji:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =========================================
+   Action Buttons
+========================================= */
+
+.message-action-buttons {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Other messages: emoji, reply, more */
+
+.discord-message-row.other-message .message-reaction-picker {
+  order: 1;
+}
+
+.discord-message-row.other-message .message-action-buttons {
+  order: 2;
+}
+
+/* Own messages: more, reply, emoji */
+
+.discord-message-row.own-message .message-action-buttons {
+  order: 1;
+}
+
+.discord-message-row.own-message .more-actions-trigger {
+  order: -1;
+}
+
+.discord-message-row.own-message .message-reaction-picker {
+  order: 2;
+}
+
+/* Individual reaction emoji */
+
+.message-reaction-emoji {
   width: 26px;
   height: 26px;
-  border-radius: var(--radius-xs);
+
+  padding: 0;
+
+  border: none;
+  border-radius: 6px;
+
+  background: transparent;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  font-size: 15px;
+  line-height: 1;
+
   cursor: pointer;
-  transition: all var(--transition-fast);
+
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast);
 }
+
+.message-reaction-emoji:hover {
+  background: var(--bg-hover);
+  transform: scale(1.08);
+}
+
+.message-reaction-emoji:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Message reaction badges */
+
+.message-reactions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.message-reaction-badge {
+  position: relative;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  height: 24px;
+  padding: 2px 7px;
+
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+
+  background: var(--bg-card);
+  color: var(--text-secondary);
+
+  font-size: 13px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.message-reaction-badge:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.message-reaction-badge.active {
+  background: #eef2ff;
+  border-color: #6366f1;
+  color: #4338ca;
+}
+
+.message-reaction-badge:disabled {
+  cursor: default;
+  opacity: 0.6;
+  transform: none;
+}
+
+.message-reaction-badge-emoji {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.message-reaction-count {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Reaction user tooltip */
+
+.message-reaction-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+
+  min-width: 100px;
+  max-width: 220px;
+
+  padding: 8px 10px;
+
+  background: #1f2937;
+  color: #ffffff;
+
+  border-radius: 7px;
+  box-shadow: var(--shadow-sm);
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+
+  font-size: 12px;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transform: translate(-50%, 4px);
+
+  transition:
+    opacity var(--transition-fast),
+    visibility var(--transition-fast),
+    transform var(--transition-fast);
+
+  z-index: 20;
+}
+
+/* Small tooltip arrow */
+
+.message-reaction-tooltip::after {
+  content: '';
+
+  position: absolute;
+  left: 50%;
+  top: 100%;
+
+  transform: translateX(-50%);
+
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #1f2937;
+}
+
+.message-reaction-badge:hover .message-reaction-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+.message-reaction-tooltip-emoji {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.message-reaction-tooltip-users {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.message-reaction-tooltip-user {
+  white-space: nowrap;
+  color: #ffffff;
+}
+
+/* Copy / Reply / Edit / Delete actions */
+
+.discord-action-btn {
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+
+  padding: 0;
+
+  border: none;
+  border-radius: 6px;
+
+  background: transparent;
+  color: var(--text-secondary);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+/* Normal action hover */
 
 .discord-action-btn:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
+}
+
+/* Small press feedback */
+
+.discord-action-btn:active {
+  transform: scale(0.97);
+}
+
+/* Delete action */
+
+.discord-action-btn.delete-btn {
+  color: var(--text-secondary);
 }
 
 .discord-action-btn.delete-btn:hover {
@@ -1022,4 +1565,211 @@
     z-index: 50;
     box-shadow: var(--shadow-lg);
   }
+}
+
+.discord-replied-message {
+  position: relative;
+
+  margin-bottom: 6px;
+  padding: 6px 10px 6px 12px;
+
+  border-left: 3px solid var(--accent);
+  border-radius: 5px;
+
+  background: var(--bg-secondary);
+
+  max-width: min(520px, 100%);
+
+  overflow: hidden;
+
+  cursor: pointer;
+
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.discord-replied-message:hover {
+  background: var(--bg-hover);
+  border-left-color: var(--accent-hover, var(--accent));
+}
+
+.discord-replied-message-author {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+
+  color: var(--accent);
+
+  margin-bottom: 1px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.discord-replied-message-text {
+  font-size: 12px;
+  line-height: 17px;
+
+  color: var(--text-secondary);
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* =========================================
+   Expandable More Actions
+========================================= */
+
+.message-action-buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2px;
+  position: relative;
+  overflow: visible;
+}
+
+/* Expand above the action bar, matching the emoji picker */
+.message-more-menu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+
+  padding: 5px;
+  margin: 0;
+
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 9px;
+  box-shadow: var(--shadow-md);
+
+  white-space: nowrap;
+  z-index: 30;
+
+  animation: more-actions-enter 120ms ease-out;
+}
+
+@keyframes more-actions-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Copy, Edit and Delete */
+.message-more-menu .message-more-menu-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 30px;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+
+  padding: 0;
+  margin: 0;
+
+  border: none;
+  border-radius: 6px;
+
+  background: transparent;
+  color: var(--text-secondary);
+
+  cursor: pointer;
+  line-height: 1;
+}
+
+.message-more-menu .message-more-menu-item svg {
+  display: block;
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.message-more-menu .message-more-menu-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.message-more-menu .message-more-menu-item.danger {
+  color: #dc2626;
+}
+
+.message-more-menu .message-more-menu-item.danger:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.message-more-menu .message-more-menu-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* =========================================================
+   Message Header Ordering
+   Own messages:  timestamp → role badge → username → avatar
+   Other messages: avatar → username → role badge → timestamp
+   ========================================================= */
+
+/* Own messages: timestamp, badge, username */
+.discord-message-row.own-message .discord-message-header .discord-message-timestamp {
+  order: 1;
+}
+
+.discord-message-row.own-message .discord-message-header .discord-role-pill {
+  order: 2;
+}
+
+.discord-message-row.own-message .discord-message-header .discord-message-author {
+  order: 3;
+}
+
+/* Other messages: username, badge, timestamp */
+.discord-message-row.other-message .discord-message-header .discord-message-author {
+  order: 1;
+}
+
+.discord-message-row.other-message .discord-message-header .discord-role-pill {
+  order: 2;
+}
+
+.discord-message-row.other-message .discord-message-header .discord-message-timestamp {
+  order: 3;
+}
+
+/* Keep own-message headers anchored to the right */
+.discord-message-row.own-message .discord-message-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+/* Keep other-message headers anchored to the left */
+.discord-message-row.other-message .discord-message-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+/* Prevent header items from stretching or shifting */
+.discord-message-header .discord-message-timestamp,
+.discord-message-header .discord-role-pill,
+.discord-message-header .discord-message-author {
+  flex: 0 0 auto;
 }

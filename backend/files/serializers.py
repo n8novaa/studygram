@@ -111,18 +111,20 @@ class WorkspaceFileSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, attrs):
-        uploaded_file = self.context["request"].FILES.get("uploaded_file")
+        request = self.context.get("request")
+        uploaded_file = request.FILES.get("uploaded_file") if request else None
 
-        if uploaded_file is None:
+        if self.instance is None and uploaded_file is None:
             raise serializers.ValidationError({
                 "uploaded_file": "A file is required."
             })
 
-        max_size = 100 * 1024 * 1024  # 100 MB
+        if uploaded_file:
+            max_size = 100 * 1024 * 1024  # 100 MB
 
-        if uploaded_file.size > max_size:
-            raise serializers.ValidationError({
-                "uploaded_file": "File size cannot exceed 100 MB."
-            })
+            if uploaded_file.size > max_size:
+                raise serializers.ValidationError({
+                    "uploaded_file": "File size cannot exceed 100 MB."
+                })
 
         return attrs

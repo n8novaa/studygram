@@ -41,6 +41,46 @@ export async function deleteWorkspaceChannel(accessToken, workspaceId, channelId
   return apiDelete(`/workspaces/${workspaceId}/channels/${channelId}/`, accessToken);
 }
 
+export async function updateChannelMessage(
+  accessToken,
+  workspaceId,
+  channelId,
+  messageId,
+  body
+) {
+  return apiPatch(
+    `/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}/`,
+    { body },
+    accessToken
+  );
+}
+
+export async function addChannelMessageReaction(
+  accessToken,
+  workspaceId,
+  channelId,
+  messageId,
+  emoji
+) {
+  return apiPost(
+    `/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}/reactions/`,
+    { emoji },
+    accessToken
+  );
+}
+
+export async function removeChannelMessageReaction(
+  accessToken,
+  workspaceId,
+  channelId,
+  messageId
+) {
+  return apiDelete(
+    `/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}/reactions/`,
+    accessToken
+  );
+}
+
 /*
  * Get all messages for a specific channel.
  */
@@ -55,10 +95,19 @@ export async function getChannelMessages(accessToken, workspaceId, channelId) {
 /*
  * Send a message to a channel.
  */
-export async function sendChannelMessage(accessToken, workspaceId, channelId, body) {
+export async function sendChannelMessage(
+  accessToken,
+  workspaceId,
+  channelId,
+  body,
+  replyTo = null
+) {
   return apiPost(
     `/workspaces/${workspaceId}/channels/${channelId}/messages/`,
-    { body },
+    {
+      body,
+      ...(replyTo ? { reply_to: replyTo } : {}),
+    },
     accessToken
   );
 }

@@ -35,7 +35,10 @@ from .views.channels import (
 from .views.channel_messages import (
     WorkspaceChannelMessageListCreateView,
     WorkspaceChannelMessageDetailView,
+    WorkspaceChannelMessageReactionView,
 )
+
+
 
 
 router = DefaultRouter()
@@ -175,6 +178,12 @@ urlpatterns = [
         'workspaces/<int:workspace_pk>/channels/<int:channel_pk>/messages/<int:message_pk>/',
         WorkspaceChannelMessageDetailView.as_view(),
         name='workspace-channel-message-detail',
+    ),
+
+    path(
+        'workspaces/<int:workspace_pk>/channels/<int:channel_pk>/messages/<int:message_pk>/reactions/',
+        WorkspaceChannelMessageReactionView.as_view(),
+        name='workspace-channel-message-reaction',
     ),
 
     # ---------------------------------------------------------

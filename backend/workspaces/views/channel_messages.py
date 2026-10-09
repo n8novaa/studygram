@@ -1,12 +1,14 @@
 from django.shortcuts import get_object_or_404
 
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, serializers
+from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 
 from ..models import (
     Workspace,
     WorkspaceChannel,
     WorkspaceChannelMessage,
+    WorkspaceChannelMessageReaction,
 )
 from ..permissions import is_workspace_member
 from ..serializers import WorkspaceChannelMessageSerializer
@@ -56,13 +58,25 @@ class WorkspaceChannelMessageListCreateView(
     def perform_create(self, serializer):
         channel = self.get_channel()
 
+        reply_to = serializer.validated_data.get('reply_to')
+
+        if reply_to and reply_to.channel_id != channel.id:
+            raise serializers.ValidationError(
+                {
+                    'reply_to': (
+                        'You can only reply to a message '
+                        'in the same channel.'
+                    )
+                }
+            )
+
         serializer.save(
             channel=channel,
             user=self.request.user,
         )
 
 class WorkspaceChannelMessageDetailView(
-    generics.DestroyAPIView
+    generics.RetrieveUpdateDestroyAPIView
 ):
     lookup_url_kwarg = 'message_pk'
     serializer_class = WorkspaceChannelMessageSerializer
@@ -94,10 +108,109 @@ class WorkspaceChannelMessageDetailView(
             channel=channel,
         )
 
-    def perform_destroy(self, instance):
-        if instance.user != self.request.user:
+    def perform_update(self, serializer):
+        if serializer.instance.user != self.request.user:
             raise PermissionDenied(
-                'You can only delete your own messages.'
+                'You can only edit your own messages.'
             )
 
-        instance.delete()
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.user == self.request.user:
+            instance.delete()
+            return
+
+        if (
+            instance.channel.workspace.owner_id == self.request.user.id
+            or instance.channel.workspace.memberships.filter(
+                user=self.request.user,
+                role='admin',
+            ).exists()
+        ):
+            instance.delete()
+            return
+
+        raise PermissionDenied(
+            'You can only delete your own messages.'
+        )
+
+class WorkspaceChannelMessageReactionView(
+    generics.CreateAPIView,
+    generics.DestroyAPIView,
+):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_message(self):
+        workspace = get_object_or_404(
+            Workspace,
+            pk=self.kwargs['workspace_pk'],
+        )
+
+        if not is_workspace_member(
+            self.request.user,
+            workspace.id,
+        ):
+            raise PermissionDenied(
+                'You must be a workspace member.'
+            )
+
+        channel = get_object_or_404(
+            WorkspaceChannel,
+            pk=self.kwargs['channel_pk'],
+            workspace=workspace,
+        )
+
+        return get_object_or_404(
+            WorkspaceChannelMessage,
+            pk=self.kwargs['message_pk'],
+            channel=channel,
+        )
+
+    def create(self, request, *args, **kwargs):
+        message = self.get_message()
+
+        emoji = request.data.get('emoji')
+
+        if not emoji or not isinstance(emoji, str):
+            raise serializers.ValidationError(
+                {'emoji': 'An emoji is required.'}
+            )
+
+        emoji = emoji.strip()
+
+        if not emoji:
+            raise serializers.ValidationError(
+                {'emoji': 'An emoji is required.'}
+            )
+
+        reaction, created = (
+            WorkspaceChannelMessageReaction.objects.update_or_create(
+                message=message,
+                user=request.user,
+                defaults={'emoji': emoji},
+            )
+        )
+
+        return Response(
+            {
+                'id': reaction.id,
+                'message': message.id,
+                'user': request.user.username,
+                'emoji': reaction.emoji,
+            },
+            status=201 if created else 200,
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        message = self.get_message()
+
+        reaction = get_object_or_404(
+            WorkspaceChannelMessageReaction,
+            message=message,
+            user=request.user,
+        )
+
+        reaction.delete()
+
+        return Response(status=204)

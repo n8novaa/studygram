@@ -278,7 +278,7 @@ function WorkspaceFiles({ workspaceId, isAdmin = false }) {
           gap: '10px',
         }}>
           <FolderIcon size={36} />
-          <h4 style={{ color: '#ffffff', margin: 0, fontSize: '16px' }}>
+          <h4 style={{ color: 'var(--text-primary)', margin: 0, fontSize: '16px' }}>
             {currentFolderId ? 'This folder is empty' : 'No files or folders yet'}
           </h4>
           <p style={{ fontSize: '13.5px', margin: 0 }}>

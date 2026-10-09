@@ -128,6 +128,16 @@ function WorkspaceChannels({ workspace, isAdmin }) {
     setMessages((prev) => [...prev, newMsg]);
   }
 
+  function handleMessageUpdated(updatedMsg) {
+    setMessages((prev) =>
+      prev.map((message) =>
+        message.id === updatedMsg.id
+          ? updatedMsg
+          : message
+      )
+    );
+  }
+
   function handleMessageDeleted(msgId) {
     setMessages((prev) => prev.filter((m) => m.id !== msgId));
   }
@@ -162,7 +172,6 @@ function WorkspaceChannels({ workspace, isAdmin }) {
         onCloseMobile={() => setMobileSidebarOpen(false)}
       />
 
-      {/* 2. Center: Discord Chat Area */}
       <ChannelChatArea
         workspace={workspace}
         channel={activeChannel}
@@ -177,6 +186,7 @@ function WorkspaceChannels({ workspace, isAdmin }) {
         onToggleMembers={() => setShowMembers((prev) => !prev)}
         onOpenMobileSidebar={() => setMobileSidebarOpen(true)}
         onMessageSent={handleMessageSent}
+        onMessageUpdated={handleMessageUpdated}
         onMessageDeleted={handleMessageDeleted}
       />
 

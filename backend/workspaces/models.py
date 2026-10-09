@@ -125,6 +125,14 @@ class WorkspaceChannelMessage(models.Model):
         related_name='workspace_channel_messages',
     )
 
+    reply_to = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='replies',
+    )
+
     body = models.TextField()
 
     created = models.DateTimeField(auto_now_add=True)
@@ -139,6 +147,36 @@ class WorkspaceChannelMessage(models.Model):
             f'{self.user.username} in '
             f'#{self.channel.name}: '
             f'{self.body[:50]}'
+        )
+
+
+class WorkspaceChannelMessageReaction(models.Model):
+    message = models.ForeignKey(
+        WorkspaceChannelMessage,
+        on_delete=models.CASCADE,
+        related_name='reactions',
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='workspace_channel_message_reactions',
+    )
+    emoji = models.CharField(max_length=32)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['message', 'user'],
+                name='unique_message_user_reaction',
+            ),
+        ]
+        ordering = ['created']
+
+    def __str__(self):
+        return (
+            f'{self.user.username} reacted '
+            f'{self.emoji} to message {self.message_id}'
         )
 
     

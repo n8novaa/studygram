@@ -10,6 +10,7 @@ from .models import (
     WorkspaceMembership,
     WorkspaceChannel,
     WorkspaceChannelMessage,
+    WorkspaceChannelMessageReaction,
 )
 
 
@@ -180,6 +181,7 @@ class WorkspaceDiscoverSerializer(serializers.ModelSerializer):
             'updated',
         ]
 
+
 class WorkspaceChannelSerializer(serializers.ModelSerializer):
     created_by = serializers.StringRelatedField(read_only=True)
 
@@ -212,8 +214,35 @@ class WorkspaceChannelSerializer(serializers.ModelSerializer):
 
         return value
 
-class WorkspaceChannelMessageSerializer(serializers.ModelSerializer):
+class WorkspaceChannelMessageReactionSerializer(
+    serializers.ModelSerializer
+):
     user = UserSerializer(read_only=True)
+    
+
+    class Meta:
+        model = WorkspaceChannelMessageReaction
+        fields = [
+            'id',
+            'user',
+            'emoji',
+            'created',
+        ]
+        read_only_fields = [
+            'id',
+            'user',
+            'created',
+        ]
+
+class WorkspaceChannelMessageSerializer(
+    serializers.ModelSerializer
+):
+    user = UserSerializer(read_only=True)
+    reactions = WorkspaceChannelMessageReactionSerializer(
+            many=True,
+            read_only=True,
+        )
+    is_edited = serializers.SerializerMethodField()
 
     class Meta:
         model = WorkspaceChannelMessage
@@ -222,8 +251,11 @@ class WorkspaceChannelMessageSerializer(serializers.ModelSerializer):
             'channel',
             'user',
             'body',
+            'reply_to',
             'created',
             'updated',
+            'is_edited',
+            'reactions',
         ]
         read_only_fields = [
             'id',
@@ -231,6 +263,7 @@ class WorkspaceChannelMessageSerializer(serializers.ModelSerializer):
             'user',
             'created',
             'updated',
+            'is_edited',
         ]
 
     def validate_body(self, value):
@@ -242,3 +275,14 @@ class WorkspaceChannelMessageSerializer(serializers.ModelSerializer):
             )
 
         return value
+
+    def validate_reply_to(self, value):
+        if value.channel_id != self.instance.channel_id if self.instance else False:
+            raise serializers.ValidationError(
+                'You can only reply to a message in the same channel.'
+            )
+
+        return value
+
+    def get_is_edited(self, obj):
+        return obj.updated > obj.created

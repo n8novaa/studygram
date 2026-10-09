@@ -134,7 +134,7 @@ function Messages() {
     try {
       setSending(true);
       const newMsg = await sendRoomMessage(accessToken, selectedRoom.id, text);
-      setMessages((prev) => [newMsg, ...prev]);
+      setMessages((prev) => [...prev, newMsg]);
     } catch (err) {
       addToast(err.message || 'Failed to send message.', 'error');
       setMessageInput(text);
