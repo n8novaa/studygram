@@ -48,15 +48,7 @@ function ChannelChatHeader({
       </div>
 
       <div className="channel-header-actions">
-        <button
-          type="button"
-          className="chat-header-btn"
-          onClick={onRefresh}
-          title="Refresh messages"
-          aria-label="Refresh messages"
-        >
-          <RefreshIcon size={14} />
-        </button>
+        
 
         {isAdmin && (
           <button

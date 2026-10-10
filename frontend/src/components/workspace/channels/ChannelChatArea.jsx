@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { HashIcon } from '../../common/Icons';
+import { HashIcon, ArrowDownIcon } from '../../common/Icons';
 import { useToast } from '../../common/ToastContext';
 
 import {
@@ -47,10 +47,14 @@ function ChannelChatArea({
   const [moreMenuMessageId, setMoreMenuMessageId] = useState(null);
   const [highlightedMessageId, setHighlightedMessageId] = useState(null);
   const messagesEndRef = useRef(null);
+  const messagesStreamRef = useRef(null);
   const textareaRef = useRef(null);
+
+  const [isAtBottom, setIsAtBottom] = useState(true);
   const [showChannelDescription, setShowChannelDescription] = useState(false);
   const descriptionPanelRef = useRef(null);
   const channelNameButtonRef = useRef(null);
+  const previousMessageCountRef = useRef(messages.length);
 
   useEffect(() => {
   setShowChannelDescription(false);
@@ -85,10 +89,41 @@ useEffect(() => {
 }, [showChannelDescription]);
 
   useEffect(() => {
-    if (channel?.id) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
+    if (!channel?.id) return;
+
+    messagesEndRef.current?.scrollIntoView({
+      behavior: 'auto',
+    });
+
+    setIsAtBottom(true);
   }, [channel?.id]);
+
+  useEffect(() => {
+    const previousCount = previousMessageCountRef.current;
+    const currentCount = messages.length;
+
+    // Keep the user's position when they are reading older messages.
+    if (isAtBottom && currentCount !== previousCount) {
+      messagesEndRef.current?.scrollIntoView({
+        behavior: 'smooth',
+      });
+    }
+
+    previousMessageCountRef.current = currentCount;
+  }, [messages, isAtBottom]);
+
+  function handleMessagesScroll() {
+    const container = messagesStreamRef.current;
+
+    if (!container) return;
+
+    const distanceFromBottom =
+      container.scrollHeight -
+      container.scrollTop -
+      container.clientHeight;
+
+    setIsAtBottom(distanceFromBottom <= 80);
+  }
 
   function handleInputChange(e) {
     setInputText(e.target.value);
@@ -312,7 +347,11 @@ useEffect(() => {
         </div>
       )}
 
-      <div className="channel-messages-stream">
+      <div
+        className="channel-messages-stream"
+        ref={messagesStreamRef}
+        onScroll={handleMessagesScroll}
+      >
         <ChannelWelcome channel={channel} />
         <ChannelMessageList
           workspace={workspace}
@@ -341,6 +380,21 @@ useEffect(() => {
           messagesEndRef={messagesEndRef}
         />
       </div>
+
+        {!isAtBottom && (
+        <button
+          type="button"
+          className="chat-scroll-to-bottom"
+          onClick={() => {
+            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+          }}
+          aria-label="Scroll to latest messages"
+          title="Latest messages"
+        >
+          <ArrowDownIcon size={18} className="chat-scroll-icon" />
+          
+        </button>
+      )}
 
       <MessageComposer
         channel={channel}

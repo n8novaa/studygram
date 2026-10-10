@@ -29,30 +29,66 @@
 }
 
 /* Responsive queries */
-@media (max-width: 900px) {
+@media (min-width: 681px) and (max-width: 900px) {
   .workspace-channels-layout.with-members-open {
-    grid-template-columns: 220px 1fr;
+    grid-template-columns: minmax(0, 1fr) 200px;
   }
-  .channel-members-sidebar {
-    display: none;
+
+  .workspace-channels-layout.sidebar-collapsed.with-members-open {
+    grid-template-columns: minmax(0, 1fr) 200px;
   }
 }
 
 @media (max-width: 680px) {
   .workspace-channels-layout {
-    grid-template-columns: 1fr;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     height: 600px;
+    min-width: 0;
+    position: relative;
+    overflow: hidden;
   }
-  .channel-sidebar {
+
+  /* Keep the chat in the only grid column */
+  .workspace-channels-layout > * {
+    min-width: 0;
+  }
+
+  /* Channel sidebar: hidden unless opened */
+  .workspace-channels-layout > .channel-sidebar {
     display: none;
   }
-  .channel-sidebar.mobile-open {
+
+  .workspace-channels-layout > .channel-sidebar.mobile-open {
     display: flex;
     position: absolute;
-    inset: 0 0 0 0;
-    width: 260px;
+    inset: 0 auto 0 0;
+    width: min(260px, 85%);
+    max-width: 100%;
+    height: 100%;
     z-index: 50;
+    overflow-y: auto;
     box-shadow: var(--shadow-lg);
+  }
+
+  /* Members panel: overlay on the right */
+  .workspace-channels-layout.with-members-open
+    > .channel-members-sidebar {
+    display: flex;
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: min(240px, 85%);
+    max-width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    z-index: 40;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Prevent the desktop grid from reserving a members column */
+  .workspace-channels-layout.with-members-open {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

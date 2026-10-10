@@ -1030,3 +1030,79 @@
     transform: translateY(0);
   }
 }
+
+.chat-scroll-to-bottom {
+  position: absolute;
+  bottom: 88px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 36px;
+  height: 36px;
+  padding: 0;
+
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+
+  /* Subtle glass surface */
+  background: rgba(255, 255, 255, 0.48);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+
+  color: #64748b;
+
+  box-shadow:
+    0 3px 12px rgba(15, 23, 42, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+
+  cursor: pointer;
+
+  transition:
+    background 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.chat-scroll-to-bottom .chat-scroll-icon {
+  display: block;
+  width: 17px;
+  height: 17px;
+  padding: 0;
+
+  color: #475569;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+
+  flex-shrink: 0;
+  opacity: 1;
+}
+
+.chat-scroll-to-bottom:hover {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(255, 255, 255, 0.95);
+
+  box-shadow:
+    0 4px 14px rgba(15, 23, 42, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.chat-scroll-to-bottom:active {
+  box-shadow: 0 1px 5px rgba(15, 23, 42, 0.08);
+}
+
+.chat-scroll-to-bottom:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-scroll-to-bottom {
+    transition: none;
+  }
+}

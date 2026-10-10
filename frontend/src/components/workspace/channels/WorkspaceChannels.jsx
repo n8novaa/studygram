@@ -203,6 +203,7 @@ function WorkspaceChannels({ workspace, isAdmin }) {
         <ChannelMemberList
           members={workspace?.members || []}
           ownerUsername={workspace?.owner}
+          onClose={() => setShowMembers(false)}
         />
       )}
 
