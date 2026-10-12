@@ -3,13 +3,20 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
-
+from rest_framework.throttling import ScopedRateThrottle
 from base.models import Message, Room, Topic
+
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .serializers import LogoutSerializer
 
 from .permissions import IsAuthorOrReadOnly, IsHostOrReadOnly
 from .serializers import (
     MessageCreateSerializer,
     MessageSerializer,
+    PublicUserSerializer,
     RegisterSerializer,
     RoomDetailSerializer,
     RoomListSerializer,
@@ -22,7 +29,8 @@ from .serializers import (
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
-
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'auth_register'
 
 class CurrentUserView(generics.RetrieveAPIView):
     serializer_class = UserSerializer
@@ -31,10 +39,23 @@ class CurrentUserView(generics.RetrieveAPIView):
     def get_object(self):
         return self.request.user
 
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = LogoutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            {"detail": "Successfully logged out."},
+            status=status.HTTP_205_RESET_CONTENT,
+        )
+
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all().order_by('username')
-    serializer_class = UserSerializer
+    serializer_class = PublicUserSerializer
 
 
 class TopicViewSet(viewsets.ModelViewSet):

@@ -190,3 +190,16 @@ class WorkspaceFileDownloadTests(APITestCase):
             status.HTTP_404_NOT_FOUND,
         )
 
+    def test_missing_physical_file_returns_404(self):
+        self.client.force_authenticate(user=self.admin)
+
+        # Delete the physical file while retaining its database record.
+        self.workspace_file.uploaded_file.delete(save=False)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_404_NOT_FOUND,
+        )
+

@@ -317,6 +317,35 @@ class WorkspaceInvitationCreateView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
+        max_uses = request.data.get("max_uses")
+
+        if max_uses is not None:
+            if isinstance(max_uses, bool):
+                return Response(
+                    {"max_uses": "Must be a positive integer or null."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if isinstance(max_uses, float):
+                return Response(
+                    {"max_uses": "Must be a positive integer or null."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            try:
+                max_uses = int(max_uses)
+            except (TypeError, ValueError):
+                return Response(
+                    {"max_uses": "Must be a positive integer or null."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if max_uses < 1:
+                return Response(
+                    {"max_uses": "Must be a positive integer."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         invitation = WorkspaceInvitation.objects.create(
             workspace=workspace,
             created_by=request.user,
@@ -324,6 +353,7 @@ class WorkspaceInvitationCreateView(APIView):
                 timezone.now()
                 + timezone.timedelta(days=7)
             ),
+            max_uses=max_uses,
         )
 
         serializer = WorkspaceInvitationSerializer(
@@ -336,6 +366,72 @@ class WorkspaceInvitationCreateView(APIView):
         )
 
 
+class WorkspaceInvitationRevokeView(APIView):
+    permission_classes = [
+        permissions.IsAuthenticated,
+    ]
+
+    def post(self, request, workspace_pk, invitation_pk):
+        workspace = get_object_or_404(
+            Workspace,
+            pk=workspace_pk,
+        )
+
+        membership = (
+            WorkspaceMembership.objects
+            .filter(
+                workspace=workspace,
+                user=request.user,
+            )
+            .first()
+        )
+
+        if (
+            not membership
+            or membership.role
+            != WorkspaceMembership.Role.ADMIN
+        ):
+            return Response(
+                {
+                    'detail': (
+                        'Only workspace admins can '
+                        'revoke invitations.'
+                    )
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        with transaction.atomic():
+            invitation = get_object_or_404(
+                WorkspaceInvitation.objects.select_for_update(),
+                pk=invitation_pk,
+                workspace=workspace,
+            )
+
+            if invitation.revoked_at is not None:
+                return Response(
+                    {
+                        'detail': (
+                            'This invitation has already '
+                            'been revoked.'
+                        )
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            invitation.revoked_at = timezone.now()
+            invitation.save(
+                update_fields=['revoked_at']
+            )
+
+        return Response(
+            {
+                'detail': 'Invitation revoked successfully.',
+                'invitation_id': invitation.id,
+            },
+            status=status.HTTP_200_OK,
+        )
+    
 class AcceptInvitationView(APIView):
     permission_classes = [
         permissions.IsAuthenticated,
@@ -370,6 +466,20 @@ class AcceptInvitationView(APIView):
                 raise_exception=True
             )
 
+            if (
+                invitation.max_uses is not None
+                and invitation.uses >= invitation.max_uses
+            ):
+                return Response(
+                    {
+                        'detail': (
+                            'This invitation has reached '
+                            'its usage limit.'
+                        )
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             membership, created = (
                 WorkspaceMembership.objects.get_or_create(
                     workspace=invitation.workspace,
@@ -393,6 +503,9 @@ class AcceptInvitationView(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+            invitation.uses += 1
+            invitation.save(update_fields=['uses'])
+
         return Response(
             {
                 'detail': 'Successfully joined workspace.',
@@ -401,6 +514,58 @@ class AcceptInvitationView(APIView):
                 'role': membership.role,
             },
             status=status.HTTP_201_CREATED,
+        )
+
+class WorkspaceInvitationListView(APIView):
+    permission_classes = [
+        permissions.IsAuthenticated,
+    ]
+
+    def get(self, request, workspace_pk):
+        workspace = get_object_or_404(
+            Workspace,
+            pk=workspace_pk,
+        )
+
+        membership = (
+            WorkspaceMembership.objects
+            .filter(
+                workspace=workspace,
+                user=request.user,
+            )
+            .first()
+        )
+
+        if (
+            not membership
+            or membership.role
+            != WorkspaceMembership.Role.ADMIN
+        ):
+            return Response(
+                {
+                    'detail': (
+                        'Only workspace admins can '
+                        'view invitations.'
+                    )
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        invitations = (
+            WorkspaceInvitation.objects
+            .filter(workspace=workspace)
+            .select_related('workspace', 'created_by')
+            .order_by('-created')
+        )
+
+        serializer = WorkspaceInvitationSerializer(
+            invitations,
+            many=True,
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK,
         )
 
 

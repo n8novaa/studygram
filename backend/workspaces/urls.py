@@ -24,6 +24,8 @@ from .views.access import (
     WorkspaceMemberPromoteView,
     WorkspaceMemberDemoteView,
     WorkspaceMemberRemoveView,
+    WorkspaceInvitationRevokeView,
+    WorkspaceInvitationListView,
 )
 
 from .views.channels import (
@@ -95,6 +97,18 @@ urlpatterns = [
         name='workspace-invitation-accept',
     ),
 
+    path(
+        'workspaces/<int:workspace_pk>/invitations/<int:invitation_pk>/revoke/',
+        WorkspaceInvitationRevokeView.as_view(),
+        name='workspace-invitation-revoke',
+    ),
+
+    path(
+        'workspaces/<int:workspace_pk>/invitations/',
+        WorkspaceInvitationListView.as_view(),
+        name='workspace-invitation-list',
+    ),
+
     # ---------------------------------------------------------
     # Folders
     # ---------------------------------------------------------
@@ -150,11 +164,6 @@ urlpatterns = [
     # Channels
     # ---------------------------------------------------------
 
-    path(
-        'workspaces/<int:workspace_pk>/channels/',
-        WorkspaceChannelListCreateView.as_view(),
-        name='workspace-channel-list-create',
-    ),
 
     path(
         'workspaces/<int:workspace_pk>/channels/',

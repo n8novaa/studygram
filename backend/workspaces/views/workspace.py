@@ -51,6 +51,7 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
                     distinct=True,
                 )
             )
+            .order_by('id')
         )
 
         if search:
@@ -59,11 +60,21 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
                 Q(description__icontains=search)
             )
 
+        page = self.paginate_queryset(workspaces)
+
+        if page is not None:
+            serializer = WorkspaceDiscoverSerializer(
+                page,
+                many=True,
+                context={'request': request},
+            )
+            return self.get_paginated_response(serializer.data)
+
         serializer = WorkspaceDiscoverSerializer(
             workspaces,
             many=True,
+            context={'request': request},
         )
-
         return Response(serializer.data)
 
     def get_permissions(self):

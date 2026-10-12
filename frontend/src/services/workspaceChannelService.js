@@ -83,13 +83,43 @@ export async function removeChannelMessageReaction(
 
 /*
  * Get all messages for a specific channel.
+ * Handles Django REST Framework pagination.
  */
-export async function getChannelMessages(accessToken, workspaceId, channelId) {
-  const data = await apiGet(
-    `/workspaces/${workspaceId}/channels/${channelId}/messages/`,
-    accessToken
-  );
-  return Array.isArray(data) ? data : data?.results ?? [];
+export async function getChannelMessages(
+  accessToken,
+  workspaceId,
+  channelId
+) {
+  const endpoint =
+    `/workspaces/${workspaceId}/channels/${channelId}/messages/`;
+
+  let requestPath = endpoint;
+  let allMessages = [];
+
+  while (requestPath) {
+    const data = await apiGet(requestPath, accessToken);
+
+    // Support both paginated and non-paginated API responses.
+    if (Array.isArray(data)) {
+      allMessages = [...allMessages, ...data];
+      break;
+    }
+
+    allMessages = [
+      ...allMessages,
+      ...(data?.results ?? []),
+    ];
+
+    // Follow the next page when one exists.
+    if (data?.next) {
+      const nextUrl = new URL(data.next, window.location.origin);
+      requestPath = `${nextUrl.pathname.replace('/api', '')}${nextUrl.search}`;
+    } else {
+      requestPath = null;
+    }
+  }
+
+  return allMessages;
 }
 
 /*

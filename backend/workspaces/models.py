@@ -254,5 +254,20 @@ class WorkspaceInvitation(models.Model):
 
     expires_at = models.DateTimeField()
 
+    max_uses = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        default=None,
+    )
+
+    uses = models.PositiveIntegerField(
+        default=0,
+    )
+
+    revoked_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
     def __str__(self):
         return f'Invitation for {self.workspace.name}'

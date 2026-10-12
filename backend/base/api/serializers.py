@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from base.models import Message, Room, Topic
 
@@ -10,6 +11,12 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'email']
         read_only_fields = ['id']
+
+class PublicUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username']
+        read_only_fields = ['id', 'username']
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -37,6 +44,22 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password'],
         )
 
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField(write_only=True)
+
+    def validate_refresh(self, value):
+        try:
+            self.token = RefreshToken(value)
+        except Exception:
+            raise serializers.ValidationError(
+                "Invalid or expired refresh token."
+            )
+
+        return value
+
+    def save(self, **kwargs):
+        self.token.blacklist()
+
 
 class TopicSerializer(serializers.ModelSerializer):
     class Meta:
@@ -45,7 +68,7 @@ class TopicSerializer(serializers.ModelSerializer):
 
 
 class MessageSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+    user = PublicUserSerializer(read_only=True)
 
     class Meta:
         model = Message
@@ -72,7 +95,7 @@ class MessageCreateSerializer(serializers.ModelSerializer):
 
 
 class RoomListSerializer(serializers.ModelSerializer):
-    host = UserSerializer(read_only=True)
+    host = PublicUserSerializer(read_only=True)
     topic = TopicSerializer(read_only=True)
     participant_count = serializers.SerializerMethodField()
 
@@ -94,7 +117,7 @@ class RoomListSerializer(serializers.ModelSerializer):
 
 
 class RoomDetailSerializer(RoomListSerializer):
-    participants = UserSerializer(many=True, read_only=True)
+    participants = PublicUserSerializer(many=True, read_only=True)
 
     class Meta(RoomListSerializer.Meta):
         fields = RoomListSerializer.Meta.fields + ['participants']

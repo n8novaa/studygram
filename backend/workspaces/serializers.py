@@ -1,7 +1,7 @@
 from django.utils import timezone
 from rest_framework import serializers
 
-from base.api.serializers import UserSerializer
+from base.api.serializers import PublicUserSerializer
 
 from .models import (
     Workspace,
@@ -109,6 +109,9 @@ class WorkspaceInvitationSerializer(
             'token',
             'created',
             'expires_at',
+            'max_uses',
+            'uses',
+            'revoked_at',
         ]
         read_only_fields = [
             'id',
@@ -116,6 +119,8 @@ class WorkspaceInvitationSerializer(
             'created_by',
             'token',
             'created',
+            'uses',
+            'revoked_at',
         ]
 
     def validate_expires_at(self, value):
@@ -136,6 +141,11 @@ class AcceptInvitationSerializer(serializers.Serializer):
         if invitation.expires_at <= timezone.now():
             raise serializers.ValidationError(
                 'This invitation has expired.'
+            )
+
+        if invitation.revoked_at is not None:
+            raise serializers.ValidationError(
+                'This invitation has been revoked.'
             )
 
         if WorkspaceMembership.objects.filter(
@@ -181,6 +191,23 @@ class WorkspaceDiscoverSerializer(serializers.ModelSerializer):
             'updated',
         ]
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        request = self.context.get('request')
+
+        if (
+            instance.visibility == 'private'
+            and request is not None
+            and not instance.memberships.filter(
+                user=request.user
+            ).exists()
+        ):
+            data.pop('description', None)
+            data.pop('owner', None)
+
+        return data
+
 
 class WorkspaceChannelSerializer(serializers.ModelSerializer):
     created_by = serializers.StringRelatedField(read_only=True)
@@ -217,7 +244,7 @@ class WorkspaceChannelSerializer(serializers.ModelSerializer):
 class WorkspaceChannelMessageReactionSerializer(
     serializers.ModelSerializer
 ):
-    user = UserSerializer(read_only=True)
+    user = PublicUserSerializer(read_only=True)
     
 
     class Meta:
@@ -237,7 +264,7 @@ class WorkspaceChannelMessageReactionSerializer(
 class WorkspaceChannelMessageSerializer(
     serializers.ModelSerializer
 ):
-    user = UserSerializer(read_only=True)
+    user = PublicUserSerializer(read_only=True)
     reactions = WorkspaceChannelMessageReactionSerializer(
             many=True,
             read_only=True,

@@ -425,6 +425,75 @@ class WorkspaceChannelMessageListCreateTests(APITestCase):
             ).exists()
         )
 
+    def test_cannot_access_message_through_another_channel(self):
+        other_channel = WorkspaceChannel.objects.create(
+            workspace=self.workspace,
+            name="other-channel",
+            description="Another channel",
+            created_by=self.owner,
+        )
+
+        message = WorkspaceChannelMessage.objects.create(
+            channel=self.channel,
+            user=self.member,
+            body="Private channel message",
+        )
+
+        self.client.force_authenticate(user=self.member)
+
+        url = reverse(
+            "workspace-channel-message-detail",
+            kwargs={
+                "workspace_pk": self.workspace.pk,
+                "channel_pk": other_channel.pk,
+                "message_pk": message.pk,
+            },
+        )
+
+        response = self.client.get(url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_404_NOT_FOUND,
+        )
+
+    def test_cannot_access_message_through_another_workspace(self):
+        other_workspace = Workspace.objects.create(
+            name="Other Workspace",
+            owner=self.owner,
+        )
+
+        other_channel = WorkspaceChannel.objects.create(
+            workspace=other_workspace,
+            name="general",
+            description="General discussion",
+            created_by=self.owner,
+        )
+
+        message = WorkspaceChannelMessage.objects.create(
+            channel=self.channel,
+            user=self.member,
+            body="Workspace A message",
+        )
+
+        self.client.force_authenticate(user=self.member)
+
+        url = reverse(
+            "workspace-channel-message-detail",
+            kwargs={
+                "workspace_pk": other_workspace.pk,
+                "channel_pk": other_channel.pk,
+                "message_pk": message.pk,
+            },
+        )
+
+        response = self.client.get(url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+
 class WorkspaceChannelMessageDeletionTests(APITestCase):
 
     def setUp(self):

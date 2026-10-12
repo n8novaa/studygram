@@ -141,11 +141,21 @@ class WorkspaceFileDownloadView(generics.GenericAPIView):
             pk=kwargs["pk"],
         )
 
+        try:
+            file_handle = workspace_file.uploaded_file.open("rb")
+        except (FileNotFoundError, OSError, ValueError):
+            return Response(
+                {"detail": "File not found on storage."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
         return FileResponse(
-            workspace_file.uploaded_file.open("rb"),
+            file_handle,
             as_attachment=True,
             filename=workspace_file.name,
         )
+
+
 
 class WorkspaceFolderCreateView(generics.CreateAPIView):
     serializer_class = WorkspaceFolderSerializer
@@ -194,6 +204,7 @@ class WorkspaceFolderDetailView(generics.RetrieveUpdateDestroyAPIView):
             for permission in permission_classes
         ]
 
+
     def get_workspace(self):
         return get_object_or_404(
             Workspace,
@@ -211,6 +222,36 @@ class WorkspaceFolderDetailView(generics.RetrieveUpdateDestroyAPIView):
         return WorkspaceFolder.objects.filter(
             workspace_id=self.kwargs["workspace_pk"]
         )
+
+    def perform_destroy(self, instance):
+        folder_ids = {instance.pk}
+        pending_ids = [instance.pk]
+
+        while pending_ids:
+            children = WorkspaceFolder.objects.filter(
+                parent_id__in=pending_ids
+            ).values_list("id", flat=True)
+
+            pending_ids = list(children)
+            folder_ids.update(pending_ids)
+
+        files = list(
+            WorkspaceFile.objects.filter(
+                folder_id__in=folder_ids
+            ).only("id", "uploaded_file")
+        )
+
+        stored_files = [
+            (workspace_file.uploaded_file.storage,
+            workspace_file.uploaded_file.name)
+            for workspace_file in files
+            if workspace_file.uploaded_file
+        ]
+
+        instance.delete()
+
+        for storage, name in stored_files:
+            storage.delete(name)
 
 class WorkspaceFileCreateView(generics.CreateAPIView):
     serializer_class = WorkspaceFileSerializer

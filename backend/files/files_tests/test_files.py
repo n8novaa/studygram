@@ -370,6 +370,91 @@ class WorkspaceFileCreateTests(APITestCase):
             ).exists()
         )
 
+    def test_admin_can_upload_allowed_pdf(self):
+        self.client.force_authenticate(user=self.admin)
+
+        uploaded_file = self.create_uploaded_file(
+            name="notes.pdf",
+            content=b"PDF test content",
+            content_type="application/pdf",
+        )
+
+        response = self.client.post(
+            self.url,
+            {
+                "name": "notes.pdf",
+                "uploaded_file": uploaded_file,
+            },
+            format="multipart",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED,
+        )
+
+
+    def test_upload_rejects_unsupported_file_extension(self):
+        self.client.force_authenticate(user=self.admin)
+
+        uploaded_file = self.create_uploaded_file(
+            name="malware.exe",
+            content=b"test executable content",
+            content_type="application/octet-stream",
+        )
+
+        response = self.client.post(
+            self.url,
+            {
+                "name": "malware.exe",
+                "uploaded_file": uploaded_file,
+            },
+            format="multipart",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+
+        self.assertFalse(
+            WorkspaceFile.objects.filter(
+                workspace=self.workspace,
+                name="malware.exe",
+            ).exists()
+        )
+
+
+    def test_upload_rejects_mismatched_mime_type(self):
+        self.client.force_authenticate(user=self.admin)
+
+        uploaded_file = self.create_uploaded_file(
+            name="notes.pdf",
+            content=b"test content",
+            content_type="image/png",
+        )
+
+        response = self.client.post(
+            self.url,
+            {
+                "name": "notes.pdf",
+                "uploaded_file": uploaded_file,
+            },
+            format="multipart",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+
+        self.assertFalse(
+            WorkspaceFile.objects.filter(
+                workspace=self.workspace,
+                name="notes.pdf",
+            ).exists()
+        )
+
 class WorkspaceFileListTests(APITestCase):
 
     def setUp(self):

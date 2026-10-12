@@ -1,12 +1,14 @@
 from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
+from django.test import override_settings
 
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from workspaces.models import Workspace, WorkspaceMembership
 
-from files.models import WorkspaceFolder
+from files.models import WorkspaceFile, WorkspaceFolder
 
 
 class WorkspaceFolderCreateTests(APITestCase):
@@ -555,4 +557,192 @@ class WorkspaceFolderDetailTests(APITestCase):
             WorkspaceFolder.objects.filter(
                 pk=grandchild.pk,
             ).exists()
+        )
+
+    def test_deleting_folder_removes_physical_files(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from django.core.files.storage import default_storage
+        from files.models import WorkspaceFile
+
+        uploaded_file = SimpleUploadedFile(
+            "test_document.txt",
+            b"Test document content",
+            content_type="text/plain",
+        )
+
+        workspace_file = WorkspaceFile.objects.create(
+            workspace=self.workspace,
+            folder=self.folder,
+            name="test_document.txt",
+            uploaded_file=uploaded_file,
+            file_type="text/plain",
+            size=len(b"Test document content"),
+            created_by=self.admin,
+        )
+
+        storage_path = workspace_file.uploaded_file.name
+
+        self.assertTrue(
+            default_storage.exists(storage_path)
+        )
+
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.delete(self.url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_204_NO_CONTENT,
+        )
+
+        self.assertFalse(
+            WorkspaceFile.objects.filter(
+                pk=workspace_file.pk,
+            ).exists()
+        )
+
+        self.assertFalse(
+            default_storage.exists(storage_path)
+        )
+
+class WorkspaceFileDownloadTests(APITestCase):
+
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            username="download_admin",
+            password="testpass123",
+        )
+
+        self.member = User.objects.create_user(
+            username="download_member",
+            password="testpass123",
+        )
+
+        self.outsider = User.objects.create_user(
+            username="download_outsider",
+            password="testpass123",
+        )
+
+        self.workspace = Workspace.objects.create(
+            name="Download Test Workspace",
+            description="Workspace for download tests",
+            owner=self.admin,
+        )
+
+        WorkspaceMembership.objects.create(
+            workspace=self.workspace,
+            user=self.admin,
+            role=WorkspaceMembership.Role.ADMIN,
+        )
+
+        WorkspaceMembership.objects.create(
+            workspace=self.workspace,
+            user=self.member,
+            role=WorkspaceMembership.Role.MEMBER,
+        )
+
+        self.workspace_file = WorkspaceFile.objects.create(
+            workspace=self.workspace,
+            name="download-document.txt",
+            uploaded_file=SimpleUploadedFile(
+                "download-document.txt",
+                b"StudyGram download test content",
+                content_type="text/plain",
+            ),
+            file_type="text/plain",
+            size=len(b"StudyGram download test content"),
+            created_by=self.admin,
+        )
+
+        self.url = reverse(
+            "workspace-file-download",
+            kwargs={
+                "workspace_pk": self.workspace.pk,
+                "pk": self.workspace_file.pk,
+            },
+        )
+
+    def test_admin_can_download_file(self):
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        self.assertEqual(
+            b"".join(response.streaming_content),
+            b"StudyGram download test content",
+        )
+
+    def test_member_can_download_file(self):
+        self.client.force_authenticate(user=self.member)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        self.assertEqual(
+            b"".join(response.streaming_content),
+            b"StudyGram download test content",
+        )
+
+    def test_outsider_cannot_download_file(self):
+        self.client.force_authenticate(user=self.outsider)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+
+    def test_unauthenticated_user_cannot_download_file(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_401_UNAUTHORIZED,
+        )
+
+    def test_cannot_download_file_from_another_workspace(self):
+        other_workspace = Workspace.objects.create(
+            name="Other Download Workspace",
+            description="Another workspace",
+            owner=self.admin,
+        )
+
+        other_file = WorkspaceFile.objects.create(
+            workspace=other_workspace,
+            name="secret.txt",
+            uploaded_file=SimpleUploadedFile(
+                "secret.txt",
+                b"Secret content",
+                content_type="text/plain",
+            ),
+            file_type="text/plain",
+            size=len(b"Secret content"),
+            created_by=self.admin,
+        )
+
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.get(
+            reverse(
+                "workspace-file-download",
+                kwargs={
+                    "workspace_pk": self.workspace.pk,
+                    "pk": other_file.pk,
+                },
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_404_NOT_FOUND,
         )
