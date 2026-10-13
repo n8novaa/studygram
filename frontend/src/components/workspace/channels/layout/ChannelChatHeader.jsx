@@ -1,6 +1,5 @@
 import {
   HashIcon,
-  RefreshIcon,
   SettingsIcon,
   UsersIcon,
   MenuIcon,
@@ -10,7 +9,6 @@ function ChannelChatHeader({
   channel,
   isAdmin,
   showMembers,
-  onRefresh,
   onEditChannel,
   onToggleMembers,
   onOpenMobileSidebar,

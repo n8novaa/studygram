@@ -38,12 +38,33 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
+if not DEBUG and (not ALLOWED_HOSTS or '*' in ALLOWED_HOSTS):
+    raise ValueError(
+        'DJANGO_ALLOWED_HOSTS must contain explicit hostnames when DEBUG=False.'
+    )
+
 # Cookie security
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 # HTTPS security
-
+SECURE_SSL_REDIRECT = os.environ.get(
+    'SECURE_SSL_REDIRECT', str(not DEBUG)
+).lower() in ('true', '1', 'yes')
+SECURE_HSTS_SECONDS = int(os.environ.get(
+    'SECURE_HSTS_SECONDS', '31536000' if not DEBUG else '0'
+))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = os.environ.get(
+    'SECURE_HSTS_INCLUDE_SUBDOMAINS', str(not DEBUG)
+).lower() in ('true', '1', 'yes')
+SECURE_HSTS_PRELOAD = os.environ.get(
+    'SECURE_HSTS_PRELOAD', 'False'
+).lower() in ('true', '1', 'yes')
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
 
 # --------------------------------------------------
@@ -216,6 +237,7 @@ REST_FRAMEWORK = {
         'DEFAULT_THROTTLE_RATES': {
         'auth_login': '5/min',
         'auth_register': '3/hour',
+        'password_reset': '5/hour',
     },
 }
 
@@ -246,4 +268,37 @@ CORS_ALLOWED_ORIGINS = [
     if origin.strip()
 ]
 
-CORS_ALLOW_CREDENTIALS = True
+# The frontend authenticates API calls with bearer tokens, not cookies.
+CORS_ALLOW_CREDENTIALS = False
+
+# --------------------------------------------------
+# Email Configuration
+# --------------------------------------------------
+
+EMAIL_BACKEND = os.environ.get(
+    'EMAIL_BACKEND',
+    'django.core.mail.backends.console.EmailBackend'
+    if DEBUG
+    else 'django.core.mail.backends.smtp.EmailBackend',
+)
+
+EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+
+EMAIL_USE_TLS = (
+    os.environ.get('EMAIL_USE_TLS', 'True').lower()
+    in ('true', '1', 'yes')
+)
+
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+
+DEFAULT_FROM_EMAIL = os.environ.get(
+    'DEFAULT_FROM_EMAIL',
+    'StudyGram <noreply@studygram.local>',
+)
+
+FRONTEND_URL = os.environ.get(
+    'FRONTEND_URL',
+    'http://localhost:5173',
+)

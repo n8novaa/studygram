@@ -301,6 +301,11 @@ class WorkspaceChannelMessageSerializer(
                 'Message body cannot be empty.'
             )
 
+        if len(value) > 10000:
+            raise serializers.ValidationError(
+                'Message body cannot exceed 10,000 characters.'
+            )
+
         return value
 
     def validate_reply_to(self, value):

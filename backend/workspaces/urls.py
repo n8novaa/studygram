@@ -9,6 +9,8 @@ from files.views import (
     WorkspaceFolderListView,
     WorkspaceFolderCreateView,
     WorkspaceFolderDetailView,
+    WorkspaceFolderPasteView,
+    WorkspaceFilePasteView,
     WorkspaceFileCreateView,
     WorkspaceFileDownloadView,
 )
@@ -131,6 +133,12 @@ urlpatterns = [
         name='workspace-folder-detail',
     ),
 
+    path(
+        'workspaces/<int:workspace_pk>/folders/<int:pk>/paste/',
+        WorkspaceFolderPasteView.as_view(),
+        name='workspace-folder-paste',
+    ),
+
     # ---------------------------------------------------------
     # Files
     # ---------------------------------------------------------
@@ -145,6 +153,12 @@ urlpatterns = [
         'workspaces/<int:workspace_pk>/files/upload/',
         WorkspaceFileCreateView.as_view(),
         name='workspace-file-upload',
+    ),
+
+    path(
+        'workspaces/<int:workspace_pk>/files/<int:pk>/paste/',
+        WorkspaceFilePasteView.as_view(),
+        name='workspace-file-paste',
     ),
 
     path(

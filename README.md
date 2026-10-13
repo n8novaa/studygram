@@ -1,105 +1,77 @@
 # StudyGram
 
-A collaborative learning workspace where students can create, organize, share, discuss, and improve learning material.
+StudyGram is a collaborative learning app for organizing study groups. The current primary experience is a React single-page app backed by a Django REST Framework API. The repository also retains an earlier Django template-based study-room experience under `/`.
 
-## Architecture
+## Current features
 
-Currently, StudyGram is a monolithic Django application with the following stack:
-- **Backend**: Django 5.x
-- **API**: Django REST Framework (DRF)
-- **Database**: PostgreSQL (via `dj-database-url`) or SQLite for local development.
-- **Authentication**: Django session auth for frontend, JWT for API.
+- Account registration, JWT sign-in/refresh/sign-out, and password reset
+- Public and private workspaces with discovery, search, and visibility controls
+- Membership requests, invitations, member roles, and admin tools
+- Workspace channels with editable messages, replies, and emoji reactions
+- Nested folders and shared file uploads/downloads
+- Legacy study rooms, topics, profiles, and activity pages
 
-## Local Setup
+## Requirements
 
-### 1. Environment Configuration
+- Python 3.10 or newer
+- Node.js 20.19+ or 22.12+ for Vite 8
+- SQLite for local development, or PostgreSQL through `DATABASE_URL`
 
-Copy `.env.example` to `.env`:
+## Local setup
 
-```bash
-cp .env.example .env
-```
+From the repository root, create `backend/.env` using the root `.env.example` as a reference. The Django settings load that file. Keep real keys and email credentials private.
 
-Edit the `.env` file to include your database configuration and other settings:
-
-```text
-DJANGO_SECRET_KEY=your-secret-key
-DJANGO_DEBUG=True
-DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
-DATABASE_URL=postgres://user:password@localhost:5432/studygram
-```
-Note: If `DATABASE_URL` is omitted, the app will fall back to SQLite for local development.
-
-### 2. Virtual Environment
-
-Create and activate a virtual environment:
-
-```bash
+```powershell
 python -m venv venv
-# On Windows
-venv\Scripts\activate
-# On macOS/Linux
-source venv/bin/activate
-```
-
-### 3. Install Dependencies
-
-```bash
+venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-```
-
-### 4. Database Migrations
-
-Apply migrations to set up the database schema:
-
-```bash
+cd backend
 python manage.py migrate
-```
-
-### 5. Run the Development Server
-
-Start the Django development server:
-
-```bash
 python manage.py runserver
 ```
-Visit `http://127.0.0.1:8000` to view the application.
 
-## Testing
+In a second terminal:
 
-Run the test suite:
-
-```bash
-python manage.py test base.tests
+```powershell
+cd frontend
+npm ci
+npm run dev
 ```
 
-## API Overview
+Open the Vite URL, normally `http://localhost:5173`. During development the frontend sends API requests to `http://127.0.0.1:8000/api` by default. Production builds use the same-origin `/api` path unless `VITE_API_BASE_URL` is configured for a separate API host. Set `VITE_API_BASE_URL` in `frontend/.env.local` to override the development URL, for example `http://127.0.0.1:8000/api`.
 
-The API is located under the `/api/v1/` namespace and requires JWT authentication (unless the endpoint specifies otherwise).
+The Django app uses SQLite if `DATABASE_URL` is unset. Password reset is requested with the account username and delivered to that account's saved email. In `DEBUG=True`, reset emails are printed in the backend console by default. To deliver to a real inbox locally, set `EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend` in `backend/.env` and configure valid SMTP credentials and `FRONTEND_URL`. Gmail SMTP normally requires an app password when two-step verification is enabled; a normal Gmail login password will not work.
 
-### Endpoints
+## Environment variables
 
-- **Auth**:
-  - `POST /api/v1/auth/register/`: Register a new user.
-  - `POST /api/v1/auth/token/`: Obtain JWT access and refresh tokens.
-  - `POST /api/v1/auth/token/refresh/`: Refresh an expired access token.
-  - `GET /api/v1/auth/me/`: Get current authenticated user details.
-- **Rooms**:
-  - `GET /api/v1/rooms/`: List rooms (paginated, supports `?q=` search).
-  - `POST /api/v1/rooms/`: Create a new room.
-  - `GET /api/v1/rooms/<id>/`: Retrieve room details (including participants).
-  - `PATCH /api/v1/rooms/<id>/`: Update a room (requires host permission).
-  - `DELETE /api/v1/rooms/<id>/`: Delete a room (requires host permission).
-- **Messages**:
-  - `GET /api/v1/rooms/<room_id>/messages/`: List messages in a room.
-  - `POST /api/v1/rooms/<room_id>/messages/`: Add a message to a room.
-  - `DELETE /api/v1/messages/<id>/`: Delete a message (requires author permission).
-- **Topics**:
-  - `GET /api/v1/topics/`: List topics.
-- **Users**:
-  - `GET /api/v1/users/`: List users.
+See `.env.example` for the available settings:
 
-## Future Roadmap
-- Phase 2: React + Vite frontend consuming the DRF API.
-- Phase 3: Workspace and Document models.
-- Phase 4: Real-time features with Django Channels.
+- `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`
+- `DATABASE_URL` (optional; SQLite is the default)
+- `CORS_ALLOWED_ORIGINS`
+- `FRONTEND_URL`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USE_TLS`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `DEFAULT_FROM_EMAIL`
+
+## Checks and tests
+
+Run backend checks and the full test suite from `backend/`:
+
+```powershell
+python manage.py check
+python manage.py test
+```
+
+Run the frontend static checks and production build from `frontend/`:
+
+```powershell
+npm run lint
+npm run build
+```
+
+## Project layout
+
+- `backend/base/`: legacy study-room views and versioned-by-prefix API functionality (the current API prefix is `/api/`)
+- `backend/workspaces/`: workspace, membership, invitation, channel, message, and reaction domain
+- `backend/files/`: workspace folders and file API
+- `frontend/src/`: React routes, UI components, auth, and API service modules
+
+For data models, endpoint groups, and the relationship between the new and legacy experiences, see [STUDYGRAM_ARCHITECTURE.md](STUDYGRAM_ARCHITECTURE.md).

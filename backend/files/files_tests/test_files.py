@@ -375,7 +375,7 @@ class WorkspaceFileCreateTests(APITestCase):
 
         uploaded_file = self.create_uploaded_file(
             name="notes.pdf",
-            content=b"PDF test content",
+            content=b"%PDF-1.7\nPDF test content",
             content_type="application/pdf",
         )
 
@@ -392,6 +392,23 @@ class WorkspaceFileCreateTests(APITestCase):
             response.status_code,
             status.HTTP_201_CREATED,
         )
+
+    def test_upload_rejects_content_that_only_claims_to_be_pdf(self):
+        self.client.force_authenticate(user=self.admin)
+
+        uploaded_file = self.create_uploaded_file(
+            name="notes.pdf",
+            content=b"<html>not a PDF</html>",
+            content_type="application/pdf",
+        )
+
+        response = self.client.post(
+            self.url,
+            {"name": "notes.pdf", "uploaded_file": uploaded_file},
+            format="multipart",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
     def test_upload_rejects_unsupported_file_extension(self):

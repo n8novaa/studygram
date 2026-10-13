@@ -117,6 +117,11 @@ function Login() {
           </form>
 
           <p className="auth-footer-prompt">
+            <Link to="/forgot-password" className="auth-link">
+              Forgot password?
+            </Link>
+          </p>
+          <p className="auth-footer-prompt">
             Don't have an account yet?{' '}
             <Link to="/register" className="auth-link">
               Create account

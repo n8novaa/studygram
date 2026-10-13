@@ -1,7 +1,8 @@
 import { formatFileSize, formatRelativeTime } from '../../../utils/formatters';
-import { FileIcon, DownloadIcon, TrashIcon } from '../../common/Icons';
+import { FileIcon, DownloadIcon } from '../../common/Icons';
+import WorkspaceItemActions from './WorkspaceItemActions';
 
-function WorkspaceFileItem({ file, isAdmin, busy, onDownload, onDelete }) {
+function WorkspaceFileItem({ file, isAdmin, busy, onDownload, onDelete, onCopy, onMove }) {
   return (
     <div className="file-item-card">
       <div className="item-left">
@@ -30,15 +31,13 @@ function WorkspaceFileItem({ file, isAdmin, busy, onDownload, onDelete }) {
         </button>
 
         {isAdmin && (
-          <button
-            type="button"
-            className="item-action-btn btn-delete"
-            onClick={() => onDelete(file)}
-            disabled={busy}
-            title="Delete file"
-          >
-            <TrashIcon size={14} />
-          </button>
+          <WorkspaceItemActions
+            item={file}
+            busy={busy}
+            onCopy={onCopy}
+            onMove={onMove}
+            onDelete={onDelete}
+          />
         )}
       </div>
     </div>

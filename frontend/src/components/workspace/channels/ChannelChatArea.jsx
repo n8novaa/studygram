@@ -197,8 +197,6 @@ useEffect(() => {
       addToast('Message deleted.', 'info');
       onMessageDeleted(deletingMessage.id);
       setDeletingMessage(null);
-    } catch (err) {
-      throw err;
     } finally {
       setDeleting(false);
     }

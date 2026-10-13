@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.test import override_settings
+import tempfile
 
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -746,3 +747,181 @@ class WorkspaceFileDownloadTests(APITestCase):
             response.status_code,
             status.HTTP_404_NOT_FOUND,
         )
+
+
+class WorkspaceFolderPasteTests(APITestCase):
+    def setUp(self):
+        self.media_dir = tempfile.TemporaryDirectory()
+        media_override = override_settings(MEDIA_ROOT=self.media_dir.name)
+        media_override.enable()
+        self.addCleanup(media_override.disable)
+        self.addCleanup(self.media_dir.cleanup)
+
+        self.admin = User.objects.create_user('paste_admin', password='testpass123')
+        self.member = User.objects.create_user('paste_member', password='testpass123')
+        self.workspace = Workspace.objects.create(
+            name='Paste Workspace', description='Folder copy and move tests', owner=self.admin,
+        )
+        WorkspaceMembership.objects.create(
+            workspace=self.workspace, user=self.admin, role=WorkspaceMembership.Role.ADMIN,
+        )
+        WorkspaceMembership.objects.create(
+            workspace=self.workspace, user=self.member, role=WorkspaceMembership.Role.MEMBER,
+        )
+        self.source = WorkspaceFolder.objects.create(
+            workspace=self.workspace, name='Source', created_by=self.admin,
+        )
+        self.destination = WorkspaceFolder.objects.create(
+            workspace=self.workspace, name='Destination', created_by=self.admin,
+        )
+        self.url = reverse(
+            'workspace-folder-paste',
+            kwargs={'workspace_pk': self.workspace.pk, 'pk': self.source.pk},
+        )
+
+    def test_copy_duplicates_nested_folders_and_file_contents(self):
+        child = WorkspaceFolder.objects.create(
+            workspace=self.workspace, parent=self.source, name='Notes', created_by=self.admin,
+        )
+        original = WorkspaceFile.objects.create(
+            workspace=self.workspace,
+            folder=child,
+            name='lesson.txt',
+            uploaded_file=SimpleUploadedFile('lesson.txt', b'copy me', content_type='text/plain'),
+            file_type='text/plain',
+            size=7,
+            created_by=self.admin,
+        )
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.post(
+            self.url, {'mode': 'copy', 'parent': self.destination.pk}, format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        copied_root = WorkspaceFolder.objects.get(pk=response.data['id'])
+        copied_child = WorkspaceFolder.objects.get(parent=copied_root, name='Notes')
+        copied_file = WorkspaceFile.objects.get(folder=copied_child, name='lesson.txt')
+        self.assertEqual(copied_root.parent, self.destination)
+        self.assertNotEqual(copied_file.uploaded_file.name, original.uploaded_file.name)
+        with copied_file.uploaded_file.open('rb') as copied_content:
+            self.assertEqual(copied_content.read(), b'copy me')
+
+    def test_move_updates_parent(self):
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.post(
+            self.url, {'mode': 'move', 'parent': self.destination.pk}, format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.source.refresh_from_db()
+        self.assertEqual(self.source.parent, self.destination)
+
+    def test_copy_into_source_or_descendant_is_rejected(self):
+        child = WorkspaceFolder.objects.create(
+            workspace=self.workspace, parent=self.source, name='Child', created_by=self.admin,
+        )
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.post(self.url, {'mode': 'copy', 'parent': child.pk}, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(WorkspaceFolder.objects.filter(name__startswith='Source (copy)').count(), 0)
+
+    def test_cross_workspace_destination_is_rejected(self):
+        other_workspace = Workspace.objects.create(
+            name='Other', description='Other workspace', owner=self.admin,
+        )
+        other_folder = WorkspaceFolder.objects.create(
+            workspace=other_workspace, name='Other destination', created_by=self.admin,
+        )
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.post(
+            self.url, {'mode': 'move', 'parent': other_folder.pk}, format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_members_cannot_copy_or_move_folders(self):
+        self.client.force_authenticate(user=self.member)
+
+        response = self.client.post(self.url, {'mode': 'move'}, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.source.refresh_from_db()
+        self.assertIsNone(self.source.parent)
+
+    def create_file(self, folder=None, name='notes.txt'):
+        return WorkspaceFile.objects.create(
+            workspace=self.workspace,
+            folder=folder,
+            name=name,
+            uploaded_file=SimpleUploadedFile(
+                name, b'file clipboard content', content_type='text/plain',
+            ),
+            file_type='text/plain',
+            size=len(b'file clipboard content'),
+            created_by=self.admin,
+        )
+
+    def file_paste_url(self, workspace, workspace_file):
+        return reverse(
+            'workspace-file-paste',
+            kwargs={'workspace_pk': workspace.pk, 'pk': workspace_file.pk},
+        )
+
+    def test_file_copy_duplicates_stored_content_and_uses_unique_name(self):
+        source_file = self.create_file(self.source)
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.post(
+            self.file_paste_url(self.workspace, source_file),
+            {'mode': 'copy', 'parent': self.destination.pk},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        copied = WorkspaceFile.objects.get(pk=response.data['id'])
+        self.assertEqual(copied.folder, self.destination)
+        self.assertEqual(copied.name, 'notes (copy).txt')
+        self.assertNotEqual(copied.uploaded_file.name, source_file.uploaded_file.name)
+        with copied.uploaded_file.open('rb') as content:
+            self.assertEqual(content.read(), b'file clipboard content')
+
+    def test_file_move_updates_folder_without_copying_storage(self):
+        source_file = self.create_file(self.source)
+        stored_name = source_file.uploaded_file.name
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.post(
+            self.file_paste_url(self.workspace, source_file),
+            {'mode': 'move', 'parent': self.destination.pk},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        source_file.refresh_from_db()
+        self.assertEqual(source_file.folder, self.destination)
+        self.assertEqual(source_file.uploaded_file.name, stored_name)
+
+    def test_file_paste_rejects_cross_workspace_destination(self):
+        source_file = self.create_file(self.source)
+        other_workspace = Workspace.objects.create(
+            name='File Paste Other', description='Other workspace', owner=self.admin,
+        )
+        other_folder = WorkspaceFolder.objects.create(
+            workspace=other_workspace, name='External', created_by=self.admin,
+        )
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.post(
+            self.file_paste_url(self.workspace, source_file),
+            {'mode': 'move', 'parent': other_folder.pk},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        source_file.refresh_from_db()
+        self.assertEqual(source_file.folder, self.source)

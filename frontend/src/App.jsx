@@ -11,6 +11,8 @@ import Workspaces from './pages/Workspaces';
 import Discover from './pages/Discover';
 import Messages from './pages/Messages';
 import WorkspaceDetail from './pages/WorkspaceDetail';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 import './styles/global.css';
 
@@ -21,6 +23,15 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route
+            path="/forgot-password"
+            element={<ForgotPassword />}
+          />
+
+          <Route
+            path="/reset-password/:uid/:token"
+            element={<ResetPassword />}
+          />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/app" element={<AppLayout />}>

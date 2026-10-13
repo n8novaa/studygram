@@ -62,6 +62,27 @@ class JWTLogoutTests(APITestCase):
 
         self.assertEqual(response.status_code, 400)
 
+    def test_user_cannot_revoke_another_users_refresh_token(self):
+        other_user = User.objects.create_user(
+            username="anotheruser",
+            password="Password123!",
+        )
+        other_refresh = str(RefreshToken.for_user(other_user))
+        self.authenticate()
+
+        response = self.client.post(
+            self.logout_url,
+            {"refresh": other_refresh},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        # A rejected logout request must leave the other user's token usable.
+        self.assertEqual(
+            str(RefreshToken(other_refresh)["user_id"]),
+            str(other_user.pk),
+        )
+
     def test_unauthenticated_user_cannot_logout(self):
         response = self.client.post(
             self.logout_url,

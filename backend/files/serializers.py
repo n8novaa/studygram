@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 import os
+import zipfile
 from .models import WorkspaceFile, WorkspaceFolder
 
 
@@ -69,6 +70,27 @@ class WorkspaceFolderSerializer(serializers.ModelSerializer):
         return value
 
 
+class WorkspaceFolderPasteSerializer(serializers.Serializer):
+    mode = serializers.ChoiceField(choices=('copy', 'move'))
+    parent = serializers.PrimaryKeyRelatedField(
+        queryset=WorkspaceFolder.objects.all(),
+        allow_null=True,
+        required=False,
+    )
+
+    def validate_parent(self, value):
+        workspace_id = self.context['workspace_id']
+        if value is not None and value.workspace_id != workspace_id:
+            raise serializers.ValidationError(
+                'Destination folder must belong to this workspace.'
+            )
+        return value
+
+
+class WorkspaceFilePasteSerializer(WorkspaceFolderPasteSerializer):
+    """Validate a file paste destination using the same workspace rules."""
+
+
 class WorkspaceFileSerializer(serializers.ModelSerializer):
     created_by = serializers.StringRelatedField(read_only=True)
 
@@ -79,7 +101,6 @@ class WorkspaceFileSerializer(serializers.ModelSerializer):
             "workspace",
             "folder",
             "name",
-            "uploaded_file",
             "file_type",
             "size",
             "created_by",
@@ -142,7 +163,63 @@ class WorkspaceFileSerializer(serializers.ModelSerializer):
                 'for this extension.'
             )
 
+        self.validate_file_signature(uploaded_file, extension)
+
         return uploaded_file
+
+    @staticmethod
+    def validate_file_signature(uploaded_file, extension):
+        signatures = {
+            '.pdf': lambda head: head.startswith(b'%PDF-'),
+            '.png': lambda head: head.startswith(b'\x89PNG\r\n\x1a\n'),
+            '.jpg': lambda head: head.startswith(b'\xff\xd8\xff'),
+            '.jpeg': lambda head: head.startswith(b'\xff\xd8\xff'),
+            '.gif': lambda head: head.startswith((b'GIF87a', b'GIF89a')),
+            '.webp': lambda head: (
+                len(head) >= 12 and head[:4] == b'RIFF' and head[8:12] == b'WEBP'
+            ),
+            '.doc': lambda head: head.startswith(b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1'),
+            '.xls': lambda head: head.startswith(b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1'),
+            '.ppt': lambda head: head.startswith(b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1'),
+        }
+
+        uploaded_file.seek(0)
+        head = uploaded_file.read(512)
+        uploaded_file.seek(0)
+
+        is_valid = signatures.get(extension)
+        if is_valid is not None and not is_valid(head):
+            raise serializers.ValidationError(
+                'The file contents do not match the selected file type.'
+            )
+
+        if extension in {'.docx', '.xlsx', '.pptx'}:
+            expected_parts = {
+                '.docx': 'word/document.xml',
+                '.xlsx': 'xl/workbook.xml',
+                '.pptx': 'ppt/presentation.xml',
+            }
+            try:
+                with zipfile.ZipFile(uploaded_file) as archive:
+                    names = set(archive.namelist())
+                    valid_archive = (
+                        '[Content_Types].xml' in names
+                        and expected_parts[extension] in names
+                    )
+            except (zipfile.BadZipFile, OSError):
+                valid_archive = False
+            finally:
+                uploaded_file.seek(0)
+
+            if not valid_archive:
+                raise serializers.ValidationError(
+                    'The file contents do not match the selected file type.'
+                )
+
+        if extension in {'.txt', '.csv'} and b'\x00' in head:
+            raise serializers.ValidationError(
+                'Text files cannot contain binary data.'
+            )
 
     def validate_name(self, value):
         value = value.strip()
@@ -206,6 +283,13 @@ class WorkspaceFileSerializer(serializers.ModelSerializer):
                         "the permitted type for this extension."
                     )
                 })
+
+            try:
+                self.validate_file_signature(uploaded_file, extension)
+            except serializers.ValidationError as exc:
+                raise serializers.ValidationError({
+                    'uploaded_file': exc.detail,
+                }) from exc
 
             max_size = 100 * 1024 * 1024  # 100 MB
 

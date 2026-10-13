@@ -184,6 +184,11 @@ class WorkspaceChannelMessageReactionView(
                 {'emoji': 'An emoji is required.'}
             )
 
+        if len(emoji) > 32:
+            raise serializers.ValidationError(
+                {'emoji': 'Emoji reactions must be 32 characters or fewer.'}
+            )
+
         reaction, created = (
             WorkspaceChannelMessageReaction.objects.update_or_create(
                 message=message,

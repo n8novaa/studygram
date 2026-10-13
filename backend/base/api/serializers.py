@@ -1,7 +1,9 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
+from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
+
 
 from base.models import Message, Room, Topic
 
@@ -55,10 +57,30 @@ class LogoutSerializer(serializers.Serializer):
                 "Invalid or expired refresh token."
             )
 
+        token_user_id = self.token.get(
+            api_settings.USER_ID_CLAIM
+        )
+        if str(token_user_id) != str(self.context['request'].user.pk):
+            raise serializers.ValidationError(
+                "This refresh token does not belong to the authenticated user."
+            )
+
         return value
 
     def save(self, **kwargs):
         self.token.blacklist()
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    password = serializers.CharField(
+        write_only=True,
+        trim_whitespace=False,
+    )
+
+    def validate_password(self, value):
+        validate_password(value)
+        return value
 
 
 class TopicSerializer(serializers.ModelSerializer):
@@ -79,6 +101,10 @@ class MessageSerializer(serializers.ModelSerializer):
         value = value.strip()
         if not value:
             raise serializers.ValidationError('Message body cannot be empty.')
+        if len(value) > 10000:
+            raise serializers.ValidationError(
+                'Message body cannot exceed 10,000 characters.'
+            )
         return value
 
 
@@ -91,6 +117,10 @@ class MessageCreateSerializer(serializers.ModelSerializer):
         value = value.strip()
         if not value:
             raise serializers.ValidationError('Message body cannot be empty.')
+        if len(value) > 10000:
+            raise serializers.ValidationError(
+                'Message body cannot exceed 10,000 characters.'
+            )
         return value
 
 
@@ -124,7 +154,11 @@ class RoomDetailSerializer(RoomListSerializer):
 
 
 class RoomWriteSerializer(serializers.ModelSerializer):
-    topic_name = serializers.CharField(write_only=True)
+    topic_name = serializers.CharField(
+        write_only=True,
+        max_length=200,
+        trim_whitespace=True,
+    )
 
     class Meta:
         model = Room

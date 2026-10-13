@@ -26,6 +26,87 @@
   flex-wrap: wrap;
 }
 
+.folder-clipboard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-highlight);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card-subtle);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.folder-clipboard-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.item-action-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.workspace-item-menu {
+  position: relative;
+}
+
+.workspace-item-menu-trigger {
+  color: var(--text-secondary);
+}
+
+.workspace-item-menu-popover {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 5px);
+  right: 0;
+  min-width: 148px;
+  padding: 5px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+}
+
+.workspace-item-menu-popover button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-primary);
+  text-align: left;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.workspace-item-menu-popover button:hover:not(:disabled) {
+  background: var(--bg-card-hover);
+}
+
+.workspace-item-menu-popover button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.workspace-item-menu-popover .workspace-item-menu-delete {
+  color: var(--danger-text);
+}
+
+@media (max-width: 600px) {
+  .folder-clipboard {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
 .breadcrumb-item {
   display: inline-flex;
   align-items: center;

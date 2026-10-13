@@ -12,6 +12,8 @@ from .views import (
     RoomViewSet,
     TopicViewSet,
     UserViewSet,
+    PasswordResetRequestView,
+    PasswordResetConfirmView,
 )
 
 class ThrottledTokenObtainPairView(TokenObtainPairView):
@@ -33,6 +35,17 @@ urlpatterns = [
     path('auth/logout/', LogoutView.as_view(), name='api-logout'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='api-token-refresh'),
     path('auth/me/', CurrentUserView.as_view(), name='api-me'),
+
+    path(
+        'auth/password-reset/',
+        PasswordResetRequestView.as_view(),
+        name='api-password-reset',
+    ),
+    path(
+        'auth/password-reset/confirm/',
+        PasswordResetConfirmView.as_view(),
+        name='api-password-reset-confirm',
+    ),
 
     path(
         'rooms/<int:room_pk>/messages/',

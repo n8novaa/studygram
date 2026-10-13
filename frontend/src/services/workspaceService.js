@@ -3,14 +3,14 @@ import {
   apiPost,
   apiPatch,
   apiDelete,
+  apiGetAll,
 } from './api'
 
 /*
  * Get workspaces that the authenticated user is a member of.
  */
 export async function getWorkspaces(accessToken) {
-  const data = await apiGet('/workspaces/', accessToken)
-  return data?.results ?? data ?? []
+  return apiGetAll('/workspaces/', accessToken)
 }
 
 /*
@@ -109,6 +109,5 @@ export async function getDiscoveredWorkspaces(accessToken, search = '') {
     ? `/workspaces/discover/?search=${encodeURIComponent(query)}`
     : '/workspaces/discover/'
 
-  const data = await apiGet(endpoint, accessToken)
-  return data?.results ?? data ?? []
+  return apiGetAll(endpoint, accessToken)
 }

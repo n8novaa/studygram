@@ -89,12 +89,9 @@ function WorkspaceChannels({ workspace, isAdmin }) {
       const timer = setInterval(() => {
         getChannelMessages(accessToken, workspaceId, activeChannelId)
           .then((data) => {
-            console.log('[Channel polling] Backend messages:', data);
             setMessages(data);
           })
-          .catch((err) => {
-            console.error('[Channel polling] Failed:', err);
-          });
+          .catch(() => {});
       }, 4000);
 
       return () => clearInterval(timer);

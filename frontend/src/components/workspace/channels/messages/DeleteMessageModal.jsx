@@ -67,7 +67,8 @@ function DeleteMessageModal({
         </div>
 
         <p className="workspace-member-modal-description">
-          Are you sure you want to delete this message?
+          Are you sure you want to delete this message
+          {message?.body ? `: “${message.body}”` : ''}?
         </p>
 
         {error && (

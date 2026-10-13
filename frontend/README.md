@@ -1,16 +1,28 @@
-# React + Vite
+# StudyGram React client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This React 19 + Vite app is the primary interface for StudyGram workspaces. The Django server-rendered study-room pages remain a separate legacy experience.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+From this directory:
 
-## React Compiler
+```powershell
+npm ci
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The backend must be running separately. In development, the default API URL is `http://127.0.0.1:8000/api`. Production builds use the same-origin `/api` path by default. To change the URL, create `.env.local` here and set:
 
-## Expanding the ESLint configuration
+```text
+VITE_API_BASE_URL=http://127.0.0.1:8000/api
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Commands
+
+```powershell
+npm run lint
+npm run build
+npm run preview
+```
+
+The client includes account registration/login/password reset, workspace discovery and management, access requests and invitation redemption, member administration, channels with replies/reactions, and workspace file/folder operations. API modules live in `src/services/`; authentication state is in `src/auth/`.

@@ -1,6 +1,8 @@
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
-  'http://127.0.0.1:8000/api'
+  (import.meta.env.DEV
+    ? 'http://127.0.0.1:8000/api'
+    : '/api')
 
 
 /*
@@ -200,6 +202,48 @@ export function apiGet(
 }
 
 
+/* Fetch every page from a DRF paginated endpoint. */
+export async function apiGetAll(
+  path,
+  accessToken = null,
+) {
+  const apiBase = new URL(
+    API_BASE_URL,
+    window.location.origin,
+  );
+  const apiPrefix = apiBase.pathname.replace(/\/+$/, '');
+  const seen = new Set();
+  const results = [];
+  let requestPath = path;
+
+  while (requestPath) {
+    if (seen.has(requestPath)) {
+      throw new Error('The server returned a repeated pagination link.');
+    }
+    seen.add(requestPath);
+
+    const data = await apiGet(requestPath, accessToken);
+    if (Array.isArray(data)) {
+      results.push(...data);
+      break;
+    }
+
+    results.push(...(data?.results ?? []));
+    if (!data?.next) break;
+
+    const nextUrl = new URL(data.next, apiBase);
+    if (!nextUrl.pathname.startsWith(`${apiPrefix}/`)) {
+      throw new Error('The server returned an invalid pagination link.');
+    }
+
+    requestPath =
+      `${nextUrl.pathname.slice(apiPrefix.length)}${nextUrl.search}`;
+  }
+
+  return results;
+}
+
+
 export function apiPost(
   path,
   body = undefined,
@@ -310,5 +354,5 @@ export async function apiDownload(
   link.click()
   link.remove()
 
-  URL.revokeObjectURL(objectUrl)
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
 }

@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
 from .forms import RoomForm, UserForm, CustomUserCreationForm
 from .models import Message, Room, Topic
@@ -30,6 +31,7 @@ def loginPage(request):
     return render(request, 'base/login_register.html', {'page': page})
 
 
+@require_POST
 def logoutUser(request):
     logout(request)
     return redirect('home')

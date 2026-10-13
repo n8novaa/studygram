@@ -337,6 +337,24 @@ export function MenuIcon({ size = 18, className = "" }) {
   );
 }
 
+export function MoreVerticalIcon({ size = 18, className = "" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <circle cx="12" cy="5" r="1.8"></circle>
+      <circle cx="12" cy="12" r="1.8"></circle>
+      <circle cx="12" cy="19" r="1.8"></circle>
+    </svg>
+  );
+}
+
+export function MoveIcon({ size = 18, className = "" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d="M5 12h14M13 6l6 6-6 6M11 6l-6 6 6 6"></path>
+    </svg>
+  );
+}
+
 export function ReplyIcon({ size = 18, className = "" }) {
   return (
     <svg

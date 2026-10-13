@@ -4,6 +4,8 @@ import {
   getWorkspaceFolders,
   createWorkspaceFolder,
   deleteWorkspaceFolder,
+  pasteWorkspaceFolder,
+  pasteWorkspaceFile,
   getWorkspaceFiles,
   uploadWorkspaceFile,
   deleteWorkspaceFile,
@@ -32,6 +34,8 @@ function WorkspaceFiles({ workspaceId, isAdmin = false }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [busyItemId, setBusyItemId] = useState(null);
+  const [itemClipboard, setItemClipboard] = useState(null);
+  const [pastingFolder, setPastingFolder] = useState(false);
 
   const [showCreateFolder, setShowCreateFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
@@ -82,6 +86,42 @@ function WorkspaceFiles({ workspaceId, isAdmin = false }) {
     }
     setFolderPath((current) => current.slice(0, index + 1));
   }
+
+  function stageItem(item, kind, mode) {
+    setItemClipboard({ item, kind, mode });
+    setError('');
+  }
+
+  async function handlePasteFolder() {
+    if (!itemClipboard || pastingFolder) return;
+    try {
+      setPastingFolder(true);
+      setError('');
+      const paste = itemClipboard.kind === 'folder'
+        ? pasteWorkspaceFolder
+        : pasteWorkspaceFile;
+      await paste(
+        accessToken,
+        workspaceId,
+        itemClipboard.item.id,
+        itemClipboard.mode,
+        currentFolderId,
+      );
+      addToast(
+        `${itemClipboard.mode === 'copy' ? 'Copied' : 'Moved'} "${itemClipboard.item.name}".`,
+        'success',
+      );
+      if (itemClipboard.mode === 'move') setItemClipboard(null);
+      await loadContents();
+    } catch (err) {
+      setError(err?.message || `Failed to ${itemClipboard.mode} item.`);
+    } finally {
+      setPastingFolder(false);
+    }
+  }
+
+  const pasteWouldBeInsideSource = itemClipboard?.kind === 'folder'
+    && folderPath.some(({ id }) => id === itemClipboard.item.id);
 
   async function handleCreateFolder(event) {
     event.preventDefault();
@@ -232,6 +272,30 @@ function WorkspaceFiles({ workspaceId, isAdmin = false }) {
 
       <WorkspaceBreadcrumbs folderPath={folderPath} onNavigate={navigateToIndex} />
 
+      {isAdmin && itemClipboard && (
+        <div className="folder-clipboard" role="status">
+          <span>
+            {itemClipboard.mode === 'copy' ? 'Copying' : 'Moving'} {itemClipboard.kind} <strong>{itemClipboard.item.name}</strong>.
+            {' '}Navigate to a destination, then paste.
+          </span>
+          <div className="folder-clipboard-actions">
+            <button
+              type="button"
+              className="workspace-btn-action workspace-btn-primary"
+              onClick={handlePasteFolder}
+              disabled={pastingFolder || loading || pasteWouldBeInsideSource}
+              title={pasteWouldBeInsideSource ? 'A folder cannot be pasted into itself or a descendant.' : undefined}
+            >{pastingFolder ? 'Pasting…' : 'Paste here'}</button>
+            <button
+              type="button"
+              className="workspace-btn-action workspace-btn-secondary"
+              onClick={() => setItemClipboard(null)}
+              disabled={pastingFolder}
+            >Cancel</button>
+          </div>
+        </div>
+      )}
+
       {error && (
         <div style={{
           padding: '12px 16px',
@@ -297,6 +361,8 @@ function WorkspaceFiles({ workspaceId, isAdmin = false }) {
               busy={busyItemId === `folder-${folder.id}`}
               onOpen={openFolder}
               onDelete={handleDeleteFolder}
+              onCopy={(folder) => stageItem(folder, 'folder', 'copy')}
+              onMove={(folder) => stageItem(folder, 'folder', 'move')}
             />
           ))}
 
@@ -308,6 +374,8 @@ function WorkspaceFiles({ workspaceId, isAdmin = false }) {
               busy={busyItemId === `file-${file.id}`}
               onDownload={handleDownload}
               onDelete={handleDeleteFile}
+              onCopy={(file) => stageItem(file, 'file', 'copy')}
+              onMove={(file) => stageItem(file, 'file', 'move')}
             />
           ))}
         </div>

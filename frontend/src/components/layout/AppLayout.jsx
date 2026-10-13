@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
+import { useToast } from '../common/ToastContext';
 import {
   HomeIcon,
   WorkspacesIcon,
@@ -12,12 +13,21 @@ import '../../styles/layout/app-layout.css';
 
 function AppLayout() {
   const { user, logout } = useAuth();
+  const { addToast } = useToast();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  function handleLogout() {
-    logout();
-    navigate('/login', { replace: true });
+  async function handleLogout() {
+    try {
+      await logout();
+    } catch {
+      addToast(
+        'Signed out locally, but the server could not revoke this session token.',
+        'error',
+      );
+    } finally {
+      navigate('/login', { replace: true });
+    }
   }
 
   function closeMobileMenu() {

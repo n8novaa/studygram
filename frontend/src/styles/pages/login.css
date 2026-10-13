@@ -168,6 +168,34 @@
   gap: 8px;
 }
 
+.auth-success {
+  padding: 16px;
+  background: #f7f7f5;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.auth-success h3 {
+  margin: 0 0 6px;
+  color: #18181b;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.auth-success p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.auth-button-secondary {
+  margin-top: 14px;
+  background: #ffffff;
+  color: #18181b;
+}
+
 .auth-button {
   height: 36px;
   width: 100%;

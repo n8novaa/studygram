@@ -8,6 +8,7 @@ import {
 import {
   getCurrentUser,
   login,
+  logoutUser as revokeRefreshToken,
   refreshAccessToken,
 } from './authService'
 
@@ -140,6 +141,13 @@ export function AuthProvider({
         data.refresh ||
         storedRefreshToken
 
+      // Rotation invalidates the old token immediately, so persist the
+      // replacement before the follow-up /me request can fail transiently.
+      localStorage.setItem(
+        'refreshToken',
+        newRefreshToken,
+      )
+
 
       const currentUser =
         await getCurrentUser(
@@ -169,15 +177,12 @@ export function AuthProvider({
         newRefreshToken,
       )
 
-    } catch {
-      /*
-       * The refresh token is invalid,
-       * expired, or the authenticated
-       * session cannot be restored.
-       */
-      localStorage.removeItem(
-        'refreshToken',
-      )
+    } catch (error) {
+      /* Clear only tokens the API explicitly rejects. Keep them after
+       * transient network/server failures so a reload can retry. */
+      if ([400, 401, 403].includes(error?.status)) {
+        localStorage.removeItem('refreshToken')
+      }
 
       setAccessToken(null)
       setRefreshToken(null)
@@ -189,7 +194,19 @@ export function AuthProvider({
   }
 
 
-  function logout() {
+  async function logout() {
+    const tokenToRevoke = refreshToken;
+
+    try {
+      if (accessToken && tokenToRevoke) {
+        await revokeRefreshToken(accessToken, tokenToRevoke);
+      }
+    } finally {
+      clearSession();
+    }
+  }
+
+  function clearSession() {
     localStorage.removeItem(
       'refreshToken',
     )

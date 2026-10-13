@@ -44,6 +44,27 @@ class APITests(TestCase):
         
         self.assertEqual(response.status_code, 401)
 
+    def test_room_create_rejects_topic_names_longer_than_model_limit(self):
+        token_response = self.client.post(
+            reverse('api-token-obtain'),
+            data={'username': 'apiuser', 'password': 'password123'},
+        )
+        token = token_response.json()['access']
+
+        response = self.client.post(
+            reverse('room-list'),
+            data=json.dumps({
+                'name': 'Long Topic Room',
+                'topic_name': 'T' * 201,
+                'description': 'Desc',
+            }),
+            content_type='application/json',
+            HTTP_AUTHORIZATION=f'Bearer {token}',
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('topic_name', response.json())
+
     def test_api_registration(self):
         response = self.client.post(reverse('api-register'), data=json.dumps({
             'username': 'newapiuser',

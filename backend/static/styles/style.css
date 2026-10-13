@@ -232,12 +232,43 @@ a {
   font-size: 1.4rem;
 }
 
+.dropdown-menu form {
+  display: block;
+}
+
+.dropdown-menu button.dropdown-link {
+  width: 100%;
+  padding: 1.2rem 4rem;
+  display: block;
+  border: 0;
+  background: transparent;
+  color: var(--color-light);
+  text-align: left;
+  font-weight: 500;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.dropdown-menu button.dropdown-link:hover,
+.dropdown-menu button.dropdown-link:focus-visible {
+  background-color: var(--color-dark-medium);
+}
+
+.dropdown-menu button.dropdown-link svg {
+  fill: var(--color-light);
+  vertical-align: middle;
+}
+
 .dropdown-menu a:hover {
   background-color: var(--color-dark-medium);
 }
 
 .dropdown-menu > a:not(:last-child) {
   border-bottom: 1px solid var(--color-dark-medium);
+}
+
+.dropdown-menu > form {
+  border-top: 1px solid var(--color-dark-medium);
 }
 
 .dropdown-menu a svg {

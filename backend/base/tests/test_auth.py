@@ -21,9 +21,16 @@ class AuthTests(TestCase):
 
     def test_logout(self):
         self.client.login(username='testuser', password='password123')
-        response = self.client.get(reverse('logout'))
+        response = self.client.post(reverse('logout'))
         self.assertRedirects(response, reverse('home'))
         self.assertFalse('_auth_user_id' in self.client.session)
+
+    def test_logout_does_not_change_state_on_get(self):
+        self.client.login(username='testuser', password='password123')
+        response = self.client.get(reverse('logout'))
+
+        self.assertEqual(response.status_code, 405)
+        self.assertTrue('_auth_user_id' in self.client.session)
 
     def test_registration(self):
         response = self.client.post(reverse('register'), {

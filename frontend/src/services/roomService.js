@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiDelete } from './api';
+import { apiGet, apiGetAll, apiPost, apiDelete } from './api';
 
 /*
  * Get all study discussion rooms, with optional search query.
@@ -7,8 +7,7 @@ export async function getRooms(accessToken, query = '') {
   const endpoint = query
     ? `/rooms/?q=${encodeURIComponent(query)}`
     : '/rooms/';
-  const data = await apiGet(endpoint, accessToken);
-  return data?.results ?? data ?? [];
+  return apiGetAll(endpoint, accessToken);
 }
 
 /*
@@ -45,7 +44,8 @@ export async function deleteRoom(accessToken, roomId) {
  */
 export async function getRoomMessages(accessToken, roomId) {
   const data = await apiGet(`/rooms/${roomId}/messages/`, accessToken);
-  return data?.results ?? data ?? [];
+  const messages = data?.results ?? data ?? [];
+  return Array.isArray(messages) ? [...messages].reverse() : [];
 }
 
 /*
@@ -70,6 +70,5 @@ export async function deleteMessage(accessToken, messageId) {
  * Get all available study topics.
  */
 export async function getTopics(accessToken) {
-  const data = await apiGet('/topics/', accessToken);
-  return data?.results ?? data ?? [];
+  return apiGetAll('/topics/', accessToken);
 }

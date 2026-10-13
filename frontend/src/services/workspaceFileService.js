@@ -94,6 +94,35 @@ export async function updateWorkspaceFolder(
   )
 }
 
+/* Copy or move a folder into another folder (or the workspace root). */
+export async function pasteWorkspaceFolder(
+  accessToken,
+  workspaceId,
+  folderId,
+  mode,
+  parentId = null,
+) {
+  return apiPost(
+    `/workspaces/${workspaceId}/folders/${folderId}/paste/`,
+    { mode, parent: parentId },
+    accessToken,
+  )
+}
+
+export async function pasteWorkspaceFile(
+  accessToken,
+  workspaceId,
+  fileId,
+  mode,
+  parentId = null,
+) {
+  return apiPost(
+    `/workspaces/${workspaceId}/files/${fileId}/paste/`,
+    { mode, parent: parentId },
+    accessToken,
+  )
+}
+
 
 /*
  * Delete a folder.

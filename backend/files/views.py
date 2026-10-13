@@ -15,7 +15,10 @@ from .permissions import (
 from .serializers import (
     WorkspaceFileSerializer,
     WorkspaceFolderSerializer,
+    WorkspaceFolderPasteSerializer,
+    WorkspaceFilePasteSerializer,
 )
+from .operations import copy_file, copy_folder, move_file, move_folder
 
 from django.http import FileResponse
 
@@ -174,7 +177,8 @@ class WorkspaceFolderCreateView(generics.CreateAPIView):
     def get_workspace(self):
         from workspaces.models import Workspace
 
-        return Workspace.objects.get(
+        return get_object_or_404(
+            Workspace,
             pk=self.kwargs["workspace_pk"]
         )
 
@@ -252,6 +256,71 @@ class WorkspaceFolderDetailView(generics.RetrieveUpdateDestroyAPIView):
 
         for storage, name in stored_files:
             storage.delete(name)
+
+
+class WorkspaceFolderPasteView(generics.GenericAPIView):
+    permission_classes = [
+        IsAuthenticated,
+        IsWorkspaceFileAdmin,
+    ]
+    serializer_class = WorkspaceFolderPasteSerializer
+
+    def post(self, request, workspace_pk, pk):
+        serializer = self.get_serializer(
+            data=request.data,
+            context={
+                **self.get_serializer_context(),
+                'workspace_id': int(workspace_pk),
+            },
+        )
+        serializer.is_valid(raise_exception=True)
+
+        source = get_object_or_404(
+            WorkspaceFolder.objects.filter(workspace_id=workspace_pk),
+            pk=pk,
+        )
+        mode = serializer.validated_data['mode']
+        destination = serializer.validated_data.get('parent')
+
+        if mode == 'copy':
+            folder = copy_folder(source, destination, request.user)
+            response_status = status.HTTP_201_CREATED
+        else:
+            folder, _moved = move_folder(source, destination)
+            response_status = status.HTTP_200_OK
+
+        return Response(
+            WorkspaceFolderSerializer(folder).data,
+            status=response_status,
+        )
+
+
+class WorkspaceFilePasteView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated, IsWorkspaceFileAdmin]
+    serializer_class = WorkspaceFilePasteSerializer
+
+    def post(self, request, workspace_pk, pk):
+        serializer = self.get_serializer(
+            data=request.data,
+            context={
+                **self.get_serializer_context(),
+                'workspace_id': int(workspace_pk),
+            },
+        )
+        serializer.is_valid(raise_exception=True)
+        source = get_object_or_404(
+            WorkspaceFile.objects.filter(workspace_id=workspace_pk),
+            pk=pk,
+        )
+        destination = serializer.validated_data.get('parent')
+        if serializer.validated_data['mode'] == 'copy':
+            file = copy_file(source, destination, request.user)
+            response_status = status.HTTP_201_CREATED
+        else:
+            file, _moved = move_file(source, destination)
+            response_status = status.HTTP_200_OK
+
+        return Response(WorkspaceFileSerializer(file).data, status=response_status)
 
 class WorkspaceFileCreateView(generics.CreateAPIView):
     serializer_class = WorkspaceFileSerializer
