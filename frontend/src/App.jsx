@@ -9,7 +9,6 @@ import Register from './pages/Register';
 import AppHome from './pages/AppHome';
 import Workspaces from './pages/Workspaces';
 import Discover from './pages/Discover';
-import Messages from './pages/Messages';
 import WorkspaceDetail from './pages/WorkspaceDetail';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
@@ -39,7 +38,7 @@ function App() {
               <Route path="workspaces" element={<Workspaces />} />
               <Route path="workspaces/:id" element={<WorkspaceDetail />} />
               <Route path="discover" element={<Discover />} />
-              <Route path="messages" element={<Messages />} />
+              <Route path="messages" element={<Navigate to="/app/workspaces" replace />} />
             </Route>
           </Route>
 

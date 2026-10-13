@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import {
   deleteWorkspace,
@@ -25,6 +25,7 @@ import '../styles/pages/workspace-detail.css';
 
 function WorkspaceDetail() {
   const { id } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { accessToken, user } = useAuth();
   const { addToast } = useToast();
@@ -44,8 +45,9 @@ function WorkspaceDetail() {
   const [visibility, setVisibility] = useState('private');
   const [formError, setFormError] = useState('');
 
-  // Default to 'overview' so content is immediately visible on mount
-  const [activeSection, setActiveSection] = useState('overview');
+  const activeSection = ['overview', 'channels', 'files', 'members'].includes(
+    searchParams.get('section'),
+  ) ? searchParams.get('section') : 'overview';
 
   useEffect(() => {
     async function loadWorkspace() {
@@ -132,7 +134,13 @@ function WorkspaceDetail() {
   function handleSectionChange(section) {
     setEditing(false);
     setFormError('');
-    setActiveSection(section);
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.set('section', section);
+      if (section !== 'channels') next.delete('channel');
+      if (section !== 'files') next.delete('folder');
+      return next;
+    });
   }
 
   if (loading) {

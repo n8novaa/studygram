@@ -3,6 +3,9 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, serializers
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from django.core import signing
 
 from ..models import (
     Workspace,
@@ -12,6 +15,30 @@ from ..models import (
 )
 from ..permissions import is_workspace_member
 from ..serializers import WorkspaceChannelMessageSerializer
+from ..consumers import TICKET_SALT
+
+
+class WorkspaceChannelWebSocketTicketView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, workspace_pk, channel_pk):
+        workspace = get_object_or_404(Workspace, pk=workspace_pk)
+        if not is_workspace_member(request.user, workspace.pk):
+            raise PermissionDenied('You must be a workspace member.')
+
+        channel = get_object_or_404(
+            WorkspaceChannel,
+            pk=channel_pk,
+            workspace=workspace,
+        )
+        ticket = signing.dumps({
+            'user_id': request.user.pk,
+            'workspace_id': workspace.pk,
+            'channel_id': channel.pk,
+        }, salt=TICKET_SALT)
+        response = Response({'ticket': ticket})
+        response['Cache-Control'] = 'no-store'
+        return response
 
 
 class WorkspaceChannelMessageListCreateView(

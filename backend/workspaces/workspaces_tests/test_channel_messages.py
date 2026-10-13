@@ -13,6 +13,46 @@ from workspaces.models import (
 )
 
 
+class WorkspaceChannelWebSocketTicketTests(APITestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user('ws_ticket_owner', password='testpass123')
+        self.member = User.objects.create_user('ws_ticket_member', password='testpass123')
+        self.outsider = User.objects.create_user('ws_ticket_outsider', password='testpass123')
+        self.workspace = Workspace.objects.create(
+            name='Socket Ticket Workspace', description='', owner=self.owner,
+        )
+        WorkspaceMembership.objects.create(
+            workspace=self.workspace,
+            user=self.member,
+            role=WorkspaceMembership.Role.MEMBER,
+        )
+        self.channel = WorkspaceChannel.objects.create(
+            workspace=self.workspace, name='general', created_by=self.owner,
+        )
+        self.url = reverse(
+            'workspace-channel-message-ws-ticket',
+            kwargs={
+                'workspace_pk': self.workspace.pk,
+                'channel_pk': self.channel.pk,
+            },
+        )
+
+    def test_workspace_member_can_get_scoped_socket_ticket(self):
+        self.client.force_authenticate(user=self.member)
+
+        response = self.client.post(self.url, {}, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data['ticket'])
+
+    def test_non_member_cannot_get_socket_ticket(self):
+        self.client.force_authenticate(user=self.outsider)
+
+        response = self.client.post(self.url, {}, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
 class WorkspaceChannelMessageListCreateTests(APITestCase):
 
     def setUp(self):

@@ -40,6 +40,7 @@ from .views.channel_messages import (
     WorkspaceChannelMessageListCreateView,
     WorkspaceChannelMessageDetailView,
     WorkspaceChannelMessageReactionView,
+    WorkspaceChannelWebSocketTicketView,
 )
 
 
@@ -195,6 +196,12 @@ urlpatterns = [
         'workspaces/<int:workspace_pk>/channels/<int:channel_pk>/messages/',
         WorkspaceChannelMessageListCreateView.as_view(),
         name='workspace-channel-message-list-create',
+    ),
+
+    path(
+        'workspaces/<int:workspace_pk>/channels/<int:channel_pk>/messages/ws-ticket/',
+        WorkspaceChannelWebSocketTicketView.as_view(),
+        name='workspace-channel-message-ws-ticket',
     ),
 
     path(

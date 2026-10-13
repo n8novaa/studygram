@@ -20,6 +20,7 @@ function ChannelChatArea({
   channel,
   messages = [],
   loadingMessages,
+  realtimeStatus,
   onRefresh,
   accessToken,
   currentUser,
@@ -344,6 +345,15 @@ useEffect(() => {
           <p>{channel.description || 'No description available.'}</p>
         </div>
       )}
+
+      <div className={`channel-realtime-status is-${realtimeStatus}`} role="status" aria-live="polite">
+        <span className="channel-realtime-indicator" />
+        {realtimeStatus === 'connected'
+          ? 'Live'
+          : realtimeStatus === 'disconnected'
+            ? 'Connection unavailable'
+            : 'Reconnecting…'}
+      </div>
 
       <div
         className="channel-messages-stream"

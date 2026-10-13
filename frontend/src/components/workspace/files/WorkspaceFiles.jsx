@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../auth/AuthContext';
 import {
   getWorkspaceFolders,
+  getWorkspaceFolder,
   createWorkspaceFolder,
   deleteWorkspaceFolder,
   pasteWorkspaceFolder,
@@ -25,6 +27,7 @@ import { useToast } from '../../common/ToastContext';
 import '../../../styles/components/workspace/files/files.css';
 
 function WorkspaceFiles({ workspaceId, isAdmin = false }) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { accessToken } = useAuth();
   const { addToast } = useToast();
 
@@ -36,6 +39,36 @@ function WorkspaceFiles({ workspaceId, isAdmin = false }) {
   const [busyItemId, setBusyItemId] = useState(null);
   const [itemClipboard, setItemClipboard] = useState(null);
   const [pastingFolder, setPastingFolder] = useState(false);
+  const requestedFolderId = searchParams.get('folder');
+
+  useEffect(() => {
+    let cancelled = false;
+    async function syncFolderPath() {
+      if (!requestedFolderId) {
+        setFolderPath([]);
+        return;
+      }
+      try {
+        const ancestors = [];
+        let nextId = requestedFolderId;
+        const seen = new Set();
+        while (nextId && ancestors.length < 32 && !seen.has(String(nextId))) {
+          seen.add(String(nextId));
+          const folder = await getWorkspaceFolder(accessToken, workspaceId, nextId);
+          ancestors.unshift({ id: folder.id, name: folder.name });
+          nextId = folder.parent;
+        }
+        if (!cancelled) setFolderPath(ancestors);
+      } catch (err) {
+        if (!cancelled) {
+          setFolderPath([]);
+          setError(err?.message || 'Unable to open that folder.');
+        }
+      }
+    }
+    if (accessToken && workspaceId) syncFolderPath();
+    return () => { cancelled = true; };
+  }, [accessToken, workspaceId, requestedFolderId]);
 
   const [showCreateFolder, setShowCreateFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
@@ -77,14 +110,33 @@ function WorkspaceFiles({ workspaceId, isAdmin = false }) {
 
   function openFolder(folder) {
     setFolderPath((current) => [...current, { id: folder.id, name: folder.name }]);
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.set('section', 'files');
+      next.set('folder', String(folder.id));
+      return next;
+    });
   }
 
   function navigateToIndex(index) {
     if (index < 0) {
       setFolderPath([]);
+      setSearchParams((current) => {
+        const next = new URLSearchParams(current);
+        next.set('section', 'files');
+        next.delete('folder');
+        return next;
+      });
       return;
     }
+    const target = folderPath[index];
     setFolderPath((current) => current.slice(0, index + 1));
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.set('section', 'files');
+      next.set('folder', String(target.id));
+      return next;
+    });
   }
 
   function stageItem(item, kind, mode) {
@@ -107,6 +159,7 @@ function WorkspaceFiles({ workspaceId, isAdmin = false }) {
         itemClipboard.mode,
         currentFolderId,
       );
+      window.dispatchEvent(new Event('studygram:workspace-navigation-change'));
       addToast(
         `${itemClipboard.mode === 'copy' ? 'Copied' : 'Moved'} "${itemClipboard.item.name}".`,
         'success',
@@ -135,6 +188,7 @@ function WorkspaceFiles({ workspaceId, isAdmin = false }) {
         name: newFolderName.trim(),
         parent: currentFolderId,
       });
+      window.dispatchEvent(new Event('studygram:workspace-navigation-change'));
 
       addToast(`Folder "${newFolderName.trim()}" created!`, 'success');
       setNewFolderName('');
@@ -160,6 +214,7 @@ function WorkspaceFiles({ workspaceId, isAdmin = false }) {
       setBusyItemId(`folder-${folder.id}`);
       setError('');
       await deleteWorkspaceFolder(accessToken, workspaceId, folder.id);
+      window.dispatchEvent(new Event('studygram:workspace-navigation-change'));
       addToast(`Folder "${folder.name}" deleted.`, 'info');
       setConfirmDeleteFolder(null);
       await loadContents();

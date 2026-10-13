@@ -55,6 +55,10 @@ export async function getWorkspaceFolders(
   return normalizeList(data)
 }
 
+export async function getWorkspaceFolder(accessToken, workspaceId, folderId) {
+  return apiGet(`/workspaces/${workspaceId}/folders/${folderId}/`, accessToken)
+}
+
 
 /*
  * Create a folder in a workspace.

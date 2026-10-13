@@ -6,15 +6,12 @@ from rest_framework.throttling import ScopedRateThrottle
 from .views import (
     CurrentUserView,
     LogoutView,
-    MessageDetailView,
     RegisterView,
-    RoomMessageListCreateView,
-    RoomViewSet,
-    TopicViewSet,
     UserViewSet,
     PasswordResetRequestView,
     PasswordResetConfirmView,
 )
+from .health import health_check
 
 class ThrottledTokenObtainPairView(TokenObtainPairView):
     throttle_classes = [ScopedRateThrottle]
@@ -22,10 +19,9 @@ class ThrottledTokenObtainPairView(TokenObtainPairView):
 
 router = DefaultRouter()
 router.register('users', UserViewSet, basename='user')
-router.register('topics', TopicViewSet, basename='topic')
-router.register('rooms', RoomViewSet, basename='room')
 
 urlpatterns = [
+    path('health/', health_check, name='api-health'),
     path('auth/register/', RegisterView.as_view(), name='api-register'),
     path(
         'auth/token/',
@@ -45,17 +41,6 @@ urlpatterns = [
         'auth/password-reset/confirm/',
         PasswordResetConfirmView.as_view(),
         name='api-password-reset-confirm',
-    ),
-
-    path(
-        'rooms/<int:room_pk>/messages/',
-        RoomMessageListCreateView.as_view(),
-        name='api-room-messages',
-    ),
-    path(
-        'messages/<int:pk>/',
-        MessageDetailView.as_view(),
-        name='api-message-detail',
     ),
 
     path('', include(router.urls)),

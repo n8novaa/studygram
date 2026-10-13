@@ -4,6 +4,8 @@
 
 This document is the working product and development guide for StudyGram.
 
+> **Current implementation note (2026-10):** Study Rooms and their legacy Django pages/API have been retired. The Study Room references below are historical planning notes and do not describe active functionality. Workspace channels are the supported messaging feature.
+
 StudyGram is a focused study collaboration platform. The objective is **not** to maximize the number of features. The objective is to provide a premium, minimal, organized experience for people studying and collaborating together.
 
 This document is intended to be read before continuing development. Development must be incremental and should follow the phases below.

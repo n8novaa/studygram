@@ -9,7 +9,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = Path(os.environ.get('DJANGO_MEDIA_ROOT', BASE_DIR / 'media'))
+STATIC_ROOT = Path(os.environ.get('DJANGO_STATIC_ROOT', BASE_DIR / 'staticfiles'))
 
 # --------------------------------------------------
 # Security Configuration
@@ -28,6 +29,15 @@ if not SECRET_KEY:
         raise ValueError(
             'DJANGO_SECRET_KEY must be configured when DEBUG=False.'
         )
+
+if not DEBUG and (
+    len(SECRET_KEY) < 50
+    or SECRET_KEY.startswith('django-insecure-')
+    or 'replace-with' in SECRET_KEY.lower()
+):
+    raise ValueError(
+        'DJANGO_SECRET_KEY must be a long, randomly generated production secret.'
+    )
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -65,6 +75,20 @@ SECURE_HSTS_PRELOAD = os.environ.get(
 ).lower() in ('true', '1', 'yes')
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+SECURE_PROXY_SSL_HEADER = (
+    ('HTTP_X_FORWARDED_PROTO', 'https')
+    if os.environ.get('TRUST_PROXY_SSL_HEADER', 'False').lower()
+    in ('true', '1', 'yes')
+    else None
+)
+USE_X_FORWARDED_HOST = os.environ.get(
+    'USE_X_FORWARDED_HOST', 'False'
+).lower() in ('true', '1', 'yes')
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin.strip()
+]
 
 
 # --------------------------------------------------
@@ -72,6 +96,7 @@ SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 # --------------------------------------------------
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -81,6 +106,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'channels',
     'corsheaders',
     'base.apps.BaseConfig',
     'workspaces',
@@ -119,7 +145,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -137,6 +163,29 @@ TEMPLATES = [
 # --------------------------------------------------
 
 WSGI_APPLICATION = 'config.wsgi.application'
+ASGI_APPLICATION = 'config.asgi.application'
+
+REDIS_URL = os.environ.get('REDIS_URL')
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                'hosts': [REDIS_URL],
+                'capacity': 1000,
+                'expiry': 10,
+            },
+        },
+    }
+else:
+    # Suitable for local development and a single process. Production instances
+    # with multiple workers should share a Redis channel layer.
+    CHANNEL_LAYERS = {
+        'default': {'BACKEND': 'channels.layers.InMemoryChannelLayer'},
+    }
+
+if not DEBUG and not REDIS_URL:
+    raise ValueError('REDIS_URL must be configured when DEBUG=False.')
 
 
 # --------------------------------------------------
@@ -145,6 +194,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
+if not DEBUG and not DATABASE_URL:
+    raise ValueError('DATABASE_URL must be configured when DEBUG=False.')
+
 if DATABASE_URL:
     DATABASES = {
         'default': dj_database_url.parse(
@@ -152,6 +204,7 @@ if DATABASE_URL:
             conn_max_age=600,
         ),
     }
+
 else:
     DATABASES = {
         'default': {
@@ -159,6 +212,9 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
+if not DEBUG and DATABASES['default']['ENGINE'] != 'django.db.backends.postgresql':
+    raise ValueError('Production must use PostgreSQL through DATABASE_URL.')
 
 
 # --------------------------------------------------
@@ -208,7 +264,8 @@ USE_TZ = True
 # --------------------------------------------------
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_FILES_DIR = BASE_DIR / 'static'
+STATICFILES_DIRS = [STATIC_FILES_DIR] if STATIC_FILES_DIR.exists() else []
 
 
 # --------------------------------------------------
@@ -271,6 +328,40 @@ CORS_ALLOWED_ORIGINS = [
 # The frontend authenticates API calls with bearer tokens, not cookies.
 CORS_ALLOW_CREDENTIALS = False
 
+LOG_LEVEL = os.environ.get('DJANGO_LOG_LEVEL', 'INFO').upper()
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'console': {
+            'format': '{asctime} {levelname} {name}: {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'console',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': LOG_LEVEL,
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': LOG_LEVEL,
+            'propagate': False,
+        },
+        'workspaces': {
+            'handlers': ['console'],
+            'level': LOG_LEVEL,
+            'propagate': False,
+        },
+    },
+}
+
 # --------------------------------------------------
 # Email Configuration
 # --------------------------------------------------
@@ -293,6 +384,13 @@ EMAIL_USE_TLS = (
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 
+if (
+    not DEBUG
+    and EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend'
+    and not EMAIL_HOST
+):
+    raise ValueError('EMAIL_HOST must be configured for production SMTP email.')
+
 DEFAULT_FROM_EMAIL = os.environ.get(
     'DEFAULT_FROM_EMAIL',
     'StudyGram <noreply@studygram.local>',
@@ -302,3 +400,12 @@ FRONTEND_URL = os.environ.get(
     'FRONTEND_URL',
     'http://localhost:5173',
 )
+
+if not DEBUG:
+    if not FRONTEND_URL.startswith('https://'):
+        raise ValueError('FRONTEND_URL must use HTTPS when DEBUG=False.')
+    if FRONTEND_URL.rstrip('/') not in CORS_ALLOWED_ORIGINS:
+        raise ValueError(
+            'FRONTEND_URL must be included in CORS_ALLOWED_ORIGINS '
+            'for authenticated WebSocket connections.'
+        )

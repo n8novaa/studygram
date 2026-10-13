@@ -104,6 +104,7 @@ function Workspaces() {
         description: description.trim(),
         visibility,
       });
+      window.dispatchEvent(new Event('studygram:workspace-navigation-change'));
 
       const updatedList = await getWorkspaces(accessToken);
       setWorkspaces(normalizeList(updatedList));

@@ -19,6 +19,7 @@ import {
   PlusIcon,
 } from '../components/common/Icons';
 import { useToast } from '../components/common/ToastContext';
+import WorkspaceCard from '../components/workspace/WorkspaceCard';
 import '../styles/pages/home.css';
 
 function AppHome() {
@@ -330,11 +331,14 @@ function AppHome() {
         )}
       </section>
 
-      {/* Recent Activity */}
+      {/* Workspace activity and quick access */}
       <section className="home-section home-activity-section">
         <div className="home-section-header">
           <div className="home-section-title">
-            <h2>Recent Activity</h2>
+            <div>
+              <h2>Your workspaces</h2>
+              <p className="home-section-description">Pick up where your team is working.</p>
+            </div>
           </div>
 
           <Link
@@ -368,39 +372,9 @@ function AppHome() {
             </Link>
           </div>
         ) : (
-          <div className="activity-list">
+          <div className="home-workspace-grid">
             {workspaces.slice(0, 5).map((workspace) => (
-              <Link
-                key={workspace.id}
-                to={`/app/workspaces/${workspace.id}`}
-                className="activity-item"
-              >
-                <div className="activity-icon">
-                  <WorkspacesIcon size={16} />
-                </div>
-
-                <div className="activity-content">
-                  <span className="activity-label">
-                    Workspace
-                  </span>
-
-                  <strong className="activity-name">
-                    {workspace.name}
-                  </strong>
-
-                  <span className="activity-description">
-                    {workspace.description ||
-                      'No description provided.'}
-                  </span>
-                </div>
-
-                <div className="activity-action">
-                  <span>
-                    Open
-                  </span>
-                  <ArrowRightIcon size={14} />
-                </div>
-              </Link>
+              <WorkspaceCard key={workspace.id} workspace={workspace} />
             ))}
           </div>
         )}

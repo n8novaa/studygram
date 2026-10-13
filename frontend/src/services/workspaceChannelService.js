@@ -6,6 +6,12 @@ import {
   apiDelete,
 } from './api';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (
+  import.meta.env.DEV
+    ? 'http://127.0.0.1:8000/api'
+    : '/api'
+);
+
 /*
  * Get all channels in a workspace.
  */
@@ -94,6 +100,27 @@ export async function getChannelMessages(
   const endpoint =
     `/workspaces/${workspaceId}/channels/${channelId}/messages/`;
   return apiGetAll(endpoint, accessToken);
+}
+
+export async function connectWorkspaceChannel(
+  accessToken,
+  workspaceId,
+  channelId,
+) {
+  const { ticket } = await apiPost(
+    `/workspaces/${workspaceId}/channels/${channelId}/messages/ws-ticket/`,
+    {},
+    accessToken,
+  );
+  const apiUrl = new URL(API_BASE_URL, window.location.origin);
+  const protocol = apiUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+  const apiPath = apiUrl.pathname.replace(/\/?api\/?$/, '').replace(/\/$/, '');
+  const socketUrl = new URL(
+    `${apiPath}/ws/workspaces/${workspaceId}/channels/${channelId}/messages/`,
+    `${protocol}//${apiUrl.host}`,
+  );
+  socketUrl.searchParams.set('ticket', ticket);
+  return new WebSocket(socketUrl);
 }
 
 /*

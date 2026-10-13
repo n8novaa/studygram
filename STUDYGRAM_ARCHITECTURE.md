@@ -2,17 +2,16 @@
 
 ## Current application
 
-StudyGram is a Django monolith with a REST API and a separate React/Vite client. The React client is the primary workspace product. The Django template UI remains available as a legacy study-room feature; it is not the React app's shell.
+StudyGram is a Django monolith with a REST API and a separate React/Vite client. The React client is the workspace product; the retired server-rendered study-room experience and its API are no longer exposed.
 
 ```text
 React + Vite (frontend/)
   └── HTTP requests with JWT access token
       └── Django REST Framework (backend/)
-          ├── base: accounts, auth endpoints, topics, rooms, messages
+          ├── base: accounts, auth, password reset, health
           ├── workspaces: workspaces, memberships, requests, invites, channels
           └── files: workspace folders, uploads, downloads
 
-Browser → Django template views at `/` for the legacy room experience
 ```
 
 The current API base is `/api/` (there is no `/api/v1/` prefix yet). Django uses SQLite by default for development and accepts PostgreSQL through `DATABASE_URL`. The Vite client defaults to `http://127.0.0.1:8000/api`; configure `VITE_API_BASE_URL` when the backend runs elsewhere.
@@ -27,7 +26,6 @@ The current API base is `/api/` (there is no `/api/v1/` prefix yet). Django uses
 - **WorkspaceChannelMessage** belongs to a channel and user. Messages can reply to another message in the same channel.
 - **WorkspaceChannelMessageReaction** stores one selected emoji per user per message.
 - **WorkspaceFolder** supports nested folders; **WorkspaceFile** belongs to a workspace and optionally to a folder.
-- **Room**, **Topic**, and **Message** support the retained study-room application.
 
 ## Main API groups
 
@@ -41,15 +39,14 @@ All routes below are relative to `/api/`.
 | Access | `workspaces/<id>/join/`, `join-requests/`, `invitations/`, `members/` | Join lifecycle, invitation redemption, and role/member management |
 | Channels | `workspaces/<id>/channels/` and nested `messages/` | Channel and message lifecycle, replies, reactions |
 | Files | `workspaces/<id>/folders/` and `files/` | Folder navigation, file upload, metadata, download, delete |
-| Legacy rooms | `rooms/`, `rooms/<id>/messages/`, `messages/` | Study-room CRUD and discussions |
 
-Authentication is JWT-based for the React client. The backend also retains Django session authentication for browsable API and legacy template views. Workspace and file endpoints enforce membership and role checks server-side; frontend visibility is only a UI aid.
+Authentication is JWT-based for the React client. Workspace and file endpoints enforce membership and role checks server-side; frontend visibility is only a UI aid.
 
 ## Frontend structure
 
 - `src/App.jsx`: route tree and public/protected route grouping
 - `src/auth/`: JWT session state and auth service functions
-- `src/pages/`: dashboard, workspace, discovery, room, and account pages
+- `src/pages/`: dashboard, workspace, discovery, and account pages
 - `src/components/workspace/`: workspace overview, members, files, and channels
 - `src/services/`: API calls organized by feature
 - `src/styles/`: global, page, layout, and component styles
@@ -63,6 +60,5 @@ When `DEBUG=True`, Django uses the console email backend by default, so password
 ## Known next steps
 
 - Add frontend tests for authentication, invitation acceptance, and the main workspace flows.
-- Decide whether to retire the server-rendered room UI or make its relationship to the React product more explicit.
 - Define deployment-specific media storage, HTTPS/security settings, and email configuration.
 - Consider short-lived access tokens and an HttpOnly refresh-cookie strategy for a deployed app.

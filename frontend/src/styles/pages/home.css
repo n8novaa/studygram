@@ -140,6 +140,13 @@
   letter-spacing: -0.012em;
 }
 
+.home-section-description {
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
 .section-badge {
   display: inline-flex;
   align-items: center;
@@ -323,8 +330,19 @@
 }
 
 /* =========================================================
-   Recent Activity
+   Workspace quick access
    ========================================================= */
+
+.home-workspace-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.home-workspace-grid .workspace-card {
+  min-width: 0;
+  padding: 15px;
+}
 
 .activity-list {
   display: flex;
@@ -516,19 +534,7 @@
     grid-template-columns: 1fr;
   }
 
-  .activity-content {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 2px 7px;
-  }
-
-  .activity-description {
-    grid-column: 1 / -1;
-  }
-
-  .activity-action {
-    align-self: center;
-  }
+  .home-workspace-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {
@@ -544,13 +550,6 @@
     font-size: 13.5px;
   }
 
-  .activity-description {
-    display: none;
-  }
-
-  .activity-item {
-    gap: 9px;
-  }
 }
 
 /* =========================================================

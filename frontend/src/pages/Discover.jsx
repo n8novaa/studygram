@@ -87,6 +87,9 @@ function Discover() {
       setError('');
 
       await joinWorkspace(accessToken, workspace.id);
+      if (workspace.visibility === 'public') {
+        window.dispatchEvent(new Event('studygram:workspace-navigation-change'));
+      }
 
       if (workspace.visibility === 'public') {
         setJoinedWorkspaceIds((prev) => new Set(prev).add(workspace.id));
@@ -109,6 +112,7 @@ function Discover() {
     try {
       setAcceptingInvite(true);
       await acceptInvitation(accessToken, inviteTokenInput.trim());
+      window.dispatchEvent(new Event('studygram:workspace-navigation-change'));
       addToast('Invitation accepted! You are now a member.', 'success');
       setInviteTokenInput('');
       // Reload discovery list

@@ -1,6 +1,6 @@
 # StudyGram
 
-StudyGram is a collaborative learning app for organizing study groups. The current primary experience is a React single-page app backed by a Django REST Framework API. The repository also retains an earlier Django template-based study-room experience under `/`.
+StudyGram is a collaborative learning app for organizing study groups. The product is a React single-page app backed by a Django REST Framework API. The earlier study-room feature has been retired; workspace channels provide the messaging experience.
 
 ## Current features
 
@@ -8,8 +8,9 @@ StudyGram is a collaborative learning app for organizing study groups. The curre
 - Public and private workspaces with discovery, search, and visibility controls
 - Membership requests, invitations, member roles, and admin tools
 - Workspace channels with editable messages, replies, and emoji reactions
+- Real-time channel message updates over WebSockets, with reconnect and REST fallback
 - Nested folders and shared file uploads/downloads
-- Legacy study rooms, topics, profiles, and activity pages
+- Workspace navigation that exposes channels and nested folders for the selected workspace
 
 ## Requirements
 
@@ -40,15 +41,29 @@ npm run dev
 
 Open the Vite URL, normally `http://localhost:5173`. During development the frontend sends API requests to `http://127.0.0.1:8000/api` by default. Production builds use the same-origin `/api` path unless `VITE_API_BASE_URL` is configured for a separate API host. Set `VITE_API_BASE_URL` in `frontend/.env.local` to override the development URL, for example `http://127.0.0.1:8000/api`.
 
-The Django app uses SQLite if `DATABASE_URL` is unset. Password reset is requested with the account username and delivered to that account's saved email. In `DEBUG=True`, reset emails are printed in the backend console by default. To deliver to a real inbox locally, set `EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend` in `backend/.env` and configure valid SMTP credentials and `FRONTEND_URL`. Gmail SMTP normally requires an app password when two-step verification is enabled; a normal Gmail login password will not work.
+The Django app uses SQLite if `DATABASE_URL` is unset. The local channel layer works in one backend process; set `REDIS_URL` to a shared Redis instance when running multiple workers or application instances so they can broadcast messages to one another. Password reset is requested with the account username and delivered to that account's saved email. In `DEBUG=True`, reset emails are printed in the backend console by default. To deliver to a real inbox locally, set `EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend` in `backend/.env` and configure valid SMTP credentials and `FRONTEND_URL`. Gmail SMTP normally requires an app password when two-step verification is enabled; a normal Gmail login password will not work.
+
+Deploy the backend with an ASGI server so WebSocket connections are supported. For example, from `backend/`, run `daphne -b 0.0.0.0 -p 8000 config.asgi:application`. A WSGI-only deployment will serve the REST API but cannot serve real-time channel connections.
+
+## Containerized local stack
+
+Docker Compose starts PostgreSQL, Redis, Django/Daphne, and Nginx with the React app. It is configured for local development (`DEBUG=True`, console email, local-only passwords) and must not be exposed directly as a production deployment.
+
+```powershell
+docker compose up --build
+```
+
+Open `http://localhost:8080`. The app is served through the Nginx proxy, including WebSocket upgrades. PostgreSQL, Redis, uploaded media, and Django static files use named volumes. Production environment requirements and hosting notes are in [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## Environment variables
 
 See `.env.example` for the available settings:
 
 - `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`
-- `DATABASE_URL` (optional; SQLite is the default)
-- `CORS_ALLOWED_ORIGINS`
+- `DATABASE_URL` (optional in development; SQLite is the default)
+- `REDIS_URL` (required with `DEBUG=False`)
+- `CORS_ALLOWED_ORIGINS`, `CSRF_TRUSTED_ORIGINS`
+- `DJANGO_MEDIA_ROOT`, `DJANGO_LOG_LEVEL`, `TRUST_PROXY_SSL_HEADER`
 - `FRONTEND_URL`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USE_TLS`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `DEFAULT_FROM_EMAIL`
 
 ## Checks and tests
@@ -69,7 +84,7 @@ npm run build
 
 ## Project layout
 
-- `backend/base/`: legacy study-room views and versioned-by-prefix API functionality (the current API prefix is `/api/`)
+- `backend/base/`: authentication, account, health, and password-reset API functionality (the current API prefix is `/api/`)
 - `backend/workspaces/`: workspace, membership, invitation, channel, message, and reaction domain
 - `backend/files/`: workspace folders and file API
 - `frontend/src/`: React routes, UI components, auth, and API service modules

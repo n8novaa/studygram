@@ -1,6 +1,6 @@
 # StudyGram React client
 
-This React 19 + Vite app is the primary interface for StudyGram workspaces. The Django server-rendered study-room pages remain a separate legacy experience.
+This React 19 + Vite app is the interface for StudyGram workspaces. Workspace channels provide persistent messaging.
 
 ## Run locally
 

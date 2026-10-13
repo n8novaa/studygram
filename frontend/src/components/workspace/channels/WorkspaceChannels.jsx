@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../auth/AuthContext';
 import {
   getWorkspaceChannels,
   getChannelMessages,
+  connectWorkspaceChannel,
 } from '../../../services/workspaceChannelService';
 import ChannelSidebar from './sidebar/ChannelSidebar';
 import ChannelChatArea from './ChannelChatArea';
@@ -13,6 +15,7 @@ import { useToast } from '../../common/ToastContext';
 import '../../../styles/components/workspace/channels/index.css';
 
 function WorkspaceChannels({ workspace, isAdmin }) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { accessToken, user } = useAuth();
   const { addToast } = useToast();
 
@@ -22,6 +25,7 @@ function WorkspaceChannels({ workspace, isAdmin }) {
 
   const [loadingChannels, setLoadingChannels] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [realtimeStatus, setRealtimeStatus] = useState('connecting');
   const [showMembers, setShowMembers] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -30,6 +34,15 @@ function WorkspaceChannels({ workspace, isAdmin }) {
   const [editingChannel, setEditingChannel] = useState(null);
 
   const workspaceId = workspace?.id;
+
+  useEffect(() => {
+    const requestedId = Number(searchParams.get('channel'));
+    if (!requestedId) return;
+    const requestedChannel = channels.find((channel) => channel.id === requestedId);
+    if (requestedChannel && requestedChannel.id !== activeChannel?.id) {
+      setActiveChannel(requestedChannel);
+    }
+  }, [channels, searchParams, activeChannel?.id]);
 
   // 1. Fetch channels list
   const loadChannels = useCallback(async () => {
@@ -69,7 +82,7 @@ function WorkspaceChannels({ workspace, isAdmin }) {
       try {
         setLoadingMessages(true);
         const data = await getChannelMessages(accessToken, workspaceId, channelId);
-        setMessages(data);
+        setMessages((current) => mergeMessages(current, data));
       } catch (err) {
         addToast(err?.message || 'Failed to load messages.', 'error');
       } finally {
@@ -82,28 +95,126 @@ function WorkspaceChannels({ workspace, isAdmin }) {
   const activeChannelId = activeChannel?.id;
 
   useEffect(() => {
-    if (activeChannelId) {
-      loadMessages(activeChannelId);
-
-      // Auto-poll for new messages every 4 seconds
-      const timer = setInterval(() => {
-        getChannelMessages(accessToken, workspaceId, activeChannelId)
-          .then((data) => {
-            setMessages(data);
-          })
-          .catch(() => {});
-      }, 4000);
-
-      return () => clearInterval(timer);
-    } else {
+    if (!activeChannelId || !accessToken || !workspaceId) {
       setMessages([]);
+      setRealtimeStatus('disconnected');
+      return undefined;
     }
+
+    let disposed = false;
+    let socket = null;
+    let reconnectTimer = null;
+    let fallbackTimer = null;
+    let reconnectAttempt = 0;
+    let fallbackEnabled = true;
+    let syncingHistory = false;
+    let pendingEvents = [];
+    let syncQueue = Promise.resolve();
+
+    setMessages([]);
+    setRealtimeStatus('connecting');
+    const initialLoad = loadMessages(activeChannelId);
+
+    const applyRealtimeEvent = (payload) => {
+      if (payload.type === 'message.deleted') {
+        setMessages((current) => current.filter((message) => message.id !== payload.message_id));
+      } else if (payload.message) {
+        setMessages((current) => mergeMessages(current, [payload.message]));
+      }
+    };
+
+    const refreshMessages = () => {
+      syncQueue = syncQueue.catch(() => {}).then(async () => {
+        if (disposed) return;
+        syncingHistory = true;
+        try {
+          const data = await getChannelMessages(accessToken, workspaceId, activeChannelId);
+          if (!disposed) setMessages(data);
+        } catch {
+          // The socket or the next fallback sync will recover the connection.
+        } finally {
+          syncingHistory = false;
+          const events = pendingEvents;
+          pendingEvents = [];
+          events.forEach(applyRealtimeEvent);
+        }
+      });
+      return syncQueue;
+    };
+
+    const scheduleReconnect = () => {
+      if (disposed || reconnectTimer) return;
+      setRealtimeStatus('reconnecting');
+      const delay = Math.min(1000 * (2 ** reconnectAttempt), 15000);
+      reconnectAttempt += 1;
+      reconnectTimer = window.setTimeout(() => {
+        reconnectTimer = null;
+        connect();
+      }, delay);
+    };
+
+    async function connect() {
+      try {
+        const nextSocket = await connectWorkspaceChannel(
+          accessToken,
+          workspaceId,
+          activeChannelId,
+        );
+        if (disposed) {
+          nextSocket.close();
+          return;
+        }
+        socket = nextSocket;
+        socket.onopen = () => {
+          reconnectAttempt = 0;
+          setRealtimeStatus('connected');
+          initialLoad.then(refreshMessages);
+        };
+        socket.onmessage = (event) => {
+          try {
+            const payload = JSON.parse(event.data);
+            if (syncingHistory) pendingEvents.push(payload);
+            else applyRealtimeEvent(payload);
+          } catch {
+            // Ignore malformed events; a reconnect/history sync recovers state.
+          }
+        };
+        socket.onerror = () => socket?.close();
+        socket.onclose = () => {
+          if (disposed) return;
+          setRealtimeStatus('reconnecting');
+          scheduleReconnect();
+        };
+      } catch (error) {
+        if (disposed) return;
+        if ([401, 403].includes(error?.status)) {
+          fallbackEnabled = false;
+          setRealtimeStatus('disconnected');
+          return;
+        }
+        setRealtimeStatus('reconnecting');
+        scheduleReconnect();
+      }
+    }
+
+    connect();
+    fallbackTimer = window.setInterval(() => {
+      if (fallbackEnabled && (!socket || socket.readyState !== WebSocket.OPEN)) refreshMessages();
+    }, 15000);
+
+    return () => {
+      disposed = true;
+      if (reconnectTimer) window.clearTimeout(reconnectTimer);
+      if (fallbackTimer) window.clearInterval(fallbackTimer);
+      socket?.close();
+    };
   }, [accessToken, workspaceId, activeChannelId, loadMessages]);
 
   // Handlers for channel management
   function handleChannelCreated(newChannel) {
     setChannels((prev) => [...prev, newChannel]);
     setActiveChannel(newChannel);
+    window.dispatchEvent(new Event('studygram:workspace-navigation-change'));
   }
 
   function handleChannelUpdated(updatedChannel) {
@@ -113,6 +224,7 @@ function WorkspaceChannels({ workspace, isAdmin }) {
     if (activeChannel?.id === updatedChannel.id) {
       setActiveChannel(updatedChannel);
     }
+    window.dispatchEvent(new Event('studygram:workspace-navigation-change'));
   }
 
   function handleChannelDeleted(deletedChannelId) {
@@ -121,22 +233,17 @@ function WorkspaceChannels({ workspace, isAdmin }) {
       if (activeChannel?.id === deletedChannelId) {
         setActiveChannel(filtered.length > 0 ? filtered[0] : null);
       }
+      window.dispatchEvent(new Event('studygram:workspace-navigation-change'));
       return filtered;
     });
   }
 
   function handleMessageSent(newMsg) {
-    setMessages((prev) => [...prev, newMsg]);
+    setMessages((prev) => mergeMessages(prev, [newMsg]));
   }
 
   function handleMessageUpdated(updatedMsg) {
-    setMessages((prev) =>
-      prev.map((message) =>
-        message.id === updatedMsg.id
-          ? updatedMsg
-          : message
-      )
-    );
+    setMessages((prev) => mergeMessages(prev, [updatedMsg]));
   }
 
   function handleMessageDeleted(msgId) {
@@ -160,6 +267,12 @@ function WorkspaceChannels({ workspace, isAdmin }) {
         activeChannel={activeChannel}
         onSelectChannel={(ch) => {
           setActiveChannel(ch);
+          setSearchParams((current) => {
+            const next = new URLSearchParams(current);
+            next.set('section', 'channels');
+            next.set('channel', String(ch.id));
+            return next;
+          });
           setMobileSidebarOpen(false);
         }}
         isAdmin={isAdmin}
@@ -178,6 +291,7 @@ function WorkspaceChannels({ workspace, isAdmin }) {
         channel={activeChannel}
         messages={messages}
         loadingMessages={loadingMessages}
+        realtimeStatus={realtimeStatus}
         onRefresh={() => activeChannelId && loadMessages(activeChannelId)}
         accessToken={accessToken}
         currentUser={user}
@@ -230,6 +344,15 @@ function WorkspaceChannels({ workspace, isAdmin }) {
       )}
     </div>
   );
+}
+
+function mergeMessages(current, incoming) {
+  const byId = new Map(current.map((message) => [message.id, message]));
+  incoming.forEach((message) => byId.set(message.id, message));
+  return [...byId.values()].sort((a, b) => (
+    new Date(a.created).getTime() - new Date(b.created).getTime()
+    || a.id - b.id
+  ));
 }
 
 export default WorkspaceChannels;
