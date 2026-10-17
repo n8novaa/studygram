@@ -14,7 +14,7 @@ StudyGram is a collaborative learning app for organizing study groups. The produ
 
 ## Requirements
 
-- Python 3.10 or newer
+- Python 3.12 or newer (matches the backend image and CI runtime)
 - Node.js 20.19+ or 22.12+ for Vite 8
 - SQLite for local development, or PostgreSQL through `DATABASE_URL`
 
@@ -64,6 +64,8 @@ See `.env.example` for the available settings:
 - `REDIS_URL` (required with `DEBUG=False`)
 - `CORS_ALLOWED_ORIGINS`, `CSRF_TRUSTED_ORIGINS`
 - `DJANGO_MEDIA_ROOT`, `DJANGO_LOG_LEVEL`, `TRUST_PROXY_SSL_HEADER`
+- `MEDIA_STORAGE_BACKEND` (`filesystem` for development or a durable volume; `s3` for S3-compatible object storage)
+- `AWS_STORAGE_BUCKET_NAME`, `AWS_S3_REGION_NAME`, `AWS_S3_ENDPOINT_URL`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` (when using S3 media storage)
 - `FRONTEND_URL`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USE_TLS`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `DEFAULT_FROM_EMAIL`
 
 ## Checks and tests

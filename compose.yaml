@@ -42,6 +42,7 @@ services:
       EMAIL_BACKEND: django.core.mail.backends.console.EmailBackend
       DJANGO_MEDIA_ROOT: /app/backend/media
       DJANGO_STATIC_ROOT: /app/backend/staticfiles
+      MEDIA_STORAGE_BACKEND: filesystem
       TRUST_PROXY_SSL_HEADER: "True"
     command:
       - sh
@@ -49,7 +50,7 @@ services:
       - >-
         python manage.py migrate --noinput &&
         python manage.py collectstatic --noinput &&
-        daphne -b 0.0.0.0 -p 8000 config.asgi:application
+        exec daphne -b 0.0.0.0 -p 8000 config.asgi:application
     volumes:
       - studygram-media:/app/backend/media
       - studygram-static:/app/backend/staticfiles

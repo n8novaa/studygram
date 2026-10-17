@@ -1,5 +1,6 @@
 import os
 from datetime import timedelta
+from email.utils import parseaddr
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -9,8 +10,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
 
 MEDIA_URL = '/media/'
+MEDIA_STORAGE_BACKEND = os.environ.get(
+    'MEDIA_STORAGE_BACKEND', 'filesystem'
+).strip().lower()
 MEDIA_ROOT = Path(os.environ.get('DJANGO_MEDIA_ROOT', BASE_DIR / 'media'))
 STATIC_ROOT = Path(os.environ.get('DJANGO_STATIC_ROOT', BASE_DIR / 'staticfiles'))
+
+if MEDIA_STORAGE_BACKEND not in {'filesystem', 's3'}:
+    raise ValueError('MEDIA_STORAGE_BACKEND must be either filesystem or s3.')
+
+if MEDIA_STORAGE_BACKEND == 's3' and not os.environ.get('AWS_STORAGE_BUCKET_NAME'):
+    raise ValueError('AWS_STORAGE_BUCKET_NAME is required with S3 media storage.')
 
 # --------------------------------------------------
 # Security Configuration
@@ -19,6 +29,16 @@ STATIC_ROOT = Path(os.environ.get('DJANGO_STATIC_ROOT', BASE_DIR / 'staticfiles'
 DEBUG = os.environ.get(
     'DJANGO_DEBUG', 'False'
 ).lower() in ('true', '1', 'yes')
+
+if (
+    not DEBUG
+    and MEDIA_STORAGE_BACKEND == 'filesystem'
+    and not os.environ.get('DJANGO_MEDIA_ROOT')
+):
+    raise ValueError(
+        'Set DJANGO_MEDIA_ROOT to a durable mounted volume, or configure '
+        'MEDIA_STORAGE_BACKEND=s3 for production uploads.'
+    )
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
@@ -52,6 +72,9 @@ if not DEBUG and (not ALLOWED_HOSTS or '*' in ALLOWED_HOSTS):
     raise ValueError(
         'DJANGO_ALLOWED_HOSTS must contain explicit hostnames when DEBUG=False.'
     )
+
+if not DEBUG and not os.environ.get('DJANGO_ALLOWED_HOSTS'):
+    raise ValueError('Set DJANGO_ALLOWED_HOSTS to the public API hostname(s).')
 
 # Cookie security
 SESSION_COOKIE_SECURE = not DEBUG
@@ -111,8 +134,10 @@ INSTALLED_APPS = [
     'base.apps.BaseConfig',
     'workspaces',
     'files',
-    
 ]
+
+if MEDIA_STORAGE_BACKEND == 's3':
+    INSTALLED_APPS.append('storages')
 
 
 # --------------------------------------------------
@@ -267,6 +292,32 @@ STATIC_URL = '/static/'
 STATIC_FILES_DIR = BASE_DIR / 'static'
 STATICFILES_DIRS = [STATIC_FILES_DIR] if STATIC_FILES_DIR.exists() else []
 
+STORAGES = {
+    'default': {
+        'BACKEND': (
+            'storages.backends.s3.S3Storage'
+            if MEDIA_STORAGE_BACKEND == 's3'
+            else 'django.core.files.storage.FileSystemStorage'
+        ),
+    },
+    'staticfiles': {
+        'BACKEND': 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage',
+    },
+}
+
+if MEDIA_STORAGE_BACKEND == 's3':
+    AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
+    AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME') or None
+    AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL') or None
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID') or None
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY') or None
+    AWS_DEFAULT_ACL = None
+    AWS_QUERYSTRING_AUTH = True
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_S3_ADDRESSING_STYLE = os.environ.get(
+        'AWS_S3_ADDRESSING_STYLE', 'auto'
+    )
+
 
 # --------------------------------------------------
 # Default Model Configuration
@@ -395,6 +446,23 @@ DEFAULT_FROM_EMAIL = os.environ.get(
     'DEFAULT_FROM_EMAIL',
     'StudyGram <noreply@studygram.local>',
 )
+
+if not DEBUG:
+    if EMAIL_BACKEND == 'django.core.mail.backends.console.EmailBackend':
+        raise ValueError('Console email backend is not allowed in production.')
+    sender_address = parseaddr(DEFAULT_FROM_EMAIL)[1]
+    sender_domain = sender_address.rsplit('@', 1)[-1].lower()
+    if (
+        '@' not in sender_address
+        or sender_domain.endswith('.local')
+    ):
+        raise ValueError(
+            'Set DEFAULT_FROM_EMAIL to a sender address verified with your email provider.'
+        )
+    if bool(EMAIL_HOST_USER) != bool(EMAIL_HOST_PASSWORD):
+        raise ValueError(
+            'Configure both EMAIL_HOST_USER and EMAIL_HOST_PASSWORD, or neither.'
+        )
 
 FRONTEND_URL = os.environ.get(
     'FRONTEND_URL',
