@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.exceptions import TokenError
@@ -7,6 +8,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 class AuthTests(APITestCase):
     def setUp(self):
+        # Rate-limit state is cached across test cases in the test process.
+        # Reset it so these tests assert API behavior rather than test order.
+        cache.clear()
         self.user = User.objects.create_user(
             username='testuser',
             password='password123',
