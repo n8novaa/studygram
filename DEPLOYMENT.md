@@ -1,62 +1,90 @@
-# Deployment checklist
+# Free-tier deployment guide
 
-StudyGram is a Django/DRF application with an ASGI WebSocket endpoint and a React single-page frontend. The repository includes Docker images, a Docker Compose local stack, and CI checks. This file describes the remaining environment-specific production setup; no cloud resources or external deployment have been created from this repository.
+This guide targets Vercel (React/Vite), Render (Django/Daphne Docker service), Neon (PostgreSQL), Upstash (Redis), Brevo (SMTP), and Cloudflare R2 (private uploads). Provider free quotas and policies change; confirm current limits and terms in each dashboard before launch. This repository has not been deployed by this guide.
 
-## Required production services
+## 1. Protect repository data and credentials
 
-- PostgreSQL, provided through `DATABASE_URL`.
-- Shared Redis, provided through `REDIS_URL`. This backs Django Channels across workers.
-- Durable, backed-up media storage. Configure `MEDIA_STORAGE_BACKEND=s3` for S3-compatible object storage, or set `DJANGO_MEDIA_ROOT` to a durable mounted volume. Production startup now fails if neither choice is explicit. S3 media is private by default and uses signed URLs; keep public bucket access blocked. For multiple replicas, use object storage or a shared volume.
-- An ASGI server such as Daphne, behind a TLS-terminating proxy that supports WebSocket upgrades.
-- Frontend and backend origins configured in `CORS_ALLOWED_ORIGINS` and `CSRF_TRUSTED_ORIGINS` as appropriate.
-- A real SMTP provider and verified sender address for password resets.
+`.env*`, SQLite databases, media, and `workspace_files/` are excluded by `.gitignore` and `.dockerignore`. The existing local `backend/db.sqlite3`, `backend/media`, and `backend/workspace_files` are local data and must be preserved. The current Git index has been cleared of tracked `backend/workspace_files` files without deleting the local copies. Those upload files remain in prior public Git history; removing them from the latest revision does not revoke public access. If any contain private information, restrict/delete the public repository or rewrite history deliberately and coordinate fresh clones. Rotate credentials if a real credential was ever committed.
 
-## Production environment
+Never commit `.env`, provider credentials, private keys, database dumps, or user uploads. Configure production secrets only in provider environment-variable settings.
 
-Set these in the hosting provider's secret/configuration manager. Do not copy the local Compose credentials into production.
+## 2. Create provider resources
+
+1. **Neon:** create a PostgreSQL database and copy its pooled or direct connection string. Keep the TLS query option (`sslmode=require`) in the URL. Use a least-privilege application role; keep the Neon owner credentials private.
+2. **Upstash:** create Redis and copy the Redis **TCP** connection string using `rediss://`. Channels Redis requires Redis protocol access; Upstash REST credentials/URLs are not compatible.
+3. **R2:** create a private bucket, block public access, enable the S3 API, and create scoped credentials for this bucket. Record its endpoint, access key, secret, and region (R2 commonly uses `auto`). Configure CORS on the bucket only if direct browser downloads/uploads are later introduced; current app downloads pass through the API.
+4. **Brevo:** verify a sender identity/domain and create SMTP credentials. Use the SMTP login and SMTP key (not an API key) with port 587 and TLS.
+
+Free tiers have quotas, service pauses, and/or ephemeral storage. In particular, Render's free service filesystem is ephemeral and free instances may spin down. Never choose filesystem media storage on Render for user uploads. Check the current plan terms: database, Redis, storage, build minutes, bandwidth, and email quotas can change.
+
+## 3. Deploy the backend to Render
+
+Create a **Web Service** from the repository, choose Docker, set the root/build context to the repository root and Dockerfile to `Dockerfile.backend`. The image binds Daphne to `0.0.0.0:$PORT` (default 10000). Configure these environment variables in Render; substitute actual values without quotes:
 
 ```text
 DJANGO_DEBUG=False
-DJANGO_SECRET_KEY=<long-random-secret>
-DJANGO_ALLOWED_HOSTS=<api-hostname>
-DATABASE_URL=<managed-postgres-url>
-REDIS_URL=<managed-redis-url>
-CORS_ALLOWED_ORIGINS=<frontend-origin>
-CSRF_TRUSTED_ORIGINS=<frontend-origin>
-FRONTEND_URL=<frontend-origin>
-TRUST_PROXY_SSL_HEADER=True
-# Choose one durable media option:
+DJANGO_SECRET_KEY=<at-least-50-random-characters>
+DJANGO_ALLOWED_HOSTS=<your-render-service-hostname>
+DATABASE_URL=<Neon-PostgreSQL-URL-with-sslmode=require>
+REDIS_URL=rediss://<Upstash-TCP-credentials-and-host>:6379
 MEDIA_STORAGE_BACKEND=s3
-AWS_STORAGE_BUCKET_NAME=<private-bucket-name>
-AWS_S3_REGION_NAME=<region>
-# For S3-compatible providers only:
-# AWS_S3_ENDPOINT_URL=<provider-endpoint>
-# AWS_ACCESS_KEY_ID=<key-if-not-using-instance-identity>
-# AWS_SECRET_ACCESS_KEY=<secret-if-not-using-instance-identity>
-# Or use a durable mounted filesystem volume instead:
-# MEDIA_STORAGE_BACKEND=filesystem
-# DJANGO_MEDIA_ROOT=<durable-media-path>
+AWS_STORAGE_BUCKET_NAME=<private-R2-bucket>
+AWS_S3_ENDPOINT_URL=https://<account-id>.r2.cloudflarestorage.com
+AWS_ACCESS_KEY_ID=<R2-scoped-access-key>
+AWS_SECRET_ACCESS_KEY=<R2-secret>
+AWS_S3_REGION_NAME=auto
 EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-EMAIL_HOST=<smtp-host>
+EMAIL_HOST=smtp-relay.brevo.com
 EMAIL_PORT=587
 EMAIL_USE_TLS=True
-EMAIL_HOST_USER=<smtp-user>
-EMAIL_HOST_PASSWORD=<smtp-app-password>
-DEFAULT_FROM_EMAIL=<verified-sender>
+EMAIL_HOST_USER=<Brevo-SMTP-login>
+EMAIL_HOST_PASSWORD=<Brevo-SMTP-key>
+DEFAULT_FROM_EMAIL=<verified-sender-address>
+FRONTEND_URL=https://<your-vercel-domain>
+CORS_ALLOWED_ORIGINS=https://<your-vercel-domain>
+CSRF_TRUSTED_ORIGINS=https://<your-vercel-domain>
+TRUST_PROXY_SSL_HEADER=True
 ```
 
-With `DEBUG=False`, Django fails at startup if `DJANGO_SECRET_KEY`, explicit `DJANGO_ALLOWED_HOSTS`, PostgreSQL, Redis, or a durable media option is missing. S3 support requires the `django-storages` S3 extra; credentials can be supplied by the host's workload identity instead of static keys. `TRUST_PROXY_SSL_HEADER=True` is safe only when the proxy is trusted and overwrites `X-Forwarded-Proto`. Terminate HTTPS at the edge and forward WebSocket upgrade headers to Daphne. Serve the frontend and `/api`, `/ws`, and `/static` routes through a same-origin proxy where possible. Do not make the media bucket public: downloads should continue to be authorized by the application.
+Add any Vercel custom domain to both frontend origin settings (and retain the `https://` scheme). Do not set `DJANGO_ALLOWED_HOSTS=*`; include the Render hostname and any custom API domain. Render terminates HTTPS and supports WebSocket upgrades. The app validates browser origins against `CORS_ALLOWED_ORIGINS`; keep that list exact. `TRUST_PROXY_SSL_HEADER=True` is appropriate behind Render's trusted proxy. Leave HTTPS redirect and secure cookie/HSTS defaults enabled; verify requests and redirects on the deployed domain before enabling HSTS preload.
 
-## Release sequence
+The service uses Daphne/ASGI; `/ws/workspaces/...` is the WebSocket path. The short-lived signed WebSocket ticket is obtained over authenticated API before connecting. Render must proxy WebSocket upgrades to the same service. The frontend's production socket URL derives `wss:` and host/path from `VITE_API_BASE_URL`.
 
-1. Build and run CI. The workflow runs Django checks/tests and frontend lint/build on pushes and pull requests. Build both Docker images from the repository root and deploy matching backend/frontend revisions.
-2. Review the generated `base` migration before applying it: it drops the retired `Room`, `Topic`, and legacy `Message` tables and permanently removes their data. Back up first if any old study-room data needs to be retained.
-3. Run `python manage.py check --deploy` with the production environment loaded; resolve every warning for the actual proxy and domain setup. The preload warning is intentionally left for the domain owner to decide after confirming all subdomains can enforce HTTPS.
-4. Back up PostgreSQL and media storage, then run `python manage.py migrate --noinput` as a one-off release job.
-5. Run `python manage.py collectstatic --noinput` as part of the release; publish `STATIC_ROOT` through the web server or a trusted static-file service. Ensure the deployed proxy can access that exact output (the local Compose stack shares a volume for this purpose).
-6. Start the ASGI application with `daphne -b 0.0.0.0 -p 8000 config.asgi:application` (or an equivalent ASGI server).
-7. Check `GET /api/health/` from the load balancer. It returns only a generic status and checks PostgreSQL and Redis readiness.
-8. Verify WSS through the public proxy with two authorized users, then verify unauthorized subscriptions, disconnect/reconnect recovery, message edit/delete/reaction broadcasts, and delivery while switching channels.
-9. Monitor application logs, database/Redis health, upload storage capacity, and WebSocket connection/error rates. Configure a provider-specific error-reporting service before public launch.
+### Release and migration safety
 
-The included Compose stack is for local integration only: it uses development credentials, `DEBUG=True`, console email, and local volume storage. It runs migrations at startup to simplify local development; production should run migrations once as a release job before rolling out application instances. Compose is not a production deployment or a replacement for managed backups, TLS, secret storage, and durable shared media.
+Do not deploy `compose.yaml` to Render. It is a local development stack and uses `DJANGO_DEBUG=True`, local-only credentials and persistent local volumes. Configure a Render pre-deploy command (if available for the selected plan) or a one-off shell/release task to run `python manage.py migrate --noinput` once, then deploy the web service. Do not run migrations concurrently in multiple instances.
+
+Migration `base.0006_remove_room_host_remove_room_participants_and_more` deletes the retired `Room`, `Topic`, and legacy `Message` models/tables and their data. On an empty new PostgreSQL database, applying the full migration chain creates the old tables and later removes them; this is safe for a fresh install. Do not point it at an existing database containing data you need. Back up and decide whether to export/retain any legacy records before applying it. Never use the local SQLite file as the production database or delete it as part of deployment.
+
+## 4. Deploy the frontend to Vercel
+
+Import this repository as a Vite project. Set the **Root Directory** to `frontend`; Vercel should use `npm ci` and `npm run build`, with output directory `dist`. Set the build-time variable:
+
+```text
+VITE_API_BASE_URL=https://<your-render-service-hostname>/api
+```
+
+Vite embeds this value at build time, so redeploy after changing it. It controls both API requests and WebSocket host/path. The `/api` suffix is required. Vercel serves the SPA; the Render service serves `/api` and `/ws`.
+
+## 5. Static files, uploads, and email
+
+The React app's static assets are served by Vercel. Django collects its own static assets into `STATIC_ROOT` during image build, but the Render Daphne container has no static-file route/proxy configured. The API/frontend do not require these assets, but Django admin may lack styling; arrange an explicit static-file hosting/proxy solution before relying on the admin UI. Do not assume `deploy/nginx.conf` is active in this Vercel + Render topology; it is used by the optional local Compose stack.
+
+Uploaded files use Django storage. Use the configured S3-compatible backend and private R2 bucket for persistent uploads. Settings enable signed URLs and disable public ACLs. Validate upload, download, and permission behavior with a non-public object after deployment. Render's local filesystem is ephemeral; filesystem storage is suitable only for development or a genuinely durable mounted volume.
+
+Brevo SMTP is optional for app operation but required for production password-reset delivery. Verify the sender and use SMTP credentials, not the API key. Send a real reset request only after configuring the production account email and check delivery, spam, and provider logs.
+
+## 6. Smoke checks
+
+Before inviting users:
+
+1. Confirm Render health check `GET https://<api-host>/api/health/` returns healthy.
+2. Register, log in, refresh/logout, and request a password reset; confirm email delivery.
+3. Create a workspace/channel, connect two authorized clients to the channel, and verify WebSocket message updates and reconnect behavior. Confirm an unauthorized origin/member cannot subscribe.
+4. Upload a file, confirm it is private in R2, and test authorized download plus denied access from another workspace.
+5. Check browser console/network for CORS errors, mixed content, failed `wss://` connections, and API errors. Confirm HTTP redirects to HTTPS.
+6. Review Render, Neon, Upstash, R2, and Brevo logs/quotas and configure backups/alerts appropriate to the data.
+
+## Free-tier limits
+
+Free plans are for evaluation and can pause, sleep, throttle, or impose strict quotas; cold starts and WebSocket disconnections are expected risks. Plan quotas and availability change, so verify them in the dashboards. Do not promise durable backups, always-on realtime, email delivery, or file retention from a free plan. For user data, establish external backups and a paid/managed reliability plan before production use.

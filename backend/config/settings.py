@@ -211,6 +211,8 @@ else:
 
 if not DEBUG and not REDIS_URL:
     raise ValueError('REDIS_URL must be configured when DEBUG=False.')
+if not DEBUG and REDIS_URL and not REDIS_URL.startswith('rediss://'):
+    raise ValueError('REDIS_URL must use rediss:// TLS in production.')
 
 
 # --------------------------------------------------
@@ -227,6 +229,8 @@ if DATABASE_URL:
         'default': dj_database_url.parse(
             DATABASE_URL,
             conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=not DEBUG,
         ),
     }
 
