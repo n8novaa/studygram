@@ -8,9 +8,7 @@ function DiscoverWorkspaceCard({ workspace, joined, requested, joining, onJoin }
   return (
     <article className="discover-card">
       <div className="discover-card-top">
-        <div className="discover-card-icon">
-          {workspace.name?.charAt(0)?.toUpperCase() || 'D'}
-        </div>
+        <h2 className="discover-card-title">{workspace.name}</h2>
 
         <span
           className={`workspace-visibility-badge ${
@@ -22,15 +20,14 @@ function DiscoverWorkspaceCard({ workspace, joined, requested, joining, onJoin }
         </span>
       </div>
 
-      <div>
-        <h2 className="discover-card-title">{workspace.name}</h2>
+      <div className="discover-card-body">
         <p className="discover-card-description">
           {workspace.description || 'No description provided.'}
         </p>
       </div>
 
       <div className="discover-card-meta">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div className="discover-member-count">
           <UsersIcon size={15} />
           <span>
             {memberCount} {memberCount === 1 ? 'member' : 'members'}
@@ -38,8 +35,8 @@ function DiscoverWorkspaceCard({ workspace, joined, requested, joining, onJoin }
         </div>
 
         {workspace.owner && (
-          <span style={{ color: 'var(--text-muted)' }}>
-            Owner: <strong>@{workspace.owner}</strong>
+          <span className="discover-card-owner">
+            Owner: <strong>{workspace.owner}</strong>
           </span>
         )}
       </div>

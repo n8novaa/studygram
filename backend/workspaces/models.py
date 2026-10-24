@@ -1,4 +1,5 @@
 import secrets
+import uuid
 
 from django.contrib.auth.models import User
 from django.db import models
@@ -76,6 +77,40 @@ class WorkspaceMembership(models.Model):
             f'({self.role})'
         )
 
+
+class WorkspacePresenceConnection(models.Model):
+    """A short-lived lease for one authenticated workspace WebSocket."""
+
+    connection_id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    workspace = models.ForeignKey(
+        Workspace,
+        on_delete=models.CASCADE,
+        related_name='presence_connections',
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='workspace_presence_connections',
+    )
+    connected_at = models.DateTimeField(auto_now_add=True)
+    last_seen = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['workspace', 'last_seen'],
+                name='ws_presence_ws_seen_idx',
+            ),
+            models.Index(
+                fields=['workspace', 'user', 'last_seen'],
+                name='ws_presence_ws_user_seen_idx',
+            ),
+        ]
+
 class WorkspaceChannel(models.Model):
     workspace = models.ForeignKey(
         Workspace,
@@ -148,6 +183,28 @@ class WorkspaceChannelMessage(models.Model):
             f'#{self.channel.name}: '
             f'{self.body[:50]}'
         )
+
+
+class WorkspaceChannelReadPosition(models.Model):
+    """Highest message a member has actually reached in a channel."""
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='channel_read_positions'
+    )
+    channel = models.ForeignKey(
+        WorkspaceChannel, on_delete=models.CASCADE, related_name='read_positions'
+    )
+    # Store the monotonic message id rather than a message FK so deleting the
+    # referenced message cannot make older activity reappear as unread.
+    last_viewed_message_id = models.PositiveBigIntegerField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'channel'], name='unique_channel_read_position'
+            ),
+        ]
 
 
 class WorkspaceChannelMessageReaction(models.Model):

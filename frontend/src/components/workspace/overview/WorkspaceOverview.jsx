@@ -1,5 +1,4 @@
 import { formatRelativeTime } from '../../../utils/dateUtils';
-import { GlobeIcon, LockIcon, UsersIcon, ActivityIcon, ShieldIcon } from '../../common/Icons';
 import '../../../styles/components/workspace/overview/overview.css';
 
 function WorkspaceOverview({ workspace }) {
@@ -12,52 +11,33 @@ function WorkspaceOverview({ workspace }) {
     <section className="workspace-overview">
       <div className="workspace-section-heading">
         <div>
-          <h2>Workspace Information</h2>
-          <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
-            General details, accessibility settings, and membership summary.
-          </p>
+          <h2>Workspace details</h2>
+          <p>Access, membership, and recent activity.</p>
         </div>
       </div>
 
       <div className="workspace-detail-description">
-        <p style={{ margin: 0, fontWeight: 500 }}>
-          {workspace.description || 'No description provided for this workspace.'}
-        </p>
+        <p>{workspace.description || 'No description provided for this workspace.'}</p>
       </div>
 
-      <div className="workspace-info-grid">
+      <dl className="workspace-info-grid">
         <div className="workspace-info-item">
-          <span>Visibility</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-            {isPublic ? <GlobeIcon size={16} /> : <LockIcon size={16} />}
-            <strong>{isPublic ? 'Public' : 'Private'}</strong>
-          </div>
+          <dt>Visibility</dt>
+          <dd>{isPublic ? 'Public' : 'Private'}</dd>
         </div>
-
         <div className="workspace-info-item">
-          <span>Members</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-            <UsersIcon size={16} />
-            <strong>{memberCount} {memberCount === 1 ? 'member' : 'members'}</strong>
-          </div>
+          <dt>Members</dt>
+          <dd>{memberCount} {memberCount === 1 ? 'member' : 'members'}</dd>
         </div>
-
         <div className="workspace-info-item">
-          <span>Owner</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-            <ShieldIcon size={16} />
-            <strong>@{workspace.owner}</strong>
-          </div>
+          <dt>Owner</dt>
+          <dd>@{workspace.owner}</dd>
         </div>
-
         <div className="workspace-info-item">
-          <span>Last Activity</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-            <ActivityIcon size={16} />
-            <strong>{formatRelativeTime(workspace.updated || workspace.created)}</strong>
-          </div>
+          <dt>Last active</dt>
+          <dd>{formatRelativeTime(workspace.updated || workspace.created)}</dd>
         </div>
-      </div>
+      </dl>
     </section>
   );
 }

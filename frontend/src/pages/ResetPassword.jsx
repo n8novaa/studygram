@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { confirmPasswordReset } from '../auth/authService';
+import AuthBrand from '../components/common/AuthBrand';
 import '../styles/pages/login.css';
 
 function ResetPassword() {
@@ -45,12 +46,9 @@ function ResetPassword() {
   }
 
   return (
-    <main className="auth-page">
+    <main className="auth-page login-page">
       <section className="auth-container">
-        <div className="auth-brand">
-          <div className="auth-logo">S</div>
-          <h1>StudyGram</h1>
-        </div>
+        <AuthBrand />
 
         <div className="auth-card">
           <div className="auth-card-header">
@@ -149,6 +147,7 @@ function ResetPassword() {
           )}
 
         </div>
+        <p className="auth-page-footer">StudyGram</p>
       </section>
     </main>
   );

@@ -137,7 +137,21 @@
 }
 
 .workspace-member-modal-action-promote {
-  color: var(--primary);
+  border-color: #d7e1d2;
+  background: #f5f8f2;
+  color: #4f6845;
+}
+
+.workspace-member-modal-action-promote:hover:not(:disabled) {
+  border-color: #bfceb8;
+  background: #edf3e9;
+  color: #3f5636;
+}
+
+.workspace-member-modal-action:focus-visible,
+.workspace-member-modal-cancel:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .workspace-member-modal-footer {

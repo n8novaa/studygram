@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createWorkspaceInvitation } from '../../../services/workspaceService';
-import { CopyIcon, CheckIcon, CloseIcon, ShareIcon, SparklesIcon } from '../../common/Icons';
+import { CopyIcon, CheckIcon, CloseIcon, ShareIcon } from '../../common/Icons';
 import { useToast } from '../../common/ToastContext';
 
 function WorkspaceInviteModal({ workspace, accessToken, onClose }) {
@@ -106,7 +106,7 @@ function WorkspaceInviteModal({ workspace, accessToken, onClose }) {
                 </>
               ) : (
                 <>
-                  <SparklesIcon size={15} /> Generate Invitation Token
+                  <ShareIcon size={15} /> Generate Invitation Token
                 </>
               )}
             </button>

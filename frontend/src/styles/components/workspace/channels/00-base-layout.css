@@ -5,28 +5,27 @@
 
 .workspace-channels-layout {
   display: grid;
-  grid-template-columns: 240px 1fr;
-  height: 700px;
-  min-height: 560px;
+  grid-template-columns: 208px minmax(0, 1fr);
+  height: clamp(500px, calc(100dvh - 160px), 820px);
+  min-height: 0;
   background: #ffffff;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
+  border: 1px solid rgba(214, 211, 209, 0.9);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-xs);
-  transition: grid-template-columns 280ms ease-in-out;
+  transition: grid-template-columns 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
   position: relative;
 }
 
 .workspace-channels-layout.with-members-open {
-  grid-template-columns: 240px 1fr 220px;
+  grid-template-columns: 208px minmax(0, 1fr) 232px;
 }
 
 /* Collapsed channel sidebar — desktop */
 /* Collapsed channel sidebar — desktop */
 @media (min-width: 681px) {
   .workspace-channels-layout {
-    grid-template-columns: 200px minmax(0, 1fr);
-    transition: grid-template-columns 300ms ease-in-out;
+    grid-template-columns: 208px minmax(0, 1fr);
+    transition: grid-template-columns 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
   .workspace-channels-layout.sidebar-collapsed {
@@ -34,7 +33,7 @@
   }
 
   .workspace-channels-layout.sidebar-collapsed.with-members-open {
-    grid-template-columns: 0px minmax(0, 1fr) 220px;
+    grid-template-columns: 0px minmax(0, 1fr) 232px;
   }
 
   .workspace-channels-layout > .channel-sidebar {

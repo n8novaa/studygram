@@ -23,10 +23,6 @@ function WorkspaceEditForm({
 
         <div>
 
-          <span className="workspace-eyebrow">
-            Workspace
-          </span>
-
           <h2>
             Edit workspace
           </h2>

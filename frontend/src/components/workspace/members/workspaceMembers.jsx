@@ -8,6 +8,7 @@ import {
 import MemberManagement from './MemberManagement';
 import RemoveMemberModal from './RemoveMemberModal'
 import { UsersIcon } from '../../common/Icons';
+import UserAvatar from '../../common/UserAvatar';
 import { useToast } from '../../common/ToastContext';
 import '../../../styles/components/workspace/members/members.css';
 import '../../../styles/components/workspace/members/management-modal.css'
@@ -23,6 +24,15 @@ function WorkspaceMembers({ workspace, isAdmin = false, onInvite }) {
   const [removeMember, setRemoveMember] =
   useState(null)
   const workspaceId = workspace?.id;
+
+  const membersWithCurrentProfile = members.map((member) => {
+    if (member.user !== user?.username || !user?.profile) return member;
+    return {
+      ...member,
+      avatar: user.profile.avatar,
+      display_name: user.profile.display_name,
+    };
+  });
 
   const loadMembers = useCallback(async () => {
     if (!accessToken || !workspaceId) return;
@@ -109,7 +119,7 @@ async function confirmRemoveMember() {
           </span>
 
           <MemberManagement
-            members={members}
+            members={membersWithCurrentProfile}
             workspace={workspace}
             accessToken={accessToken}
             isAdmin={isAdmin}
@@ -156,7 +166,7 @@ async function confirmRemoveMember() {
         </div>
       ) : (
         <div className="workspace-member-list">
-          {members.map((member) => {
+          {membersWithCurrentProfile.map((member) => {
             const memberOwner = isOwner(member);
             const memberAdmin = member.role === 'admin';
             const currentUser = isCurrentUser(member);
@@ -165,17 +175,21 @@ async function confirmRemoveMember() {
             return (
               <div className="workspace-member" key={member.user_id}>
                 <div className="member-profile-left">
-                  <div className="workspace-member-avatar">
-                    {(member.user || 'U').charAt(0).toUpperCase()}
-                  </div>
+                  <UserAvatar
+                    src={member.avatar}
+                    displayName={member.display_name}
+                    username={member.user}
+                    className="workspace-member-avatar"
+                  />
 
                   <div className="workspace-member-details">
                     <span className="workspace-member-name">
-                      @{member.user}
+                      {member.display_name || `@${member.user}`}
                       {currentUser && (
                         <span className="workspace-member-you-pill">You</span>
                       )}
                     </span>
+                    {member.display_name && <span className="workspace-member-handle">@{member.user}</span>}
                     <span className="workspace-member-role-subtitle">
                       {memberOwner
                         ? 'Workspace Creator'

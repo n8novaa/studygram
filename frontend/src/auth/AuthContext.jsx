@@ -216,9 +216,48 @@ export function AuthProvider({
     setRefreshToken(null)
   }
 
+  function updateUser(updates) {
+    setUser((currentUser) => {
+      if (!currentUser) return currentUser;
+      return {
+        ...currentUser,
+        ...updates,
+        ...(updates.profile
+          ? { profile: { ...currentUser.profile, ...updates.profile } }
+          : {}),
+      };
+    });
+  }
+
 
   useEffect(() => {
     restoreSession()
+  }, [])
+
+  useEffect(() => {
+    function handleTokenRefresh(event) {
+      const tokens = event.detail;
+      if (!tokens?.access) return;
+      setAccessToken(tokens.access);
+      if (tokens.refresh) {
+        setRefreshToken(tokens.refresh);
+        localStorage.setItem('refreshToken', tokens.refresh);
+      }
+    }
+
+    function handleExpiredSession() {
+      localStorage.removeItem('refreshToken');
+      setUser(null);
+      setAccessToken(null);
+      setRefreshToken(null);
+    }
+
+    window.addEventListener('studygram:auth-token-refreshed', handleTokenRefresh);
+    window.addEventListener('studygram:auth-session-expired', handleExpiredSession);
+    return () => {
+      window.removeEventListener('studygram:auth-token-refreshed', handleTokenRefresh);
+      window.removeEventListener('studygram:auth-session-expired', handleExpiredSession);
+    };
   }, [])
 
 
@@ -230,6 +269,7 @@ export function AuthProvider({
         refreshToken,
         loading,
         loginUser,
+        updateUser,
         logout,
       }}
     >

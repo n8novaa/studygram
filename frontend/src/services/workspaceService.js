@@ -13,6 +13,13 @@ export async function getWorkspaces(accessToken) {
   return apiGetAll('/workspaces/', accessToken)
 }
 
+export function getRecentActivity(accessToken, page = 1, pageSize = 25, view = 'active') {
+  return apiGet(
+    `/workspaces/recent-activity/?page=${page}&page_size=${pageSize}&view=${view}`,
+    accessToken,
+  )
+}
+
 /*
  * Get a single workspace.
  */

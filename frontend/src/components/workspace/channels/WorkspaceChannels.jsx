@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../auth/AuthContext';
 import {
   getWorkspaceChannels,
   getChannelMessages,
   connectWorkspaceChannel,
+  markChannelMessagesViewed,
 } from '../../../services/workspaceChannelService';
 import ChannelSidebar from './sidebar/ChannelSidebar';
 import ChannelChatArea from './ChannelChatArea';
@@ -25,13 +26,14 @@ function WorkspaceChannels({ workspace, isAdmin }) {
 
   const [loadingChannels, setLoadingChannels] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
-  const [realtimeStatus, setRealtimeStatus] = useState('connecting');
+  const [onlineUserIds, setOnlineUserIds] = useState(() => new Set());
   const [showMembers, setShowMembers] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingChannel, setEditingChannel] = useState(null);
+  const readPositionByChannel = useRef(new Map());
 
   const workspaceId = workspace?.id;
 
@@ -97,7 +99,7 @@ function WorkspaceChannels({ workspace, isAdmin }) {
   useEffect(() => {
     if (!activeChannelId || !accessToken || !workspaceId) {
       setMessages([]);
-      setRealtimeStatus('disconnected');
+      setOnlineUserIds(new Set());
       return undefined;
     }
 
@@ -112,11 +114,20 @@ function WorkspaceChannels({ workspace, isAdmin }) {
     let syncQueue = Promise.resolve();
 
     setMessages([]);
-    setRealtimeStatus('connecting');
+    setOnlineUserIds(new Set());
     const initialLoad = loadMessages(activeChannelId);
 
     const applyRealtimeEvent = (payload) => {
-      if (payload.type === 'message.deleted') {
+      if (payload.type === 'presence.snapshot') {
+        setOnlineUserIds(new Set(payload.user_ids || []));
+      } else if (payload.type === 'presence.changed') {
+        setOnlineUserIds((current) => {
+          const next = new Set(current);
+          if (payload.online) next.add(payload.user_id);
+          else next.delete(payload.user_id);
+          return next;
+        });
+      } else if (payload.type === 'message.deleted') {
         setMessages((current) => current.filter((message) => message.id !== payload.message_id));
       } else if (payload.message) {
         setMessages((current) => mergeMessages(current, [payload.message]));
@@ -144,7 +155,6 @@ function WorkspaceChannels({ workspace, isAdmin }) {
 
     const scheduleReconnect = () => {
       if (disposed || reconnectTimer) return;
-      setRealtimeStatus('reconnecting');
       const delay = Math.min(1000 * (2 ** reconnectAttempt), 15000);
       reconnectAttempt += 1;
       reconnectTimer = window.setTimeout(() => {
@@ -167,7 +177,6 @@ function WorkspaceChannels({ workspace, isAdmin }) {
         socket = nextSocket;
         socket.onopen = () => {
           reconnectAttempt = 0;
-          setRealtimeStatus('connected');
           initialLoad.then(refreshMessages);
         };
         socket.onmessage = (event) => {
@@ -182,17 +191,14 @@ function WorkspaceChannels({ workspace, isAdmin }) {
         socket.onerror = () => socket?.close();
         socket.onclose = () => {
           if (disposed) return;
-          setRealtimeStatus('reconnecting');
           scheduleReconnect();
         };
       } catch (error) {
         if (disposed) return;
         if ([401, 403].includes(error?.status)) {
           fallbackEnabled = false;
-          setRealtimeStatus('disconnected');
           return;
         }
-        setRealtimeStatus('reconnecting');
         scheduleReconnect();
       }
     }
@@ -250,6 +256,15 @@ function WorkspaceChannels({ workspace, isAdmin }) {
     setMessages((prev) => prev.filter((m) => m.id !== msgId));
   }
 
+  const handleMessageViewed = useCallback((messageId) => {
+    if (!accessToken || !workspaceId || !activeChannelId) return;
+    const previous = readPositionByChannel.current.get(activeChannelId) || 0;
+    if (messageId <= previous) return;
+    readPositionByChannel.current.set(activeChannelId, messageId);
+    markChannelMessagesViewed(accessToken, workspaceId, activeChannelId, messageId)
+      .catch(() => readPositionByChannel.current.set(activeChannelId, previous));
+  }, [accessToken, workspaceId, activeChannelId]);
+
   const currentMember = workspace?.members?.find(
     (m) => (typeof m.user === 'string' ? m.user : m.user?.username) === user?.username
   );
@@ -291,7 +306,6 @@ function WorkspaceChannels({ workspace, isAdmin }) {
         channel={activeChannel}
         messages={messages}
         loadingMessages={loadingMessages}
-        realtimeStatus={realtimeStatus}
         onRefresh={() => activeChannelId && loadMessages(activeChannelId)}
         accessToken={accessToken}
         currentUser={user}
@@ -310,12 +324,15 @@ function WorkspaceChannels({ workspace, isAdmin }) {
         onMessageSent={handleMessageSent}
         onMessageUpdated={handleMessageUpdated}
         onMessageDeleted={handleMessageDeleted}
+        onMessageViewed={handleMessageViewed}
       />
 
       {/* 3. Right: Collapsible Members Sidebar */}
       {showMembers && (
         <ChannelMemberList
           members={workspace?.members || []}
+          currentUser={user}
+          onlineUserIds={onlineUserIds}
           ownerUsername={workspace?.owner}
           onClose={() => setShowMembers(false)}
         />

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { HashIcon, ArrowDownIcon } from '../../common/Icons';
 import { useToast } from '../../common/ToastContext';
 
@@ -20,7 +21,6 @@ function ChannelChatArea({
   channel,
   messages = [],
   loadingMessages,
-  realtimeStatus,
   onRefresh,
   accessToken,
   currentUser,
@@ -33,8 +33,11 @@ function ChannelChatArea({
   onMessageSent,
   onMessageUpdated,
   onMessageDeleted,
+  onMessageViewed,
 }) {
   const { addToast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const targetMessageId = searchParams.get('message');
   const [inputText, setInputText] = useState('');
   const [sending, setSending] = useState(false);
   const [copiedMsgId, setCopiedMsgId] = useState(null);
@@ -50,6 +53,8 @@ function ChannelChatArea({
   const messagesEndRef = useRef(null);
   const messagesStreamRef = useRef(null);
   const textareaRef = useRef(null);
+  const handledTargetRef = useRef('');
+  const targetHighlightTimeoutRef = useRef(null);
 
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [showChannelDescription, setShowChannelDescription] = useState(false);
@@ -112,6 +117,37 @@ useEffect(() => {
 
     previousMessageCountRef.current = currentCount;
   }, [messages, isAtBottom]);
+
+  useEffect(() => {
+    if (!targetMessageId || loadingMessages) return;
+    const targetMessage = messages.find(
+      (message) => String(message.id) === targetMessageId,
+    );
+    if (!targetMessage) return;
+
+    const targetKey = `${channel?.id}:${targetMessageId}`;
+    if (handledTargetRef.current === targetKey) return;
+    const element = document.getElementById(`message-${targetMessage.id}`);
+    if (!element) return;
+
+    handledTargetRef.current = targetKey;
+    setHighlightedMessageId(targetMessage.id);
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    targetHighlightTimeoutRef.current = window.setTimeout(() => {
+      setHighlightedMessageId(null);
+      setSearchParams((current) => {
+        const next = new URLSearchParams(current);
+        next.delete('message');
+        return next;
+      }, { replace: true });
+    }, 1800);
+  }, [messages, loadingMessages, targetMessageId, channel?.id, setSearchParams]);
+
+  useEffect(() => () => {
+    if (targetHighlightTimeoutRef.current) {
+      window.clearTimeout(targetHighlightTimeoutRef.current);
+    }
+  }, []);
 
   function handleMessagesScroll() {
     const container = messagesStreamRef.current;
@@ -346,15 +382,6 @@ useEffect(() => {
         </div>
       )}
 
-      <div className={`channel-realtime-status is-${realtimeStatus}`} role="status" aria-live="polite">
-        <span className="channel-realtime-indicator" />
-        {realtimeStatus === 'connected'
-          ? 'Live'
-          : realtimeStatus === 'disconnected'
-            ? 'Connection unavailable'
-            : 'Reconnecting…'}
-      </div>
-
       <div
         className="channel-messages-stream"
         ref={messagesStreamRef}
@@ -386,6 +413,8 @@ useEffect(() => {
           onReaction={handleReaction}
           onReply={setReplyingTo}
           messagesEndRef={messagesEndRef}
+          messageScrollRootRef={messagesStreamRef}
+          onMessageViewed={onMessageViewed}
         />
       </div>
 

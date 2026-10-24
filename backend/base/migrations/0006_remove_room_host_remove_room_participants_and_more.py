@@ -10,25 +10,33 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='room',
-            name='host',
-        ),
-        migrations.RemoveField(
-            model_name='room',
-            name='participants',
-        ),
-        migrations.RemoveField(
-            model_name='room',
-            name='topic',
-        ),
-        migrations.DeleteModel(
-            name='Message',
-        ),
-        migrations.DeleteModel(
-            name='Room',
-        ),
-        migrations.DeleteModel(
-            name='Topic',
+        # The Study Rooms feature was removed from the application, but existing
+        # installations may still have user data in these tables. Update Django's
+        # model state without dropping the tables or their contents.
+        migrations.SeparateDatabaseAndState(
+            database_operations=[],
+            state_operations=[
+                migrations.RemoveField(
+                    model_name='room',
+                    name='host',
+                ),
+                migrations.RemoveField(
+                    model_name='room',
+                    name='participants',
+                ),
+                migrations.RemoveField(
+                    model_name='room',
+                    name='topic',
+                ),
+                migrations.DeleteModel(
+                    name='Message',
+                ),
+                migrations.DeleteModel(
+                    name='Room',
+                ),
+                migrations.DeleteModel(
+                    name='Topic',
+                ),
+            ],
         ),
     ]

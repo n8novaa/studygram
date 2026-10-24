@@ -214,6 +214,29 @@ if not DEBUG and not REDIS_URL:
 if not DEBUG and REDIS_URL and not REDIS_URL.startswith('rediss://'):
     raise ValueError('REDIS_URL must use rediss:// TLS in production.')
 
+# Keep DRF throttles consistent across backend workers and instances. The
+# in-memory backend remains useful for local development without Redis.
+if REDIS_URL:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': REDIS_URL,
+            'KEY_PREFIX': 'studygram',
+            'TIMEOUT': 300,
+            'OPTIONS': {
+                'socket_connect_timeout': 3,
+                'socket_timeout': 3,
+            },
+        },
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'studygram-local',
+        },
+    }
+
 
 # --------------------------------------------------
 # Database Configuration

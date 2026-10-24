@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { registerUser } from '../auth/authService';
-import { EyeIcon, EyeOffIcon, SparklesIcon, ShieldIcon } from '../components/common/Icons';
+import { EyeIcon, EyeOffIcon, ShieldIcon } from '../components/common/Icons';
+import AuthBrand from '../components/common/AuthBrand';
 import { useToast } from '../components/common/ToastContext';
 import '../styles/pages/login.css';
 
@@ -61,14 +62,9 @@ function Register() {
   }
 
   return (
-    <main className="auth-page">
+    <main className="auth-page login-page">
       <section className="auth-container">
-        {/* Brand */}
-        <div className="auth-brand">
-          <div className="auth-logo">S</div>
-          <h1>StudyGram</h1>
-          <p>Create your space to learn, share knowledge, and collaborate together.</p>
-        </div>
+        <AuthBrand />
 
         {/* Card */}
         <div className="auth-card">
@@ -103,7 +99,7 @@ function Register() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@example.com"
+                placeholder="you@college.edu"
                 autoComplete="email"
                 disabled={loading}
               />
@@ -163,7 +159,7 @@ function Register() {
                 </>
               ) : (
                 <>
-                  <SparklesIcon size={16} /> Get Started
+                  Create account
                 </>
               )}
             </button>
@@ -177,7 +173,7 @@ function Register() {
           </p>
         </div>
 
-        <p className="auth-page-footer">StudyGram &bull; Collaborative Learning Platform</p>
+        <p className="auth-page-footer">StudyGram</p>
       </section>
     </main>
   );

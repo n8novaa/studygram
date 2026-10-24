@@ -1,4 +1,5 @@
 import { HashIcon, PlusIcon, SettingsIcon, CloseIcon } from '../../../common/Icons';
+import UserAvatar from '../../../common/UserAvatar';
 
 function ChannelSidebar({
   channels = [],
@@ -14,8 +15,6 @@ function ChannelSidebar({
   mobileOpen = false,
   onCloseMobile,
 }) {
-  const userInitial = (currentUser?.username || 'U').charAt(0).toUpperCase();
-
   return (
     <aside
       className={`channel-sidebar ${mobileOpen ? 'mobile-open' : ''}`}
@@ -113,9 +112,14 @@ function ChannelSidebar({
       {/* Footer: User profile */}
       <div className="channel-sidebar-footer">
         <div className="channel-user-profile">
-          <div className="channel-user-avatar">{userInitial}</div>
+          <UserAvatar
+            src={currentUser?.profile?.avatar}
+            displayName={currentUser?.profile?.display_name}
+            username={currentUser?.username}
+            className="channel-user-avatar"
+          />
           <div className="channel-user-info">
-            <span className="channel-user-name">@{currentUser?.username}</span>
+            <span className="channel-user-name">{currentUser?.profile?.display_name || `@${currentUser?.username}`}</span>
             <span className="channel-user-role-badge">
               {isOwner ? 'Workspace Owner' : currentMemberRole || 'Member'}
             </span>

@@ -1,6 +1,7 @@
 from urllib.parse import urlencode
 
 from channels.db import database_sync_to_async
+from channels.layers import get_channel_layer
 from channels.routing import URLRouter
 from channels.testing import WebsocketCommunicator
 from django.contrib.auth.models import User
@@ -84,4 +85,35 @@ class WorkspaceChannelConsumerTests(TransactionTestCase):
         close_event = await communicator.receive_output(timeout=2)
         self.assertEqual(close_event['type'], 'websocket.close')
         self.assertEqual(close_event['code'], 1008)
+        await communicator.wait()
+
+    async def test_removed_member_cannot_receive_presence_updates(self):
+        path = (
+            f'/ws/workspaces/{self.workspace.pk}/channels/{self.channel.pk}/messages/?'
+            f'{urlencode({"ticket": self.ticket, "presence": "1"})}'
+        )
+        communicator = WebsocketCommunicator(URLRouter(websocket_urlpatterns), path)
+        connected, _ = await communicator.connect()
+        self.assertTrue(connected)
+        snapshot = await communicator.receive_json_from(timeout=2)
+        self.assertEqual(snapshot['type'], 'presence.snapshot')
+        initial_event = await communicator.receive_json_from(timeout=2)
+        self.assertEqual(initial_event['type'], 'presence.changed')
+
+        await database_sync_to_async(WorkspaceMembership.objects.filter(
+            workspace=self.workspace,
+            user=self.user,
+        ).delete)()
+        await get_channel_layer().group_send(
+            f'workspace_presence_{self.workspace.pk}',
+            {
+                'type': 'presence.event',
+                'user_id': self.user.pk,
+                'online': False,
+            },
+        )
+
+        close_event = await communicator.receive_output(timeout=2)
+        self.assertEqual(close_event['type'], 'websocket.close')
+        self.assertEqual(close_event['code'], 4403)
         await communicator.wait()

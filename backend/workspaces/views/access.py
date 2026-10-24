@@ -131,12 +131,13 @@ class WorkspaceJoinRequestListView(APIView):
                 workspace=workspace,
                 status=WorkspaceJoinRequest.Status.PENDING,
             )
-            .select_related('user')
+            .select_related('user', 'user__profile')
         )
 
         serializer = WorkspaceJoinRequestSerializer(
             requests,
             many=True,
+            context={'request': request},
         )
 
         return Response(serializer.data)
@@ -584,12 +585,13 @@ class WorkspaceMemberListView(APIView):
         memberships = (
             WorkspaceMembership.objects
             .filter(workspace=workspace)
-            .select_related('user')
+            .select_related('user', 'user__profile')
         )
 
         serializer = WorkspaceMemberSerializer(
             memberships,
             many=True,
+            context={'request': request},
         )
 
         return Response(serializer.data)

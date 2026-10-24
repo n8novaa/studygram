@@ -41,7 +41,9 @@ from .views.channel_messages import (
     WorkspaceChannelMessageDetailView,
     WorkspaceChannelMessageReactionView,
     WorkspaceChannelWebSocketTicketView,
+    WorkspaceChannelReadPositionView,
 )
+from .views.recent_activity import RecentWorkspaceActivityView
 
 
 
@@ -56,6 +58,12 @@ router.register(
 
 
 urlpatterns = [
+    path(
+        'workspaces/recent-activity/',
+        RecentWorkspaceActivityView.as_view(),
+        name='workspace-recent-activity',
+    ),
+
     # ---------------------------------------------------------
     # Workspace access
     # ---------------------------------------------------------
@@ -190,6 +198,12 @@ urlpatterns = [
         'workspaces/<int:workspace_pk>/channels/<int:channel_pk>/',
         WorkspaceChannelDetailView.as_view(),
         name='workspace-channel-detail',
+    ),
+
+    path(
+        'workspaces/<int:workspace_pk>/channels/<int:channel_pk>/read-position/',
+        WorkspaceChannelReadPositionView.as_view(),
+        name='workspace-channel-read-position',
     ),
 
     path(

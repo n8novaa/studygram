@@ -32,8 +32,8 @@ def _broadcast_current_message(message_id, channel_id, event_type):
         message = (
             WorkspaceChannelMessage.objects
             .filter(pk=message_id, channel_id=channel_id)
-            .select_related('user', 'channel')
-            .prefetch_related('reactions__user')
+            .select_related('user__profile', 'channel')
+            .prefetch_related('reactions__user__profile')
             .first()
         )
         if message is not None:

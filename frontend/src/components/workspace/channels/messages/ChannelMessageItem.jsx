@@ -1,4 +1,5 @@
 import { formatMessageTime, getAvatarColor } from '../chat/messageUtils';
+import UserAvatar from '../../../common/UserAvatar';
 import MessageEditForm from './MessageEditForm';
 import ChannelMessageReactions from './ChannelMessageReactions';
 import ChannelMessageActions from './ChannelMessageActions';
@@ -28,23 +29,28 @@ function ChannelMessageItem({
   onReply,
 }) {
   const msgUser = message.msgUser || message.user?.username || 'user';
-  const msgDate = message.msgDate || new Date(message.created);
-  const isGrouped = Boolean(message.isGrouped);
-  const isSelf = msgUser === currentUser?.username;
-  const canDelete =
-    isSelf || isAdmin || workspace?.owner === currentUser?.username;
-  const initial = msgUser.charAt(0).toUpperCase();
-  const avatarColor = getAvatarColor(msgUser);
-  const isOwner = msgUser === workspace?.owner;
-  const repliedMessage = message.reply_to
-    ? allMessages.find((item) => item.id === message.reply_to)
-    : null;
   const memberInfo = workspace?.members?.find(
     (member) =>
       (typeof member.user === 'string'
         ? member.user
         : member.user?.username) === msgUser
   );
+  const isSelf = msgUser === currentUser?.username;
+  const avatarCandidates = isSelf
+    ? [currentUser?.profile?.avatar]
+    : [message.user?.profile?.avatar, memberInfo?.avatar, memberInfo?.user?.profile?.avatar];
+  const isGrouped = Boolean(message.isGrouped);
+  const canDelete =
+    isSelf || isAdmin || workspace?.owner === currentUser?.username;
+  const displayName = (isSelf ? currentUser?.profile?.display_name : '')?.trim()
+    || message.user?.profile?.display_name?.trim()
+    || memberInfo?.display_name?.trim()
+    || msgUser;
+  const avatarColor = getAvatarColor(msgUser);
+  const isOwner = msgUser === workspace?.owner;
+  const repliedMessage = message.reply_to
+    ? allMessages.find((item) => item.id === message.reply_to)
+    : null;
   const isMsgAdmin = isOwner || memberInfo?.role === 'admin';
 
   function cancelEdit() {
@@ -77,36 +83,28 @@ function ChannelMessageItem({
       }`}
     >
       <div className="discord-message-gutter">
-        {isGrouped ? (
-          <span className="discord-grouped-time">
-            {msgDate.toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-          </span>
-        ) : (
-          <div
-            className="discord-message-avatar"
-            style={{ backgroundColor: avatarColor }}
-          >
-            {initial}
-          </div>
-        )}
+        <UserAvatar
+          src={avatarCandidates}
+          displayName={displayName}
+          username={msgUser}
+          className="discord-message-avatar"
+          title={`${displayName} (@${msgUser})`}
+          fallbackColor={avatarColor}
+          viewable
+        />
       </div>
 
       <div className="discord-message-body-wrap">
-        {!isGrouped && (
-          <div className="discord-message-header">
-            <span className="discord-message-author">@{msgUser}</span>
-            {isOwner && <span className="discord-role-pill owner">Owner</span>}
-            {!isOwner && isMsgAdmin && (
-              <span className="discord-role-pill admin">Admin</span>
-            )}
-            <span className="discord-message-timestamp">
-              {formatMessageTime(message.created)}
-            </span>
-          </div>
-        )}
+        <div className="discord-message-header">
+          <span className="discord-message-author" title={`@${msgUser}`}>{displayName}</span>
+          {isOwner && <span className="discord-role-pill owner">Owner</span>}
+          {!isOwner && isMsgAdmin && (
+            <span className="discord-role-pill admin">Admin</span>
+          )}
+          <span className="discord-message-timestamp">
+            {formatMessageTime(message.created)}
+          </span>
+        </div>
 
         {editingMsgId === message.id ? (
           <MessageEditForm

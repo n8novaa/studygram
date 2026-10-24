@@ -17,7 +17,7 @@ import ConfirmModal from '../components/common/ConfirmModal';
 import {
   FolderIcon,
   UsersIcon,
-  SparklesIcon,
+  HomeIcon,
   HashIcon,
 } from '../components/common/Icons';
 import { useToast } from '../components/common/ToastContext';
@@ -191,7 +191,7 @@ function WorkspaceDetail() {
           className={`workspace-tab-btn ${activeSection === 'overview' ? 'active' : ''}`}
           onClick={() => handleSectionChange('overview')}
         >
-          <SparklesIcon size={16} />
+          <HomeIcon size={16} />
           <span>Overview</span>
         </button>
 

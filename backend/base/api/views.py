@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .serializers import LogoutSerializer
+from base.models import Profile
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -28,6 +29,7 @@ from smtplib import SMTPException
 
 from .serializers import (
     PasswordResetConfirmSerializer,
+    ProfileSerializer,
     PublicUserSerializer,
     RegisterSerializer,
     UserSerializer,
@@ -197,6 +199,16 @@ class CurrentUserView(generics.RetrieveAPIView):
     def get_object(self):
         return self.request.user
 
+
+class CurrentProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'patch', 'head', 'options']
+
+    def get_object(self):
+        profile, _ = Profile.objects.get_or_create(user=self.request.user)
+        return profile
+
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -215,6 +227,17 @@ class LogoutView(APIView):
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = User.objects.all().order_by('username')
     serializer_class = PublicUserSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return (
+            User.objects
+            .filter(
+                is_active=True,
+                workspace_memberships__workspace__memberships__user=self.request.user,
+            )
+            .select_related('profile')
+            .distinct()
+            .order_by('username')
+        )

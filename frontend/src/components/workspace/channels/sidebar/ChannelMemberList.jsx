@@ -1,30 +1,32 @@
 import { useMemo } from 'react';
 import { ShieldIcon, UsersIcon } from '../../../common/Icons';
+import UserAvatar from '../../../common/UserAvatar';
+import { getAvatarColor } from '../chat/messageUtils';
 
-function getAvatarColor(username = '') {
-  const colors = [
-    '#3b82f6', // blue
-    '#8b5cf6', // purple
-    '#ec4899', // pink
-    '#10b981', // emerald
-    '#f59e0b', // amber
-    '#06b6d4', // cyan
-    '#6366f1', // indigo
-  ];
+function MemberAvatar({ member, initial, color, online, currentUser }) {
+  const isCurrentUser = member.username === currentUser?.username;
+  const displayName = isCurrentUser
+    ? currentUser?.profile?.display_name || member.display_name || member.username
+    : member.display_name || member.username;
 
-  let hash = 0;
-
-  for (let i = 0; i < username.length; i++) {
-    hash = username.charCodeAt(i) + ((hash << 5) - hash);
-  }
-
-  const index = Math.abs(hash) % colors.length;
-
-  return colors[index];
+  return (
+    <div className="member-avatar-wrap" title={online ? `${member.username} is online` : member.username}>
+      <UserAvatar
+        src={isCurrentUser ? [currentUser?.profile?.avatar] : [member.avatar, member.user?.profile?.avatar]}
+        displayName={displayName || initial}
+        username={member.username}
+        className="member-avatar"
+        fallbackColor={color}
+        online={online}
+      />
+    </div>
+  );
 }
 
 function ChannelMemberList({
   members = [],
+  currentUser,
+  onlineUserIds = new Set(),
   ownerUsername,
   onClose,
 }) {
@@ -74,6 +76,10 @@ function ChannelMemberList({
         <span className="channel-members-count">
           {members.length}
         </span>
+        <span className="channel-members-online-count">
+          <span className="channel-members-online-dot" />
+          {onlineUserIds.size} online
+        </span>
 
         <button
           type="button"
@@ -96,25 +102,20 @@ function ChannelMemberList({
           {admins.map((member, idx) => {
             const initial = member.username.charAt(0).toUpperCase();
             const color = getAvatarColor(member.username);
+            const online = onlineUserIds.has(member.user_id);
 
             return (
               <div
                 key={member.user_id || `admin-${idx}`}
                 className="member-row-item"
               >
-                <div className="member-avatar-wrap">
-                  <div
-                    className="member-avatar"
-                    style={{ backgroundColor: color }}
-                  >
-                    {initial}
-                  </div>
-                </div>
+                <MemberAvatar member={member} initial={initial} color={color} online={online} currentUser={currentUser} />
 
                 <div className="member-info">
                   <span className="member-name">
-                    @{member.username}
+                    {member.display_name || member.username}
                   </span>
+                  {member.display_name && <span className="member-handle">@{member.username}</span>}
 
                   {member.isOwner ? (
                     <span
@@ -164,25 +165,20 @@ function ChannelMemberList({
           {regulars.map((member, idx) => {
             const initial = member.username.charAt(0).toUpperCase();
             const color = getAvatarColor(member.username);
+            const online = onlineUserIds.has(member.user_id);
 
             return (
               <div
                 key={member.user_id || `member-${idx}`}
                 className="member-row-item"
               >
-                <div className="member-avatar-wrap">
-                  <div
-                    className="member-avatar"
-                    style={{ backgroundColor: color }}
-                  >
-                    {initial}
-                  </div>
-                </div>
+                <MemberAvatar member={member} initial={initial} color={color} online={online} currentUser={currentUser} />
 
                 <div className="member-info">
                   <span className="member-name">
-                    @{member.username}
+                    {member.display_name || member.username}
                   </span>
+                  {member.display_name && <span className="member-handle">@{member.username}</span>}
                 </div>
               </div>
             );

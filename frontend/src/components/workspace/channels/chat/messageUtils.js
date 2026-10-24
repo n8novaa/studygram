@@ -1,20 +1,4 @@
-export function getAvatarColor(username = '') {
-  const colors = [
-    '#3b82f6', // blue
-    '#8b5cf6', // purple
-    '#ec4899', // pink
-    '#10b981', // emerald
-    '#f59e0b', // amber
-    '#06b6d4', // cyan
-    '#6366f1', // indigo
-  ];
-  let hash = 0;
-  for (let i = 0; i < username.length; i++) {
-    hash = username.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const index = Math.abs(hash) % colors.length;
-  return colors[index];
-}
+export { getAvatarColor } from '../../../../utils/avatarColors';
 
 export function formatMessageTime(dateString) {
   if (!dateString) return '';

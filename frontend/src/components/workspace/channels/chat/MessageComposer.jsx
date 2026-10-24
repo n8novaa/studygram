@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { SendIcon } from '../../../common/Icons';
+import { SendIcon, SmileIcon } from '../../../common/Icons';
 
+// taste-skill-ignore: These are selectable message content in the emoji picker, not decorative UI.
 const EMOJI_OPTIONS = [
-  '😀', '😂', '🥹', '😊', '😍', '🥰', '😎', '🤔',
-  '😅', '😭', '😴', '🤝', '👍', '👎', '👏', '🙌',
-  '❤️', '🔥', '✨', '🎉', '🚀', '💡', '📚', '💯',
-  '🙏', '💪', '✅', '👀', '💀', '🤣', '🙂', '😉',
+  '😀', '😂', '🥹', '😊', '😍', '🥰', '😎', '🤔', // taste-skill-ignore: selectable message content in the emoji picker.
+  '😅', '😭', '😴', '🤝', '👍', '👎', '👏', '🙌', // taste-skill-ignore: selectable message content in the emoji picker.
+  '❤️', '🔥', '✨', '🎉', '🚀', '💡', '📚', '💯', // taste-skill-ignore: selectable message content in the emoji picker.
+  '🙏', '💪', '✅', '👀', '💀', '🤣', '🙂', '😉', // taste-skill-ignore: selectable message content in the emoji picker.
 ];
 
 function MessageComposer({
@@ -112,7 +113,7 @@ function MessageComposer({
             title="Insert emoji"
             onClick={() => setEmojiPickerOpen((open) => !open)}
           >
-            ☺
+            <SmileIcon size={19} />
           </button>
 
           <textarea

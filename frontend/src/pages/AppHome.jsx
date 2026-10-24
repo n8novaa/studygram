@@ -9,24 +9,20 @@ import {
 } from '../services/workspaceService';
 
 import {
-  WorkspacesIcon,
- 
-  DiscoverIcon,
   CheckIcon,
   CloseIcon,
   ArrowRightIcon,
-  SparklesIcon,
   PlusIcon,
 } from '../components/common/Icons';
 import { useToast } from '../components/common/ToastContext';
-import WorkspaceCard from '../components/workspace/WorkspaceCard';
+import UserAvatar from '../components/common/UserAvatar';
+import RecentActivityFeed from '../components/home/RecentActivityFeed';
 import '../styles/pages/home.css';
 
 function AppHome() {
   const { user, accessToken } = useAuth();
   const { addToast } = useToast();
 
-  const [workspaces, setWorkspaces] = useState([]);
   const [joinRequests, setJoinRequests] = useState([]);
  
   const [loading, setLoading] = useState(true);
@@ -53,9 +49,6 @@ function AppHome() {
         const allWorkspaces = Array.isArray(wsData)
           ? wsData
           : wsData?.results ?? [];
-
-        setWorkspaces(allWorkspaces);
-
 
         const adminWorkspaces = allWorkspaces.filter((ws) => {
           const isOwner = ws.owner === user.username;
@@ -183,18 +176,10 @@ function AppHome() {
       {/* Welcome Header */}
       <section className="home-hero">
         <div className="home-hero-text">
-          <span className="home-eyebrow">
-            <SparklesIcon size={14} />
-            Workspace Dashboard
-          </span>
-
-          <h1>
-            Welcome back, {user?.username}
-          </h1>
+          <h1>Your study workspaces</h1>
 
           <p className="home-subtitle">
-            Manage your study groups, organize course
-            materials, and collaborate in real-time.
+            Recent messages, active workspaces, and requests that need your attention.
           </p>
         </div>
 
@@ -276,16 +261,20 @@ function AppHome() {
                 className="request-card"
               >
                 <div className="request-card-info">
-                  <div className="request-avatar">
-                    {(request.user || 'U')
-                      .charAt(0)
-                      .toUpperCase()}
-                  </div>
+                  <UserAvatar
+                    src={request.avatar}
+                    displayName={request.display_name}
+                    username={request.user}
+                    className="request-avatar"
+                  />
 
                   <div className="request-details">
                     <span className="request-user">
-                      @{request.user}
+                      {request.display_name || `@${request.user}`}
                     </span>
+                    {request.display_name && (
+                      <span className="request-user-handle">@{request.user}</span>
+                    )}
 
                     <span className="request-workspace">
                       Requested to join{' '}
@@ -331,53 +320,25 @@ function AppHome() {
         )}
       </section>
 
-      {/* Workspace activity and quick access */}
+      {/* Recent workspace activity */}
       <section className="home-section home-activity-section">
         <div className="home-section-header">
           <div className="home-section-title">
             <div>
-              <h2>Your workspaces</h2>
-              <p className="home-section-description">Pick up where your team is working.</p>
+              <h2>Recent Activity</h2>
+              <p className="home-section-description">The latest conversations across your workspaces.</p>
             </div>
           </div>
 
           <Link
-            to="/app/workspaces"
+            to="/app/activity"
             className="home-section-link"
           >
-            View All
+            See all
             <ArrowRightIcon size={14} />
           </Link>
         </div>
-
-        {loading ? (
-          <div className="home-empty-state">
-            <span className="spinner" />
-            Loading activity...
-          </div>
-        ) : workspaces.length === 0 ? (
-          <div className="home-empty-state">
-            <WorkspacesIcon size={28} />
-
-            <p>
-              You haven't joined any workspaces yet.
-            </p>
-
-            <Link
-              to="/app/discover"
-              className="home-discover-link"
-            >
-              <DiscoverIcon size={15} />
-              Discover study groups
-            </Link>
-          </div>
-        ) : (
-          <div className="home-workspace-grid">
-            {workspaces.slice(0, 5).map((workspace) => (
-              <WorkspaceCard key={workspace.id} workspace={workspace} />
-            ))}
-          </div>
-        )}
+        <RecentActivityFeed view="active" pageSize={5} preview />
       </section>
 
     </main>

@@ -1,3 +1,5 @@
+import { SmileIcon } from '../../../common/Icons';
+
 function ChannelMessageReactions({
   message,
   currentUser,
@@ -79,12 +81,12 @@ function ChannelMessageReactions({
             aria-label="Add reaction"
             aria-expanded={reactionPickerMessageId === message.id}
           >
-            ☺
+            <SmileIcon size={16} />
           </button>
   
           {reactionPickerMessageId === message.id && (
             <div className="message-reaction-options">
-              {['👍', '❤️', '😂', '🔥'].map((emoji) => (
+              {['👍', '❤️', '😂', '🔥'].map((emoji) => ( // taste-skill-ignore: reactions are user-authored message content.
                 <button
                   key={emoji}
                   type="button"

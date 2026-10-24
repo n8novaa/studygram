@@ -6,16 +6,51 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.core import signing
+from django.utils import timezone
 
 from ..models import (
     Workspace,
     WorkspaceChannel,
     WorkspaceChannelMessage,
     WorkspaceChannelMessageReaction,
+    WorkspaceChannelReadPosition,
 )
 from ..permissions import is_workspace_member
 from ..serializers import WorkspaceChannelMessageSerializer
 from ..consumers import TICKET_SALT
+
+
+class WorkspaceChannelReadPositionSerializer(serializers.Serializer):
+    message_id = serializers.IntegerField(min_value=1)
+
+
+class WorkspaceChannelReadPositionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, workspace_pk, channel_pk):
+        workspace = get_object_or_404(Workspace, pk=workspace_pk)
+        if not is_workspace_member(request.user, workspace.pk):
+            raise PermissionDenied('You must be a workspace member.')
+        channel = get_object_or_404(
+            WorkspaceChannel, pk=channel_pk, workspace=workspace
+        )
+        payload = WorkspaceChannelReadPositionSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        message_id = payload.validated_data['message_id']
+        message = get_object_or_404(
+            WorkspaceChannelMessage, pk=message_id, channel=channel
+        )
+        position, _ = WorkspaceChannelReadPosition.objects.get_or_create(
+            user=request.user, channel=channel
+        )
+        # Monotonic update: concurrent visibility reports cannot move the
+        # position backwards, and the stored integer survives message deletion.
+        WorkspaceChannelReadPosition.objects.filter(
+            pk=position.pk,
+            last_viewed_message_id__lt=message.pk,
+        ).update(last_viewed_message_id=message.pk, updated_at=timezone.now())
+        position.refresh_from_db(fields=['last_viewed_message_id'])
+        return Response({'last_viewed_message_id': position.last_viewed_message_id})
 
 
 class WorkspaceChannelWebSocketTicketView(APIView):
@@ -78,7 +113,8 @@ class WorkspaceChannelMessageListCreateView(
         return (
             WorkspaceChannelMessage.objects
             .filter(channel=channel)
-            .select_related('user', 'channel')
+            .select_related('user__profile', 'channel')
+            .prefetch_related('reactions__user__profile')
             .order_by('created')
         )
 

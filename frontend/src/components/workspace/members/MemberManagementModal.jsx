@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import UserAvatar from '../../common/UserAvatar'
 
 import {
   promoteWorkspaceMember,
@@ -139,10 +140,6 @@ function MemberManagementModal({
 
           <div>
 
-            <span className="workspace-eyebrow">
-              Member Management
-            </span>
-
             <h3 id="workspace-member-modal-title">
               {isPromote
                 ? 'Promote Member'
@@ -210,13 +207,12 @@ function MemberManagementModal({
 
                   <div className="workspace-member-candidate-info">
 
-                    <div className="workspace-member-avatar">
-
-                      {member.user
-                        ?.charAt(0)
-                        ?.toUpperCase()}
-
-                    </div>
+                    <UserAvatar
+                      src={member.avatar}
+                      displayName={member.display_name}
+                      username={member.user}
+                      className="workspace-member-avatar"
+                    />
 
 
                     <div className="workspace-member-details">

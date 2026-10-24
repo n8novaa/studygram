@@ -176,7 +176,8 @@ class WorkspaceChannelMessageListCreateView(
         return (
             WorkspaceChannelMessage.objects
             .filter(channel=channel)
-            .select_related('user', 'channel')
+            .select_related('user__profile', 'channel')
+            .prefetch_related('reactions__user__profile')
             .order_by('created')
         )
 

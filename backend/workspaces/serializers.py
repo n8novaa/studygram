@@ -15,13 +15,25 @@ from .models import (
 
 
 class WorkspaceMemberSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
+    # The frontend uses this value as the member's stable username identity;
+    # StringRelatedField would return WorkspaceMembership.__str__ instead.
+    user = serializers.CharField(source='user.username', read_only=True)
+    display_name = serializers.CharField(
+        source='user.profile.display_name',
+        read_only=True,
+    )
+    avatar = serializers.ImageField(
+        source='user.profile.avatar',
+        read_only=True,
+    )
 
     class Meta:
         model = WorkspaceMembership
         fields = [
             'user_id',
             'user',
+            'display_name',
+            'avatar',
             'role',
             'created',
         ]
@@ -65,6 +77,7 @@ class WorkspaceSerializer(serializers.ModelSerializer):
         return WorkspaceMemberSerializer(
             memberships,
             many=True,
+            context=self.context,
         ).data
 
 
@@ -73,6 +86,14 @@ class WorkspaceJoinRequestSerializer(
 ):
     user = serializers.StringRelatedField(read_only=True)
     workspace = serializers.StringRelatedField(read_only=True)
+    display_name = serializers.CharField(
+        source='user.profile.display_name',
+        read_only=True,
+    )
+    avatar = serializers.ImageField(
+        source='user.profile.avatar',
+        read_only=True,
+    )
 
     class Meta:
         model = WorkspaceJoinRequest
@@ -80,6 +101,8 @@ class WorkspaceJoinRequestSerializer(
             'id',
             'workspace',
             'user',
+            'display_name',
+            'avatar',
             'status',
             'created',
             'reviewed_at',
@@ -318,3 +341,48 @@ class WorkspaceChannelMessageSerializer(
 
     def get_is_edited(self, obj):
         return obj.updated > obj.created
+
+
+class RecentWorkspaceActivitySerializer(serializers.ModelSerializer):
+    author_username = serializers.CharField(source='user.username', read_only=True)
+    author_display_name = serializers.CharField(
+        source='user.profile.display_name',
+        read_only=True,
+    )
+    author_avatar = serializers.ImageField(
+        source='user.profile.avatar',
+        read_only=True,
+    )
+    workspace_id = serializers.IntegerField(
+        source='channel.workspace_id',
+        read_only=True,
+    )
+    workspace_name = serializers.CharField(
+        source='channel.workspace.name',
+        read_only=True,
+    )
+    channel_id = serializers.IntegerField(read_only=True)
+    channel_name = serializers.CharField(source='channel.name', read_only=True)
+    preview = serializers.SerializerMethodField()
+
+    class Meta:
+        model = WorkspaceChannelMessage
+        fields = [
+            'id',
+            'author_username',
+            'author_display_name',
+            'author_avatar',
+            'workspace_id',
+            'workspace_name',
+            'channel_id',
+            'channel_name',
+            'preview',
+            'created',
+        ]
+        read_only_fields = fields
+
+    def get_preview(self, obj):
+        text = ' '.join(obj.body.split())
+        if len(text) <= 200:
+            return text
+        return f'{text[:197].rstrip()}…'

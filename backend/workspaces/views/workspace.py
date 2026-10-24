@@ -27,7 +27,7 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
             Workspace.objects
             .filter(memberships__user=user)
             .select_related('owner')
-            .prefetch_related('memberships__user')
+            .prefetch_related('memberships__user__profile')
             .distinct()
         )
 

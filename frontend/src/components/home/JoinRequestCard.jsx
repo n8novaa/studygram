@@ -1,4 +1,5 @@
 import "../../styles/components/home/join-request-card.css";
+import UserAvatar from '../common/UserAvatar';
 
 function JoinRequestCard({
   request,
@@ -11,17 +12,19 @@ function JoinRequestCard({
 
       <div className="request-content">
 
-        <div className="request-avatar">
-          {request.user
-            ?.charAt(0)
-            ?.toUpperCase()}
-        </div>
+        <UserAvatar
+          src={request.avatar}
+          displayName={request.display_name}
+          username={request.user}
+          className="request-avatar"
+        />
 
         <div className="request-details">
 
           <h3>
-            {request.user}
+            {request.display_name || request.user}
           </h3>
+          {request.display_name && <span className="request-user-handle">@{request.user}</span>}
 
           <p>
             wants to join

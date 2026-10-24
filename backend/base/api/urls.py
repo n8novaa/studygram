@@ -5,6 +5,7 @@ from rest_framework.throttling import ScopedRateThrottle
 
 from .views import (
     CurrentUserView,
+    CurrentProfileView,
     LogoutView,
     RegisterView,
     UserViewSet,
@@ -31,6 +32,7 @@ urlpatterns = [
     path('auth/logout/', LogoutView.as_view(), name='api-logout'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='api-token-refresh'),
     path('auth/me/', CurrentUserView.as_view(), name='api-me'),
+    path('auth/profile/', CurrentProfileView.as_view(), name='api-profile'),
 
     path(
         'auth/password-reset/',

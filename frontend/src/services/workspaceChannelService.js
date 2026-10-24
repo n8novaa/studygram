@@ -102,6 +102,14 @@ export async function getChannelMessages(
   return apiGetAll(endpoint, accessToken);
 }
 
+export async function markChannelMessagesViewed(accessToken, workspaceId, channelId, messageId) {
+  return apiPost(
+    `/workspaces/${workspaceId}/channels/${channelId}/read-position/`,
+    { message_id: messageId },
+    accessToken,
+  );
+}
+
 export async function connectWorkspaceChannel(
   accessToken,
   workspaceId,
@@ -120,6 +128,7 @@ export async function connectWorkspaceChannel(
     `${protocol}//${apiUrl.host}`,
   );
   socketUrl.searchParams.set('ticket', ticket);
+  socketUrl.searchParams.set('presence', '1');
   return new WebSocket(socketUrl);
 }
 

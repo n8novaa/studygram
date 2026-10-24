@@ -12,8 +12,8 @@ import Discover from './pages/Discover';
 import WorkspaceDetail from './pages/WorkspaceDetail';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
-
-import './styles/global.css';
+import Profile from './pages/Profile';
+import ActivityHistory from './pages/ActivityHistory';
 
 function App() {
   return (
@@ -35,9 +35,11 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/app" element={<AppLayout />}>
               <Route index element={<AppHome />} />
+              <Route path="activity" element={<ActivityHistory />} />
               <Route path="workspaces" element={<Workspaces />} />
               <Route path="workspaces/:id" element={<WorkspaceDetail />} />
               <Route path="discover" element={<Discover />} />
+              <Route path="profile" element={<Profile />} />
               <Route path="messages" element={<Navigate to="/app/workspaces" replace />} />
             </Route>
           </Route>

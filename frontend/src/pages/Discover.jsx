@@ -10,7 +10,6 @@ import DiscoverWorkspaceGrid from '../components/discover/DiscoverWorkspaceGrid'
 import {
   DiscoverIcon,
   SearchIcon,
-  SparklesIcon,
   ShareIcon,
   CloseIcon,
 } from '../components/common/Icons';
@@ -137,11 +136,8 @@ function Discover() {
     <main className="discover-page">
       {/* Header */}
       <header className="discover-header">
-        <span className="discover-eyebrow">
-          <SparklesIcon size={14} /> Community Hub
-        </span>
         <h1>Discover Workspaces</h1>
-        <p>Find public study groups, course networks, and specialized learning cohorts.</p>
+        <p>Browse public workspaces by name or subject.</p>
       </header>
 
       {/* Invite Code Quick Box */}

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import MemberManagementModal from './MemberManagementModal';
 import { ShieldIcon, ShareIcon } from '../../common/Icons';
+import '../../../styles/components/workspace/members/management.css';
 import '../../../styles/components/workspace/members/management-modal.css';
 
 function MemberManagement({

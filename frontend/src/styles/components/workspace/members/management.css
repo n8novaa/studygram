@@ -1,9 +1,14 @@
 /* Member management controls */
-.workspace-member-management-actions { display: flex; gap: 8px; }
+.workspace-member-management-actions { display: flex; align-items: center; gap: 8px; }
 .workspace-member-manage-button {
-  min-height: 34px; padding: 0 12px; border: 1px solid var(--border-strong);
-  border-radius: 7px; background: var(--surface); color: var(--text);
-  font-size: 12px; font-weight: 600;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 34px; padding: 0 11px; border: 1px solid #e5e3df;
+  border-radius: 6px; background: #fff; color: #5f5b55;
+  font-size: 11.5px; font-weight: 600;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
 }
-.workspace-member-manage-button:hover { background: var(--surface-muted); }
-.workspace-member-manage-button-promote { color: var(--primary); }
+.workspace-member-manage-button:hover:not(:disabled) { border-color: #d6d3ce; background: #f8f7f5; color: var(--text-primary); }
+.workspace-member-manage-button-promote { border-color: #d7e1d2; background: #f5f8f2; color: #4f6845; }
+.workspace-member-manage-button-promote:hover:not(:disabled) { border-color: #bfceb8; background: #edf3e9; color: #3f5636; }
+.workspace-member-manage-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.workspace-member-manage-button:disabled { cursor: not-allowed; opacity: 0.6; }

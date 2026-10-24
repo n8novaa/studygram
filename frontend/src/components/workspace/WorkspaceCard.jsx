@@ -10,9 +10,7 @@ function WorkspaceCard({ workspace }) {
   return (
     <article className="workspace-card">
       <div className="workspace-card-top">
-        <div className="workspace-card-icon">
-          {workspace.name?.charAt(0)?.toUpperCase() || 'W'}
-        </div>
+        <h2 className="workspace-card-title">{workspace.name}</h2>
 
         <span
           className={`workspace-visibility-badge ${
@@ -27,7 +25,6 @@ function WorkspaceCard({ workspace }) {
       </div>
 
       <div className="workspace-card-body">
-        <h2 className="workspace-card-title">{workspace.name}</h2>
         <p className="workspace-card-description">
           {workspace.description || 'No description provided.'}
         </p>
@@ -55,7 +52,7 @@ function WorkspaceCard({ workspace }) {
           className="workspace-open-link"
           to={`/app/workspaces/${workspace.id}`}
         >
-          <span>Open</span>
+          <span>Open workspace</span>
           <ArrowRightIcon size={13} />
         </Link>
       </div>

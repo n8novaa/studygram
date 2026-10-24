@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { EyeIcon, EyeOffIcon, ShieldIcon, SparklesIcon } from '../components/common/Icons';
+import { EyeIcon, EyeOffIcon, ShieldIcon } from '../components/common/Icons';
+import AuthBrand from '../components/common/AuthBrand';
 import { useToast } from '../components/common/ToastContext';
 import '../styles/pages/login.css';
 
@@ -39,14 +40,9 @@ function Login() {
   }
 
   return (
-    <main className="auth-page">
+    <main className="auth-page login-page">
       <section className="auth-container">
-        {/* Brand */}
-        <div className="auth-brand">
-          <div className="auth-logo">S</div>
-          <h1>StudyGram</h1>
-          <p>Your space to learn, collaborate, and study together.</p>
-        </div>
+        <AuthBrand />
 
         {/* Login card */}
         <div className="auth-card">
@@ -110,7 +106,7 @@ function Login() {
                 </>
               ) : (
                 <>
-                  <SparklesIcon size={16} /> Sign In
+                  Sign in
                 </>
               )}
             </button>
@@ -129,7 +125,7 @@ function Login() {
           </p>
         </div>
 
-        <p className="auth-page-footer">StudyGram &bull; Collaborative Learning Platform</p>
+        <p className="auth-page-footer">StudyGram</p>
       </section>
     </main>
   );

@@ -4,6 +4,80 @@ const API_BASE_URL =
     ? 'http://127.0.0.1:8000/api'
     : '/api')
 
+let refreshInFlight = null;
+
+function isTokenEndpoint(path) {
+  return ['/auth/token/', '/auth/token/refresh/'].some((endpoint) =>
+    path.split('?')[0].endsWith(endpoint)
+  );
+}
+
+async function refreshExpiredAccessToken() {
+  if (refreshInFlight) return refreshInFlight;
+
+  const storedRefreshToken = localStorage.getItem('refreshToken');
+  if (!storedRefreshToken) {
+    window.dispatchEvent(new Event('studygram:auth-session-expired'));
+    throw new Error('Your session has expired. Please sign in again.');
+  }
+
+  refreshInFlight = (async () => {
+    let response;
+    try {
+      response = await fetch(buildUrl('/auth/token/refresh/'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh: storedRefreshToken }),
+      });
+    } catch {
+      throw new Error('Unable to connect to the StudyGram server.');
+    }
+
+    const data = await parseResponse(response);
+    if (!response.ok) {
+      const error = new Error(getErrorMessage(data, 'Could not refresh your session.'));
+      error.status = response.status;
+      error.data = data;
+      if ([400, 401, 403].includes(response.status)) {
+        localStorage.removeItem('refreshToken');
+        window.dispatchEvent(new Event('studygram:auth-session-expired'));
+      }
+      throw error;
+    }
+
+    if (!data?.access) {
+      throw new Error('The server returned an invalid session refresh response.');
+    }
+
+    const tokens = {
+      access: data.access,
+      refresh: data.refresh || storedRefreshToken,
+    };
+    localStorage.setItem('refreshToken', tokens.refresh);
+    window.dispatchEvent(new CustomEvent('studygram:auth-token-refreshed', { detail: tokens }));
+    return tokens;
+  })().finally(() => {
+    refreshInFlight = null;
+  });
+
+  return refreshInFlight;
+}
+
+// WebSocket payloads are serialized without a request context, so DRF can
+// return media paths rather than absolute URLs. Resolve those paths against
+// the configured API host so profile photos load from the backend in every
+// deployment shape (same-origin proxy or separate API host).
+export function resolveMediaUrl(path) {
+  if (!path || typeof path !== 'string') return ''
+
+  try {
+    const apiBase = new URL(API_BASE_URL, window.location.origin)
+    return new URL(path, apiBase).toString()
+  } catch {
+    return path
+  }
+}
+
 
 /*
  * Build the full API URL.
@@ -148,9 +222,30 @@ export async function apiRequest(
         body: requestBody,
       },
     )
-  } catch {
+
+    if (response.status === 401 && accessToken && !isTokenEndpoint(path)) {
+      const refreshedTokens = await refreshExpiredAccessToken();
+      const retryHeaders = {
+        ...requestHeaders,
+        Authorization: `Bearer ${refreshedTokens.access}`,
+      };
+      let retryBody = requestBody;
+      if (path.split('?')[0].endsWith('/auth/logout/') && body && !(body instanceof FormData)) {
+        retryBody = JSON.stringify({ ...body, refresh: refreshedTokens.refresh });
+      }
+      response = await fetch(buildUrl(path), {
+        method,
+        headers: retryHeaders,
+        body: retryBody,
+      });
+    }
+  } catch (requestError) {
+    if (requestError?.status || requestError?.message?.includes('session has expired')) {
+      throw requestError;
+    }
     throw new Error(
       'Unable to connect to the StudyGram server.',
+      { cause: requestError },
     )
   }
 
@@ -318,9 +413,21 @@ export async function apiDownload(
           : {},
       },
     )
-  } catch {
+
+    if (response.status === 401 && accessToken) {
+      const refreshedTokens = await refreshExpiredAccessToken();
+      response = await fetch(buildUrl(path), {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${refreshedTokens.access}` },
+      });
+    }
+  } catch (requestError) {
+    if (requestError?.status || requestError?.message?.includes('session has expired')) {
+      throw requestError;
+    }
     throw new Error(
       'Unable to connect to the StudyGram server.',
+      { cause: requestError },
     )
   }
 

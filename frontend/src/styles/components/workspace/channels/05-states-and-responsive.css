@@ -43,7 +43,9 @@
   .workspace-channels-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    height: 600px;
+    height: calc(100dvh - 148px);
+    min-height: 440px;
+    max-height: 780px;
     min-width: 0;
     position: relative;
     overflow: hidden;
@@ -89,6 +91,14 @@
   /* Prevent the desktop grid from reserving a members column */
   .workspace-channels-layout.with-members-open {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-channels-layout,
+  .workspace-channels-layout > .channel-sidebar,
+  .channel-members-sidebar {
+    transition-duration: 0.01ms !important;
   }
 }
 

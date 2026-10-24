@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import { useToast } from '../common/ToastContext';
+import UserAvatar from '../common/UserAvatar';
 import { getWorkspaces } from '../../services/workspaceService';
 import { getWorkspaceChannels } from '../../services/workspaceChannelService';
 import { getWorkspaceFolders } from '../../services/workspaceFileService';
@@ -29,6 +30,15 @@ function AppLayout() {
   const [navigationVersion, setNavigationVersion] = useState(0);
   const [workspacePickerOpen, setWorkspacePickerOpen] = useState(false);
   const [workspaceSearch, setWorkspaceSearch] = useState('');
+  const pageSurface = location.pathname === '/app'
+    ? 'surface-dashboard'
+    : location.pathname === '/app/workspaces'
+      ? 'surface-workspaces'
+      : location.pathname.startsWith('/app/workspaces/')
+        ? 'surface-workspace-detail'
+        : location.pathname === '/app/discover'
+          ? 'surface-discover'
+          : '';
   const activeWorkspaceId = location.pathname.match(/^\/app\/workspaces\/(\d+)/)?.[1];
   const [workspaceTreeOpen, setWorkspaceTreeOpen] = useState(
     () => location.pathname === '/app/workspaces' || Boolean(activeWorkspaceId),
@@ -174,7 +184,9 @@ function AppLayout() {
       {/* Mobile Top Bar */}
       <header className="mobile-header">
         <div className="mobile-header-brand">
-          <div className="brand-logo-icon">S</div>
+          <div className="brand-logo-icon">
+            <img src="/studygram-mark.webp" alt="" aria-hidden="true" />
+          </div>
           <span className="brand-title">StudyGram</span>
         </div>
         <button
@@ -198,7 +210,9 @@ function AppLayout() {
       <aside className={`app-sidebar ${mobileMenuOpen ? 'open' : ''}`}>
         {/* Brand */}
         <div className="sidebar-brand">
-          <div className="brand-logo-icon">S</div>
+          <div className="brand-logo-icon">
+            <img src="/studygram-mark.webp" alt="" aria-hidden="true" />
+          </div>
           <div className="brand-info">
             <h2 className="brand-title">StudyGram</h2>
             <span className="brand-tag">Workspace Hub</span>
@@ -388,30 +402,39 @@ function AppLayout() {
 
         {/* User Account Section */}
         <div className="sidebar-account">
-          <div className="account-info">
-            <div className="account-avatar">
-              {user?.username?.charAt(0).toUpperCase() || 'U'}
-            </div>
+          <NavLink
+            to="/app/profile"
+            onClick={closeMobileMenu}
+            className="account-info account-profile-link"
+            aria-label="View and edit profile"
+          >
+            <UserAvatar
+              src={user?.profile?.avatar}
+              displayName={user?.profile?.display_name}
+              username={user?.username}
+              className="account-avatar"
+            />
             <div className="account-details">
-              <span className="account-name">{user?.username}</span>
-              <span className="account-label">Online</span>
+              <span className="account-name">{user?.profile?.display_name || user?.username}</span>
+              <span className="account-label">@{user?.username}</span>
             </div>
-          </div>
+          </NavLink>
 
           <button
             type="button"
             className="logout-button"
             onClick={handleLogout}
-            title="Logout from StudyGram"
+            aria-label="Sign out of StudyGram"
+            title="Sign out"
           >
             <LogOutIcon size={16} />
-            <span>Sign Out</span>
+            <span>Sign out</span>
           </button>
         </div>
       </aside>
 
       {/* Page Content Area */}
-      <main className="app-content">
+      <main className={`app-content ${pageSurface}`}>
         <Outlet />
       </main>
     </div>
