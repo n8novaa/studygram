@@ -3,6 +3,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.test import override_settings
 import tempfile
+from unittest.mock import patch
 
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -794,9 +795,17 @@ class WorkspaceFolderPasteTests(APITestCase):
         )
         self.client.force_authenticate(user=self.admin)
 
-        response = self.client.post(
-            self.url, {'mode': 'copy', 'parent': self.destination.pk}, format='json',
-        )
+        with patch.object(
+            original.uploaded_file.storage,
+            'size',
+            side_effect=AssertionError('copy should use persisted file size'),
+        ) as storage_size:
+            response = self.client.post(
+                self.url,
+                {'mode': 'copy', 'parent': self.destination.pk},
+                format='json',
+            )
+        storage_size.assert_not_called()
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         copied_root = WorkspaceFolder.objects.get(pk=response.data['id'])
@@ -876,11 +885,17 @@ class WorkspaceFolderPasteTests(APITestCase):
         source_file = self.create_file(self.source)
         self.client.force_authenticate(user=self.admin)
 
-        response = self.client.post(
-            self.file_paste_url(self.workspace, source_file),
-            {'mode': 'copy', 'parent': self.destination.pk},
-            format='json',
-        )
+        with patch.object(
+            source_file.uploaded_file.storage,
+            'size',
+            side_effect=AssertionError('copy should use persisted file size'),
+        ) as storage_size:
+            response = self.client.post(
+                self.file_paste_url(self.workspace, source_file),
+                {'mode': 'copy', 'parent': self.destination.pk},
+                format='json',
+            )
+        storage_size.assert_not_called()
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         copied = WorkspaceFile.objects.get(pk=response.data['id'])

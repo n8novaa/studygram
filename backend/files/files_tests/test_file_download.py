@@ -1,4 +1,6 @@
 
+from unittest.mock import patch
+
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
@@ -119,13 +121,16 @@ class WorkspaceFileDownloadTests(APITestCase):
 
     def test_outsider_cannot_download_file(self):
         self.client.force_authenticate(user=self.outsider)
+        storage = self.workspace_file.uploaded_file.storage
 
-        response = self.client.get(self.url)
+        with patch.object(storage, "_open") as open_stored_file:
+            response = self.client.get(self.url)
 
         self.assertEqual(
             response.status_code,
             status.HTTP_403_FORBIDDEN,
         )
+        open_stored_file.assert_not_called()
 
     def test_unauthenticated_user_cannot_download_file(self):
         response = self.client.get(self.url)

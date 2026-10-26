@@ -9,26 +9,47 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
 
+DEBUG = os.environ.get(
+    'DJANGO_DEBUG', 'False'
+).lower() in ('true', '1', 'yes')
+
 MEDIA_URL = '/media/'
+MEDIA_STORAGE_BACKEND_DEFAULT = 'filesystem' if DEBUG else 'cloudinary'
 MEDIA_STORAGE_BACKEND = os.environ.get(
-    'MEDIA_STORAGE_BACKEND', 'filesystem'
+    'MEDIA_STORAGE_BACKEND', MEDIA_STORAGE_BACKEND_DEFAULT
 ).strip().lower()
 MEDIA_ROOT = Path(os.environ.get('DJANGO_MEDIA_ROOT', BASE_DIR / 'media'))
 STATIC_ROOT = Path(os.environ.get('DJANGO_STATIC_ROOT', BASE_DIR / 'staticfiles'))
 
-if MEDIA_STORAGE_BACKEND not in {'filesystem', 's3'}:
-    raise ValueError('MEDIA_STORAGE_BACKEND must be either filesystem or s3.')
+if MEDIA_STORAGE_BACKEND not in {'filesystem', 's3', 'cloudinary'}:
+    raise ValueError(
+        'MEDIA_STORAGE_BACKEND must be filesystem, s3, or cloudinary.'
+    )
 
 if MEDIA_STORAGE_BACKEND == 's3' and not os.environ.get('AWS_STORAGE_BUCKET_NAME'):
     raise ValueError('AWS_STORAGE_BUCKET_NAME is required with S3 media storage.')
 
+CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME', '').strip()
+CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY', '').strip()
+CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET', '').strip()
+
+if MEDIA_STORAGE_BACKEND == 'cloudinary':
+    missing_cloudinary_settings = [
+        name for name, value in (
+            ('CLOUDINARY_CLOUD_NAME', CLOUDINARY_CLOUD_NAME),
+            ('CLOUDINARY_API_KEY', CLOUDINARY_API_KEY),
+            ('CLOUDINARY_API_SECRET', CLOUDINARY_API_SECRET),
+        ) if not value
+    ]
+    if missing_cloudinary_settings:
+        raise ValueError(
+            'Cloudinary media storage requires: '
+            + ', '.join(missing_cloudinary_settings)
+        )
+
 # --------------------------------------------------
 # Security Configuration
 # --------------------------------------------------
-
-DEBUG = os.environ.get(
-    'DJANGO_DEBUG', 'False'
-).lower() in ('true', '1', 'yes')
 
 if (
     not DEBUG
@@ -37,7 +58,7 @@ if (
 ):
     raise ValueError(
         'Set DJANGO_MEDIA_ROOT to a durable mounted volume, or configure '
-        'MEDIA_STORAGE_BACKEND=s3 for production uploads.'
+        'MEDIA_STORAGE_BACKEND=s3 or cloudinary for production uploads.'
     )
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
@@ -324,7 +345,11 @@ STORAGES = {
         'BACKEND': (
             'storages.backends.s3.S3Storage'
             if MEDIA_STORAGE_BACKEND == 's3'
-            else 'django.core.files.storage.FileSystemStorage'
+            else (
+                'config.cloudinary_storage.CloudinaryStorage'
+                if MEDIA_STORAGE_BACKEND == 'cloudinary'
+                else 'django.core.files.storage.FileSystemStorage'
+            )
         ),
     },
     'staticfiles': {

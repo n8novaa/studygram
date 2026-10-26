@@ -20,6 +20,17 @@ def _children_of(folder, workspace_id):
     ).order_by('id')
 
 
+def _stored_file_size(workspace_file):
+    """Use validated upload metadata before making a remote storage lookup.
+
+    Upload and copy paths persist the byte size in the model. Legacy rows with
+    an unset size fall back to storage metadata for compatibility.
+    """
+    if workspace_file.size:
+        return int(workspace_file.size)
+    return workspace_file.uploaded_file.size
+
+
 def _get_folder_subtree(root):
     folders = [root]
     seen = {root.pk}
@@ -125,7 +136,11 @@ def copy_folder(source, destination, copied_by):
         )
 
     try:
-        total_bytes = sum(file.uploaded_file.size for file in files)
+        file_sizes = {
+            workspace_file.pk: _stored_file_size(workspace_file)
+            for workspace_file in files
+        }
+        total_bytes = sum(file_sizes.values())
     except (OSError, ValueError, FileNotFoundError) as exc:
         raise serializers.ValidationError(
             'A file in this folder is missing from storage.'
@@ -170,7 +185,7 @@ def copy_folder(source, destination, copied_by):
                     folder=copied_folders[source_file.folder_id],
                     name=source_file.name,
                     file_type=source_file.file_type,
-                    size=source_file.uploaded_file.size,
+                    size=file_sizes[source_file.pk],
                     created_by=copied_by,
                 )
 
@@ -265,7 +280,7 @@ def copy_file(source, destination, copied_by):
         raise serializers.ValidationError('This file is missing from storage.')
 
     try:
-        size = source.uploaded_file.size
+        size = _stored_file_size(source)
     except (OSError, ValueError, FileNotFoundError) as exc:
         raise serializers.ValidationError('This file is missing from storage.') from exc
     if size > MAX_COPIED_BYTES:
