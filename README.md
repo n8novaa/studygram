@@ -1,94 +1,178 @@
-# StudyGram
+<p align="center">
+  <img src="frontend/public/studygram-mark.webp" alt="StudyGram logo" width="76" />
+</p>
 
-StudyGram is a collaborative learning app for organizing study groups. The product is a React single-page app backed by a Django REST Framework API. The earlier study-room feature has been retired; workspace channels provide the messaging experience.
+<h1 align="center">StudyGram</h1>
 
-## Current features
+<p align="center">
+  A collaborative study workspace for focused group learning.<br />
+  Organize resources, share ideas, and stay in sync.
+</p>
 
-- Account registration, JWT sign-in/refresh/sign-out, and password reset
-- Public and private workspaces with discovery, search, and visibility controls
-- Membership requests, invitations, member roles, and admin tools
-- Workspace channels with editable messages, replies, and emoji reactions
-- Real-time channel message updates over WebSockets, with reconnect and REST fallback
-- Nested folders and shared file uploads/downloads
-- Workspace navigation that exposes channels and nested folders for the selected workspace
+<p align="center">
+  <a href="https://studygram-tau.vercel.app"><strong>Open the live app →</strong></a>
+  &nbsp;·&nbsp;
+  <a href="https://studygram-backend.onrender.com/api/health/">API health</a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/n8novaa/studygram">Source code</a>
+</p>
 
-## Requirements
+<p align="center">
+  <a href="https://github.com/n8novaa/studygram/actions/workflows/ci.yml"><img src="https://github.com/n8novaa/studygram/actions/workflows/ci.yml/badge.svg" alt="CI status" /></a>
+  <img src="https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=white" alt="React 19" />
+  <img src="https://img.shields.io/badge/Django-REST-092e20?logo=django&logoColor=white" alt="Django REST Framework" />
+  <img src="https://img.shields.io/badge/Realtime-WebSockets-4b5563" alt="WebSocket messaging" />
+</p>
 
-- Python 3.12 or newer (matches the backend image and CI runtime)
-- Node.js 20.19+ or 22.12+ for Vite 8
-- SQLite for local development, or PostgreSQL through `DATABASE_URL`
+## Overview
 
-## Local setup
+StudyGram is a full-stack collaboration app for study groups. Members work in shared workspaces, talk in live channels, and keep study files organized. The deployed frontend is hosted on Vercel and communicates with a Django REST and WebSocket backend.
 
-From the repository root, create `backend/.env` using the root `.env.example` as a reference. The Django settings load that file. Keep real keys and email credentials private.
+Create an account in the [live application](https://studygram-tau.vercel.app) to explore. No shared demo credentials are published.
+
+## Key features
+
+- **Workspaces:** create public or private spaces and discover communities by topic.
+- **Membership:** join requests, invitations, member roles, and workspace administration.
+- **Channels:** persistent conversations with replies, reactions, and online presence.
+- **Real-time messaging:** channel updates over authenticated WebSockets, with REST APIs for message operations.
+- **Shared files:** nested folders, uploads, copy/move operations, and protected downloads.
+- **Profiles:** display names and avatars shown across member and conversation views.
+- **Account security:** JWT authentication, token refresh, sign-out, and password reset by username.
+
+Study Rooms are a retired feature; workspace channels are the supported messaging experience.
+
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/dashboard.png" alt="StudyGram dashboard with pending workspace requests and recent channel activity" width="100%" />
+</p>
+<p align="center"><em>Dashboard · recent conversations and requests that need attention</em></p>
+
+<p align="center">
+  <img src="docs/screenshots/workspace-channel.png" alt="StudyGram workspace channel with live messages" width="49%" />
+  <img src="docs/screenshots/file-storage.png" alt="StudyGram workspace file storage with folders and shared resources" width="49%" />
+</p>
+<p align="center"><em>Workspace channels · shared file storage</em></p>
+
+## Engineering highlights
+
+- **Authorization at the API:** workspace, membership, and file permissions are checked by Django rather than relying on frontend visibility.
+- **Protected file delivery:** workspace attachments are downloaded through a membership-checked Django endpoint; direct Cloudinary attachment URLs are not returned to clients.
+- **Authenticated realtime:** the client obtains a short-lived signed WebSocket ticket over the API. The consumer validates the ticket and verifies current workspace membership before accepting a connection.
+- **Persistent collaboration:** PostgreSQL stores workspaces, memberships, channels, messages, reactions, presence connections, and per-user channel read positions. Redis provides the shared Channels layer in production.
+- **Automated checks:** GitHub Actions runs Django checks, migration-state validation, backend tests, frontend lint, Vercel configuration validation, and a production build.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    browser["React 19 + Vite<br/>Vercel"] -->|HTTPS · JWT| api["Django REST API<br/>Daphne + Channels<br/>Render"]
+    browser -->|WSS · signed ticket| api
+    api --> database["PostgreSQL<br/>Neon"]
+    api --> redis["Redis<br/>Upstash"]
+    api --> media["Media storage<br/>Cloudinary / S3-compatible"]
+```
+
+The React client uses REST for account, workspace, channel, and file operations, and WebSockets for live channel updates and presence. Django enforces access to workspace resources and private attachment downloads. See [STUDYGRAM_ARCHITECTURE.md](STUDYGRAM_ARCHITECTURE.md) for the domain model and API map.
+
+## Technology stack
+
+| Area | Technologies |
+| --- | --- |
+| Frontend | React 19, React Router, Vite |
+| Backend | Django, Django REST Framework, Simple JWT |
+| Realtime infrastructure | Django Channels, Daphne, Redis / Upstash |
+| Database | SQLite for local development; PostgreSQL / Neon in production |
+| Storage | Local filesystem in development; Cloudinary or S3-compatible object storage in production |
+| Deployment | Vercel (frontend), Render (backend), Neon (database), Upstash (Redis), Cloudinary (media), Brevo (SMTP) |
+
+> **Storage note:** Cloudinary Free currently limits raw assets to 10 MB. StudyGram’s workspace upload validation remains 100 MiB, so files above the provider limit will be rejected by Cloudinary. See [DEPLOYMENT.md](DEPLOYMENT.md) before relying on free-tier uploads.
+
+## Local development
+
+### Prerequisites
+
+- Python 3.12 or newer
+- Node.js 22.12 or newer
+- Redis only when testing cross-process WebSocket delivery; a single local process uses the in-memory channel layer
+
+### Backend
+
+From the repository root, create a virtual environment, install dependencies, and copy the development settings file:
 
 ```powershell
-python -m venv venv
-venv\Scripts\Activate.ps1
+python -m venv .venv
+.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+Copy-Item .env.example backend/.env
 cd backend
 python manage.py migrate
 python manage.py runserver
 ```
 
-In a second terminal:
+For macOS or Linux, activate with `source .venv/bin/activate` and copy the environment template with `cp .env.example backend/.env`. Then run the Django commands from `backend/`.
 
-```powershell
+The API runs at `http://127.0.0.1:8000`. Local defaults use SQLite, filesystem media, and console email. Password-reset links are printed to the backend terminal unless SMTP is configured.
+
+### Frontend
+
+In a second terminal, from the repository root:
+
+```sh
 cd frontend
 npm ci
 npm run dev
 ```
 
-Open the Vite URL, normally `http://localhost:5173`. During development the frontend sends API requests to `http://127.0.0.1:8000/api` by default. Production builds use the same-origin `/api` path unless `VITE_API_BASE_URL` is configured for a separate API host. Set `VITE_API_BASE_URL` in `frontend/.env.local` to override the development URL, for example `http://127.0.0.1:8000/api`.
+Vite serves the app at `http://localhost:5173`; its API client defaults to the local Django API. For a different backend, copy `frontend/.env.example` to `frontend/.env.local` and set `VITE_API_BASE_URL` to the backend API URL, including the `/api` suffix.
 
-The Django app uses SQLite if `DATABASE_URL` is unset. The local channel layer works in one backend process; set `REDIS_URL` to a shared Redis instance when running multiple workers or application instances so they can broadcast messages to one another. Password reset is requested with the account username and delivered to that account's saved email. In `DEBUG=True`, reset emails are printed in the backend console by default. To deliver to a real inbox locally, set `EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend` in `backend/.env` and configure valid SMTP credentials and `FRONTEND_URL`. Gmail SMTP normally requires an app password when two-step verification is enabled; a normal Gmail login password will not work.
+## Testing and validation
 
-Deploy the backend with an ASGI server so WebSocket connections are supported. For example, from `backend/`, run `daphne -b 0.0.0.0 -p 8000 config.asgi:application`. A WSGI-only deployment will serve the REST API but cannot serve real-time channel connections.
+Run backend checks and tests from `backend/`:
 
-## Containerized local stack
-
-Docker Compose starts PostgreSQL, Redis, Django/Daphne, and Nginx with the React app. It is configured for local development (`DEBUG=True`, console email, local-only passwords) and must not be exposed directly as a production deployment.
-
-```powershell
-docker compose up --build
-```
-
-Open `http://localhost:8080`. The app is served through the Nginx proxy, including WebSocket upgrades. PostgreSQL, Redis, uploaded media, and Django static files use named volumes. Production environment requirements and hosting notes are in [DEPLOYMENT.md](DEPLOYMENT.md).
-
-## Environment variables
-
-See `.env.example` for the available settings:
-
-- `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`
-- `DATABASE_URL` (optional in development; SQLite is the default)
-- `REDIS_URL` (required with `DEBUG=False`)
-- `CORS_ALLOWED_ORIGINS`, `CSRF_TRUSTED_ORIGINS`
-- `DJANGO_MEDIA_ROOT`, `DJANGO_LOG_LEVEL`, `TRUST_PROXY_SSL_HEADER`
-- `MEDIA_STORAGE_BACKEND` (`filesystem` for development or a durable volume; `s3` for S3-compatible object storage)
-- `AWS_STORAGE_BUCKET_NAME`, `AWS_S3_REGION_NAME`, `AWS_S3_ENDPOINT_URL`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` (when using S3 media storage)
-- `FRONTEND_URL`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USE_TLS`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `DEFAULT_FROM_EMAIL`
-
-## Checks and tests
-
-Run backend checks and the full test suite from `backend/`:
-
-```powershell
+```sh
 python manage.py check
 python manage.py test
 ```
 
-Run the frontend static checks and production build from `frontend/`:
+Run frontend lint and build from `frontend/`:
 
-```powershell
+```sh
 npm run lint
 npm run build
 ```
 
-## Project layout
+The same checks run in GitHub Actions on pushes and pull requests. Frontend tests are not currently part of the CI workflow; CI validates lint and the production build.
 
-- `backend/base/`: authentication, account, health, and password-reset API functionality (the current API prefix is `/api/`)
-- `backend/workspaces/`: workspace, membership, invitation, channel, message, and reaction domain
-- `backend/files/`: workspace folders and file API
-- `frontend/src/`: React routes, UI components, auth, and API service modules
+## Deployment and configuration
 
-For data models, endpoint groups, and the relationship between the new and legacy experiences, see [STUDYGRAM_ARCHITECTURE.md](STUDYGRAM_ARCHITECTURE.md).
+The deployed setup uses Vercel, Render, Neon, Upstash, Cloudinary, and Brevo. The repository includes a Docker-based backend deployment and a local Compose stack.
+
+- Follow [DEPLOYMENT.md](DEPLOYMENT.md) for provider setup, exact environment variables, migrations, storage constraints, and smoke checks.
+- Review [STUDYGRAM_ARCHITECTURE.md](STUDYGRAM_ARCHITECTURE.md) for component boundaries, domain models, routes, and known trade-offs.
+- `docker compose up --build` starts the optional local PostgreSQL, Redis, Django/Daphne, and Nginx stack at `http://localhost:8080`. Compose is for local development and is not the Render deployment configuration.
+
+## Repository structure
+
+```text
+backend/
+  base/          Authentication, profiles, and health API
+  workspaces/    Workspaces, memberships, channels, messages, realtime
+  files/         Workspace folders, uploads, and downloads
+  config/        Django settings, ASGI, and storage adapters
+frontend/
+  src/pages/     Application pages
+  src/components/Shared and feature UI
+  src/services/  API clients
+  src/styles/    Application styles
+docs/screenshots/ Product screenshots used in this README
+```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow, checks, and pull-request expectations. Keep secrets, `.env` files, database dumps, and private uploads out of commits.
+
+## License
+
+This repository does not currently include a `LICENSE` file. No open-source reuse terms are granted by this README.
