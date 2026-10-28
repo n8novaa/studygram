@@ -21,4 +21,4 @@ USER studygram
 EXPOSE 10000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD python -c "import os, urllib.request; urllib.request.urlopen('http://127.0.0.1:%s/api/health/' % os.environ.get('PORT', '10000'), timeout=3)" || exit 1
-CMD ["sh", "-c", "exec daphne -b 0.0.0.0 -p ${PORT:-10000} config.asgi:application"]
+CMD ["sh", "-c", "python manage.py migrate --noinput && exec daphne -b 0.0.0.0 -p ${PORT:-10000} config.asgi:application"]
