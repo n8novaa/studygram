@@ -26,7 +26,7 @@
 
 ## Overview
 
-StudyGram is a full-stack collaboration app for study groups. Members work in shared workspaces, talk in live channels, and keep study files organized. The deployed frontend is hosted on Vercel and communicates with a Django REST and WebSocket backend.
+StudyGram is a full-stack collaboration app for study groups. Evolving from an earlier version of the project, the current release centers on shared workspaces, live channels, and organized study resources. Its Vercel-hosted frontend communicates with a Django REST and WebSocket backend.
 
 Create an account in the [live application](https://studygram-tau.vercel.app) to explore. No shared demo credentials are published.
 
@@ -40,7 +40,11 @@ Create an account in the [live application](https://studygram-tau.vercel.app) to
 - **Profiles:** display names and avatars shown across member and conversation views.
 - **Account security:** JWT authentication, token refresh, sign-out, and password reset by username.
 
-Study Rooms are a retired feature; workspace channels are the supported messaging experience.
+Study Rooms are not part of the current build; workspace channels are the supported messaging experience.
+
+### Planned roadmap
+
+Future iterations are planned to explore AI-assisted study tools and bring back live study rooms. These are roadmap ideas, not features in the current release.
 
 ## Screenshots
 
